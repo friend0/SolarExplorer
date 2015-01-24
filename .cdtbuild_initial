@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?fileVersion 3.1.0?>
+
+<ManagedProjectBuildInfo>
+<project id="PowerLibTestBench.com.ti.ccstudio.buildDefinitions.C2000.ProjectType.1231166514" name="C2000" projectType="com.ti.ccstudio.buildDefinitions.C2000.ProjectType">
+<configuration artifactExtension="out" artifactName="SolarExplorer_PVInverter" description="" id="com.ti.ccstudio.buildDefinitions.C2000.Debug.327632721" name="F2803x_FLASH" parent="com.ti.ccstudio.buildDefinitions.C2000.Debug">
+<toolChain id="com.ti.ccstudio.buildDefinitions.C2000.Debug.ToolchainPlaceholder.1328223400" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.DebugToolchain" targetTool="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.643800428">
+<option id="com.ti.ccstudio.buildDefinitions.core.OPT_CODEGEN_VERSION.1281850011" name="Code Generation tools version" superClass="com.ti.ccstudio.buildDefinitions.core.OPT_CODEGEN_VERSION" value="5.2.6" valueType="string"/>
+<option id="com.ti.ccstudio.buildDefinitions.core.OPT_TAGS.595338588" superClass="com.ti.ccstudio.buildDefinitions.core.OPT_TAGS" valueType="stringList">
+<listOptionValue builtIn="false" value="DEVICE_CONFIGURATION_ID=TMS320C28XX.TMS320F28035"/>
+<listOptionValue builtIn="false" value="DEVICE_ENDIANNESS=little"/>
+<listOptionValue builtIn="false" value="IS_ELF=false"/>
+<listOptionValue builtIn="false" value="LINKER_COMMAND_FILE="/>
+<listOptionValue builtIn="false" value="RUNTIME_SUPPORT_LIBRARY=libc.a"/>
+<listOptionValue builtIn="false" value="IS_ASSEMBLY_ONLY=false"/>
+<listOptionValue builtIn="false" value="CCS_MBS_VERSION=4.1.2"/>
+<listOptionValue builtIn="false" value="PROJECT_KIND=com.ti.ccstudio.managedbuild.core.ProjectKind_Executable"/>
+</option>
+<tool id="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.compilerDebug.579168314" name="C2000 Compiler" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.compilerDebug">
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.DIAG_WARNING.972843410" name="Treat diagnostic &lt;id&gt; as warning (--diag_warning, -pdsw)" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.DIAG_WARNING" valueType="stringList">
+<listOptionValue builtIn="false" value="225"/>
+</option>
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.LARGE_MEMORY_MODEL.2010377082" name="Use large memory model (--large_memory_model, -ml)" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.LARGE_MEMORY_MODEL" value="true" valueType="boolean"/>
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.SILICON_VERSION.1688251907" name="Processor version (--silicon_version, -v)" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.SILICON_VERSION" value="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.SILICON_VERSION.28" valueType="enumerated"/>
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.INCLUDE_PATH.1801649128" name="Add dir to #include search path (--include_path, -I)" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.INCLUDE_PATH" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${CG_TOOL_ROOT}/include&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_DEVICE_SUPPORT_ROOT}\DSP2803x_headers\include&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_DEVICE_SUPPORT_ROOT}\DSP2803x_common\include&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_INSTALL_ROOT}\development_kits\~SupportFiles\F2803x_headers&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SolarExplorer_PVInverter_F2803x/src commros}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_IQMATH_ROOT}\include&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_POWERLIB_ROOT}\include&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_POWERLIB_ROOT}\asm&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_SOLARLIB_IQMATH_ROOT}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_APPLIB_DRIVERS_ROOT}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_SGENLIB_ROOT}\include&quot;"/>
+</option>
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.DEFINE.1198397471" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.DEFINE" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="&quot;_DEBUG&quot;"/>
+<listOptionValue builtIn="false" value="&quot;FLASH&quot;"/>
+<listOptionValue builtIn="false" value="&quot;LARGE_MODEL&quot;"/>
+</option>
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.CLA_SUPPORT.1591861358" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.CLA_SUPPORT" value="com.ti.ccstudio.buildDefinitions.C2000_5.2.compilerID.CLA_SUPPORT.cla0" valueType="enumerated"/>
+</tool>
+<tool id="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653" name="C2000 Linker" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug">
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.OUTPUT_FILE.1941733256" name="Specify output file name (--output_file, -o)" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.OUTPUT_FILE" value="&quot;SolarExplorer_PVInverter.out&quot;" valueType="string"/>
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.MAP_FILE.862821601" name="Input and output sections listed into &lt;file&gt; (--map_file, -m)" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.MAP_FILE" value="&quot;ProjectName.map&quot;" valueType="string"/>
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.LIBRARY.2099937291" name="Include library file or command file as input (--library, -l)" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.LIBRARY" valueType="libs">
+<listOptionValue builtIn="false" value="&quot;libc.a&quot;"/>
+</option>
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.SEARCH_PATH.538082696" name="Add &lt;dir&gt; to library search path (--search_path, -i)" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.SEARCH_PATH" valueType="stringList">
+<listOptionValue builtIn="false" value="&quot;${CG_TOOL_ROOT}/lib&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${CG_TOOL_ROOT}/include&quot;"/>
+</option>
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.generatedLinkerCommandFiles.1254108428" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.generatedLinkerCommandFiles" valueType="libs">
+<listOptionValue builtIn="false" value="&quot;$(GEN_CMDS_QUOTED)&quot;"/>
+</option>
+<option id="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.STACK_SIZE.881635814" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.linkerID.STACK_SIZE" value="0x380" valueType="string"/>
+</tool>
+<macros expandEnvironmentMacros="true"/>
+</toolChain>
+<resourceConfiguration exclude="true" id="com.ti.ccstudio.buildDefinitions.C2000.Debug.327632721./PowerLibTestBench/F28035_RAM_PwrLibTestBench.CMD" name="F28035_RAM_PwrLibTestBench.CMD" rcbsApplicability="disable" resourcePath="/PowerLibTestBench/F28035_RAM_PwrLibTestBench.CMD" toolsToInvoke="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./PowerLibTestBench/F28035_RAM_PwrLibTestBench.CMD">
+<tool id="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./PowerLibTestBench/F28035_RAM_PwrLibTestBench.CMD" name="C2000 Linker" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653"/>
+</resourceConfiguration>
+<resourceConfiguration exclude="false" id="com.ti.ccstudio.buildDefinitions.C2000.Debug.327632721./PowerLibTestBench/F28035_FLASH_PwrLibTestBench.CMD" name="F28035_FLASH_PwrLibTestBench.CMD" rcbsApplicability="disable" resourcePath="/PowerLibTestBench/F28035_FLASH_PwrLibTestBench.CMD" toolsToInvoke="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./PowerLibTestBench/F28035_FLASH_PwrLibTestBench.CMD">
+<tool id="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./PowerLibTestBench/F28035_FLASH_PwrLibTestBench.CMD" name="C2000 Linker" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653"/>
+</resourceConfiguration>
+<resourceConfiguration exclude="true" id="com.ti.ccstudio.buildDefinitions.C2000.Debug.327632721./PFC2PhiLCLA/F28035_RAM_PwrLibTestBench.CMD" name="F28035_RAM_PwrLibTestBench.CMD" rcbsApplicability="disable" resourcePath="/PFC2PhiLCLA/F28035_RAM_PwrLibTestBench.CMD" toolsToInvoke="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./PFC2PhiLCLA/F28035_RAM_PwrLibTestBench.CMD">
+<tool id="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./PFC2PhiLCLA/F28035_RAM_PwrLibTestBench.CMD" name="C2000 Linker" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653"/>
+</resourceConfiguration>
+<resourceConfiguration exclude="true" id="com.ti.ccstudio.buildDefinitions.C2000.Debug.327632721./ProjectName/F28035_RAM_ProjectName.CMD" name="F28035_RAM_ProjectName.CMD" rcbsApplicability="disable" resourcePath="/DPLibTemplate-F2803x/F28035_RAM_ProjectName.CMD" toolsToInvoke="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./ProjectName/F28035_RAM_ProjectName.CMD">
+<tool id="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./ProjectName/F28035_RAM_ProjectName.CMD" name="C2000 Linker" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653"/>
+</resourceConfiguration>
+<resourceConfiguration exclude="true" id="com.ti.ccstudio.buildDefinitions.C2000.Debug.327632721./SolarLV_OLSI/F28035_RAM_SolarLV.CMD" name="F28035_RAM_SolarLV.CMD" rcbsApplicability="disable" resourcePath="/SolarLV_OLSI/F28035_RAM_SolarLV.CMD" toolsToInvoke="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./SolarLV_OLSI/F28035_RAM_SolarLV.CMD">
+<tool id="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./SolarLV_OLSI/F28035_RAM_SolarLV.CMD" name="C2000 Linker" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653"/>
+</resourceConfiguration>
+<resourceConfiguration exclude="true" id="com.ti.ccstudio.buildDefinitions.C2000.Debug.327632721./SolarLV_DCDC_MPPT_INV/F28035_RAM_SolarLV.CMD" name="F28035_RAM_SolarLV.CMD" rcbsApplicability="disable" resourcePath="/SolarLV_DCDC_MPPT_INV/F28035_RAM_SolarLV.CMD" toolsToInvoke="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./SolarLV_DCDC_MPPT_INV/F28035_RAM_SolarLV.CMD">
+<tool id="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./SolarLV_DCDC_MPPT_INV/F28035_RAM_SolarLV.CMD" name="C2000 Linker" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653"/>
+</resourceConfiguration>
+<resourceConfiguration exclude="false" id="com.ti.ccstudio.buildDefinitions.C2000.Debug.327632721./SolarExplorer_DCDC_MPPT_INV/commros_28xx_c_regular.lib" name="commros_28xx_c_regular.lib" rcbsApplicability="disable" resourcePath="/SolarExplorer_PVInverter_F2803x/commros_28xx_c_regular.lib" toolsToInvoke="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./SolarExplorer_DCDC_MPPT_INV/commros_28xx_c_regular.lib">
+<tool id="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653./SolarExplorer_DCDC_MPPT_INV/commros_28xx_c_regular.lib" name="C2000 Linker" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.linkerDebug.1905689653"/>
+</resourceConfiguration>
+<resourceConfiguration exclude="false" id="com.ti.ccstudio.buildDefinitions.C2000.Debug.327632721./SolarExplorer_DCDC_MPPT_INV/src commros/Commros_user.c" name="Commros_user.c" rcbsApplicability="disable" resourcePath="/SolarExplorer_PVInverter_F2803x/src commros/Commros_user.c" toolsToInvoke="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.compilerDebug.579168314./SolarExplorer_DCDC_MPPT_INV/src commros/Commros_user.c">
+<tool id="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.compilerDebug.579168314./SolarExplorer_DCDC_MPPT_INV/src commros/Commros_user.c" name="C2000 Compiler" superClass="com.ti.ccstudio.buildDefinitions.C2000_5.2.exe.compilerDebug.579168314"/>
+</resourceConfiguration>
+</configuration>
+<macros/>
+</project>
+</ManagedProjectBuildInfo>
