@@ -25,7 +25,7 @@
 // used by CLA Initialaization function
 extern Uint16 Cla1funcsLoadStart, Cla1funcsLoadEnd, Cla1funcsRunStart;
 
-void DeviceInit(void);
+void DeviceIlnit(void);
 void PieCntlInit(void);
 void PieVectTableInit(void);
 void WDogDisable(void);
