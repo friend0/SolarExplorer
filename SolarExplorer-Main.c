@@ -29,12 +29,20 @@
 * @Email: ryarodri@ucsc.edu, bchainey@ucsc.edu, lhadams@ucsc.edu
 */
 
+/**
+ * SolarExplorer-Includes.h gives us:
+ * IQMath.lib
+ * PeripheralHeaderIncludes, which gives us access to all peripheral headers (ADC, PWM, i2C, etc...)
+ * SolarExplorer-Settings - where we set incremental builds and choose which ePWM triggers ISR, deadband, sineGen and lighting settings
+ * DPlib - 2p2z, 3p3z, and some ADCtrig defines
+ * PWMDac
+ *
+ */
 #include "SolarExplorer-Includes.h"
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// FUNCTION PROTOTYPES
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// Add protoypes of functions being used in the project here 
+ /*******************************
+  * Function Prototypes
+  *******************************/
 
 
 void DeviceInit(void);
@@ -57,33 +65,25 @@ void SPI_init();
 void PWM_1ch_UpDwnCntCompl_CNF(int16 n, int16 period, int16 mode, int16 phase);
 void ADC_SOC_CNF(int ChSel[], int Trigsel[], int ACQPS[], int IntChSel, int mode);
 
+/**************************************************
+ * State Machine Framework
+ * @TODO: Include State Machine Implemention Here
+ **************************************************/
 
-///////////////////////////////
-//State Machine Framework    //
-///////////////////////////////
+ /*******************************
+  * General Variable Declarations
+  *******************************/
 
+/************************
+ * Main Code Starts Here
+ *************************/
 
-//////////////////////////////////
-//	  State Machine Framework //
-//////////////////////////////////
-
-
-//@TODO: Include State machine implementation here
-
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// VARIABLE DECLARATIONS - GENERAL
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// MAIN CODE - starts here
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 void main(void)
 {
-//=================================================================================
-//	INITIALISATION - General
-//=================================================================================
+
+	/**
+	 * Initializations
+	 */
 
 	// The DeviceInit() configures the clocks and pin mux registers 
 	// The function is declared in {ProjectName}-DevInit_F2803/2x.c,
@@ -94,9 +94,9 @@ void main(void)
 
 	DeviceInit();	// Device Life support & GPIO
 	
-//=================================================================================
-//	BACKGROUND (BG) LOOP
-//=================================================================================
+	/**
+	 * Background Loop
+	 */
 
 //--------------------------------- FRAMEWORK -------------------------------------
 	for(;;)

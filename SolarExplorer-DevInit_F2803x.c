@@ -560,7 +560,6 @@ void PLLset(Uint16 val)
 
 
 // This function initializes the PIE control registers to a known state.
-//
 void PieCntlInit(void)
 {
     // Disable Interrupts at the CPU level:
