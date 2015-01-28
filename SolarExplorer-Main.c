@@ -29,8 +29,18 @@
 * @Email: ryarodri@ucsc.edu, bchainey@ucsc.edu, lhadams@ucsc.edu
 */
 
+/**
+ * SolarExplorer-Includes.h gives us:
+ * IQMath.lib
+ * PeripheralHeaderIncludes, which gives us access to all peripheral headers (ADC, PWM, i2C, etc...)
+ * SolarExplorer-Settings - where we set incremental builds and choose which ePWM triggers ISR, deadband, sineGen and lighting settings
+ * DPlib - 2p2z, 3p3z, and some ADCtrig defines
+ * PWMDac
+ *
+ */
 #include "SolarExplorer-Includes.h"
 
+<<<<<<< HEAD
 /**
  * Local Function Prototypes
  */
@@ -46,6 +56,13 @@
  * -CLA_init
  * -MemCopy
  */
+=======
+ /*******************************
+  * Function Prototypes
+  *******************************/
+
+
+>>>>>>> 9b437274f306d6a6669de3c4b121eabaa0babcb0
 void DeviceInit(void);
 #ifdef FLASH
 	/**
@@ -108,7 +125,12 @@ void PWM_1ch_UpDwnCntCompl_CNF(int16 n, int16 period, int16 mode, int16 phase);
  */
 void ADC_SOC_CNF(int ChSel[], int Trigsel[], int ACQPS[], int IntChSel, int mode);
 
+/**************************************************
+ * State Machine Framework
+ * @TODO: Include State Machine Implemention Here
+ **************************************************/
 
+<<<<<<< HEAD
 /**
  * State Machine Framework
  * @TODO: Include State machine implementation here
@@ -164,6 +186,22 @@ void main(void)
 /**
  * Device and Variable Inits
  */
+=======
+ /*******************************
+  * General Variable Declarations
+  *******************************/
+
+/************************
+ * Main Code Starts Here
+ *************************/
+
+void main(void)
+{
+
+	/**
+	 * Initializations
+	 */
+>>>>>>> 9b437274f306d6a6669de3c4b121eabaa0babcb0
 
 	// The DeviceInit() configures the clocks and pin mux registers 
 	// The function is declared in {ProjectName}-DevInit_F2803/2x.c,
@@ -179,6 +217,7 @@ void main(void)
 	 * Init State variables here
 	 */
 	
+<<<<<<< HEAD
 
 
 	/**
@@ -188,6 +227,11 @@ void main(void)
 /**
  * Background (BG) Loop
  */
+=======
+	/**
+	 * Background Loop
+	 */
+>>>>>>> 9b437274f306d6a6669de3c4b121eabaa0babcb0
 
 //--------------------------------- FRAMEWORK -------------------------------------
 	for(;;)

@@ -562,6 +562,7 @@ void PLLset(Uint16 val)
         EDIS;
     }
 
+<<<<<<< HEAD
     //divide down SysClk by 2 to increase stability
     EALLOW;
     SysCtrlRegs.PLLSTS.bit.DIVSEL = 2;
@@ -572,6 +573,9 @@ void PLLset(Uint16 val)
  * @brief PIE control Init to known state 
  * This function initializes the PIE control registers to a known state.
  */
+=======
+// This function initializes the PIE control registers to a known state.
+>>>>>>> 9b437274f306d6a6669de3c4b121eabaa0babcb0
 void PieCntlInit(void)
 {
     // Disable Interrupts at the CPU level:
