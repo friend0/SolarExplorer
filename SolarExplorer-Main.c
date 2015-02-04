@@ -30,7 +30,10 @@
 */
 
 #include "SolarExplorer-Includes.h"
-
+#include "fsm.h"
+#include "inverterFSM.h"
+#include "Structs.h"
+#include "InverterVariables.h"
 /**
  * Local Function Prototypes
  */
@@ -61,6 +64,7 @@ void MemCopy();
 #ifdef FLASH
 #pragma CODE_SECTION(Inv_ISR,"ramfuncs");
 #endif
+
 interrupt void Inv_ISR(void);
 interrupt void spiTxFifoIsr(void);
 interrupt void spiRxFifoIsr(void);
@@ -71,9 +75,9 @@ interrupt void spiRxFifoIsr(void);
 void SPI_init();
 
 
-/**
+/****************
  * DPLIB Configs
- */
+ ****************/
 
 /**
  * @brief PWM configuration
@@ -114,9 +118,22 @@ void ADC_SOC_CNF(int ChSel[], int Trigsel[], int ACQPS[], int IntChSel, int mode
  * @TODO: Include State machine implementation here
  */
 
+	//Declare the variable 'inverter' to be of the type 'Inverter', where 'Inverter' is the class
+	//wrapping the FSM object. Note that the FSM object is a pointer to the current state. 
+	Inverter inverter;
 
-//FSM Here ->
+	//Take the instance of the 'Inverter' class inverter, get the FSM it contains, and point it to an initialization state
+	InverterCtor(&inverter);
 
+	//Derference the Fsm object pointed to by inverter, initialize it with an initial event
+	//@TODO: need to figure the best initial event to send the machine
+	FsmInit((Fsm *)&inverter, 0);
+
+
+	//Now the inverter is initialized, and pointing to an initial state function
+	//From here, we can call the transition function to bring the FSM to life. 
+	//@TODO write a wrapper for the trasition function implementing the jump set
+	//Call the jump set only when we are in D, the jump set. 
 
 /**
  * VARIABLE DECLARATIONS - GENERAL
