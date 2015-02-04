@@ -551,6 +551,36 @@ void PLLset(Uint16 val)
         SysCtrlRegs.PLLCR.bit.DIV = val;
         EDIS;
 
+        // Optional: Wait for PLL to lock.
+        // During this time the CPU will switch to OSCCLK/2 until
+        // the PLL is stable.  Once the PLL is stable the CPU will
+        // switch to the new PLL value.
+        // This time-to-lock is monitored by a PLL lock counter.
+        // Code is not required to sit and wait for the PLL to lock.
+        // However, if the code does anything that is timing critical,
+        // and requires the correct clock be locked, then it is best to
+        // wait until this switching has completed.
+        // Wait for the PLL lock bit to be set.
+        // The watchdog should be disabled before this loop, or fed within
+        // the loop via ServiceDog().
+
+
+        // Uncomment to disable the watchdog
+        WDogDisable();
+
+        while (SysCtrlRegs.PLLSTS.bit.PLLLOCKS != 1) {}
+
+        EALLOW;
+        SysCtrlRegs.PLLSTS.bit.MCLKOFF = 0;
+        EDIS;
+    }
+
+    //divide down SysClk by 2 to increase stability
+    EALLOW;
+    SysCtrlRegs.PLLSTS.bit.DIVSEL = 2;
+    EDIS;
+}
+
         // Uncomment to disable the watchdog
         WDogDisable();
 
@@ -688,6 +718,18 @@ void InitFlash(void)
  * @param SourceEndAddr Pointer to the last word to be moved
  * @param DestAddr      Pointer to the first destination word
  */
+
+// This function will copy the specified memory contents from
+// one location to another.
+//
+//  Uint16 *SourceAddr        Pointer to the first word to be moved
+//                          SourceAddr < SourceEndAddr
+//  Uint16* SourceEndAddr     Pointer to the last word to be moved
+//  Uint16* DestAddr          Pointer to the first destination word
+//
+// No checks are made for invalid memory locations or that the
+// end address is > then the first start address.
+
 void MemCopy(Uint16 *SourceAddr, Uint16 *SourceEndAddr, Uint16 *DestAddr)
 {
     while (SourceAddr < SourceEndAddr)
