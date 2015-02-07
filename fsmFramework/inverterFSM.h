@@ -53,7 +53,7 @@ void Inverter_default(Inverter *self, Event const *e);
 * @param self self reference to inverterFSM
 * @param e    event
 */
-void Inverter_VDC(Inverter *self, Event const *e);
+void Inverter_PowerOn(Inverter *self, Event const *e);
 
 /**
 * Implements the state handler for the case that the H-Bridge
@@ -61,7 +61,7 @@ void Inverter_VDC(Inverter *self, Event const *e);
 * @param self self reference to inverterFSM
 * @param e    event
 */
-void Inverter_Zero(Inverter *self, Event const *e);
+void Inverter_OutOfParameters(Inverter *self, Event const *e);
 
 /**
 * Implements the state handler for the case that the H-Bridge
@@ -69,7 +69,27 @@ void Inverter_Zero(Inverter *self, Event const *e);
 * @param self self reference to inverterFSM
 * @param e    event
 */
-void Inverter_negVDC(Inverter *self, Event const *e);
+void Inverter_WithinParameters(Inverter *self, Event const *e);
+
+/**
+* Implements the state handler for a source that has a trajectory
+* headed outside the allowable parameters for the inverter to deliver the 
+* desired voltage and current
+* 
+* @param self self reference to inverterFSM
+* @param e    event
+*/
+void Inverter_AlmostOutOfParameters(Inverter *self, Event const *e);
+
+/**
+* Implements the state handler for an Inverter that is about to shut down.
+* Right now I'm not exactly sure what needs to happen here.
+* 
+* @param self self reference to inverterFSM
+* @param e    event
+*/
+void Inverter_ShutDown(Inverter *self, Event const *e);
+
 
 #endif
 

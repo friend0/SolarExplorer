@@ -13,9 +13,9 @@
 #include <ctype.h>
 
 
-/****************************************************************
-Inverter FSM
-****************************************************************/
+/**************************************************************************
+Inverter FSM - Public Type Definitions for Inverter FSM and Inverter Events
+***************************************************************************/
 /**
 * @brief 'type naming' of the FSM object
 *
@@ -42,21 +42,11 @@ Events
 /* signals used by the Inverter FSM */
 enum
 {
-    ANY_KEY_SIG,
     NEG_VDC,    //q = -1
     ZERO_VDC,   //q = 0
     VDC,        //q = 1
-    NO_EVENT,
+    NO_EVENT,   //qDot = 0
 };
-
-/* signals used by the Inverter FSM *//*
-enum
-{
-    NEG_VDC,    //q = -1
-    ZERO_VDC,   //q = 0
-    VDC,        //q = 1
-    NO_EVENT,
-};*/
 
 /**
 * Begin State Defintiions

@@ -1,3 +1,5 @@
+#ifndef STRUCTS_H
+#define STRUCTS_H
 
 // Used to indirectly access all EPWM modules
 volatile struct EPWM_REGS *ePWM[] = 
@@ -27,3 +29,5 @@ volatile struct COMP_REGS *Comp[] =
 					&Comp3Regs
 					#endif 
 				  };
+
+#endif
