@@ -666,6 +666,21 @@ void ISR_Init(void){
 	AdcRegs.COMPHYSTCTL.bit.COMP1_HYST_DISABLE = 0x1; 
 	
 // Cycle by cycle trip for overvoltage protection
+	/**
+	 * DCTRIPSEL Register: Digital Trip Compare Select
+	 * 
+	 * DCAHCOMPSEL: Digital Compare A High Input Select
+	 * 		Defines the source for the DCAH input. The TZ signals, when used as trip signals, 
+	 * 		are treated as normal inputs and can be defined as active high or active low.
+	 * 		Here, DC_COMP1OUT = 0x8 which will use COMP1OUT as input
+	 *
+	 * TZDCSEL: Trip Zone Digital Compare Event Select Register
+	 * 		DCAEVT2: Digital Compare Output A Event 2 Selection, 
+	 * 		in this case is set to 'TZ_DCAH_HI' where TZ_DCAH_HI = 0x2.
+	 * 		This option corresponds to DCAH = high, DCAL = don't care,
+	 * 		where these are Digital Compare A high and Low resprectively. 
+	 * 		These indicate when a trip event has occured.
+	 */
 	EPwm3Regs.DCTRIPSEL.bit.DCAHCOMPSEL=DC_COMP1OUT;
 	EPwm3Regs.TZDCSEL.bit.DCAEVT2=TZ_DCAH_HI;
 	
@@ -680,6 +695,16 @@ void ISR_Init(void){
 	EALLOW;
 	
 // Cycle by cycle interrupt for CPU halt trip
+
+/**
+ * TZSEL Register: Trip Zone Select:
+ * 
+ * TZCTL Register: Trip Zone Controller:
+ *
+ * TZCLR Register: Trip Zone Clear Register:
+ *
+ * TZFRC Register: Trip Zone Force Register:
+ */
 	EPwm3Regs.TZSEL.bit.CBC6=0x1;
 	EPwm1Regs.TZSEL.bit.CBC6=0x1;
 	EPwm2Regs.TZSEL.bit.CBC6=0x1;
