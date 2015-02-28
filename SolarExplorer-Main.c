@@ -35,6 +35,7 @@
 #include "Structs.h"
 #include "InverterVariables.h"
 #include "ADC_Configs.h"
+
 /**
  * Local Function Prototypes
  */
@@ -238,6 +239,10 @@ void main(void)
 	B_Task_Ptr = &B1;
 	C_Task_Ptr = &C1;
 
+	/**
+	 * @TODO:How are these virtual timers incremented?
+	 */
+
 	VTimer0[0] = 0;	
 	VTimer1[0] = 0;
 	VTimer2[0] = 0;
@@ -254,21 +259,24 @@ void main(void)
 	 * User Initialization
 	 */
 	userInitialization();
-	/**
-	 * PWM Inits
-	 * @TODO: Go a bit deeper here and figure out what's actually being done:
-	 * Calcs, Library calls, etc... Also, make sure to update the comments on everything.
-	 */
 	
 	/**
-	 * Configure PWM3 for 100Khz switching Frequency
-	 * I think this is for the Boost Loop
+	 * Configure PWM3, Boost Loop, for 100Khz switching Frequency
+	 *
+	 *PWM_1ch_UpDwnCntCompl_CNF(int16 n, int16 period, int16 mode, int16 phase)	 *  
+	 * 
+	 * PWM3, configured with a period of 600 sysclks, i.e. 600*(1/(60MHz)) = 1/(100kHz)
+	 * Configured in 'slave mode', clock synchronization from EPWM x, the master.
 	 */
-	PWM_1ch_UpDwnCntCompl_CNF(3, 600,0,30); 
+	PWM_1ch_UpDwnCntCompl_CNF(3,600,0,30); 
 
 	/**
-	 * Solar_PWM_Inv_1ph_unipolar_CNF(1, 1500, 20, 20);
-	 * I think this is for the Inverter Loop
+	 * PWM_1phInv_unipolar_CNF(n,period,deadband_rising,deadband_falling)	
+	 * 
+	 * PWM1, configured with a period of 1500 sysclks, i.e. 1500*(1/(60MHz)) = 1/(40kHz)
+	 * Deadband, rising and falling, set to 20, I presume this to be 20 sysclks
+	 * In this case we have 20*(1/(60MHz)) = 33uS
+	 * @TODO verify the deadband assumption above
 	 */
 	PWM_1phInv_unipolar_CNF(1,1500,20,20);	
 
@@ -419,19 +427,33 @@ void main(void)
 
 void pwmPhaseConfig(void){
 
-	EPwm1Regs.TBCTL.bit.PHSEN   = TB_DISABLE;
-	EPwm1Regs.TBCTL.bit.SYNCOSEL = TB_CTR_ZERO;
+	/**
+	 * TBCTL: Time-Base Control Register
+	 * 		PHSEN: Counter Register Load From Phase Register Enable	  
+	 * 		SYNCOSEL: Synchronization Output Select. These bits select the source of the EPWMxSYNCO signal.		
+	 * TBPHS: Time-Base Phase Register. These bits set time-base counter phase of the selected ePWM relative 
+	 * to the time-base that is supplying the synchronization input signal.
+	 * Example: If TBPRD (time-base period) is 600, and TBPHS is set to 200 for the 'slave', then we have 200/600 X 360° = 120° 
+	 * So we have 120° phase lead for the slave. See Figure 58 in SPRUG04A for an example of this.
+	 */
 	
-	EPwm2Regs.TBCTL.bit.PHSEN   = TB_ENABLE;
-	EPwm2Regs.TBCTL.bit.SYNCOSEL = TB_SYNC_IN;
-	EPwm2Regs.TBCTL.bit.PHSDIR = TB_UP;
-	EPwm2Regs.TBPHS.half.TBPHS = 2;
+	//EPWM1
+	EPwm1Regs.TBCTL.bit.PHSEN   = TB_DISABLE;		//Do not load from the time-base counter from time-base phase register
+	EPwm1Regs.TBCTL.bit.SYNCOSEL = TB_CTR_ZERO;		//CTR = zero: Time-base counter equal to zero (TBCTR = 0x0000)
 	
-	EPwm3Regs.TBCTL.bit.SYNCOSEL=TB_SYNC_IN;
-	EPwm3Regs.TBCTL.bit.PHSEN=TB_ENABLE; 
-	EPwm3Regs.TBCTL.bit.PHSDIR=TB_UP;
+	//EPWM2
+	EPwm2Regs.TBCTL.bit.PHSEN   = TB_ENABLE;		//Load the time-base counter with the phase register when an EPWMxSYNCI 
+													//input signal occurs or when a software synchronization is forced by the SWFSYNC bit
+	EPwm2Regs.TBCTL.bit.SYNCOSEL = TB_SYNC_IN;		//Choose EPWM2SYNC signal as source for synchronization
+	EPwm2Regs.TBCTL.bit.PHSDIR = TB_UP;				//Count up on synchronization event
+	EPwm2Regs.TBPHS.half.TBPHS = 2;					//@TODO: Figure out what the phase delay from this struct corresponds to!				
 	
-	EPwm3Regs.TBPHS.half.TBPHS=4;
+	//EPWM3
+	EPwm3Regs.TBCTL.bit.PHSEN=TB_ENABLE;			//Load the time-base counter with the phase register when an EPWMxSYNCI 
+													//input signal occurs or when a software synchronization is forced by the SWFSYNC bit 
+	EPwm3Regs.TBCTL.bit.SYNCOSEL=TB_SYNC_IN;		//Choose EPWM3SYNC signal as source for synchronization															
+	EPwm3Regs.TBCTL.bit.PHSDIR=TB_UP;				//Count up on synchronization event	
+	EPwm3Regs.TBPHS.half.TBPHS=4;					//@TODO: Figure out what the phase delay from this struct corresponds to!
 }
 
 void userInitialization(void){
@@ -489,8 +511,6 @@ void netConnections(void){
 	MATH_EMAVG_Out2=&VpvRead_EMAVG;
 	MATH_EMAVG_Multiplier2=_IQ30(0.001); // a 1000 point moving average filter
 	
-	
-	//======================================================================================
 	//connect the 2P2Z connections, for the inner current Loop
 	CNTL_2P2Z_Ref2 = &IboostSwRef; 
 	CNTL_2P2Z_Out2 = &Duty3A;
@@ -624,8 +644,6 @@ void dataLoggingInits(void){
  * @TODO: Why are EDIS and EALLOW being called so many times in between configs?
  */
 void ISR_Init(void){
-
-
 
 // Set up C28x Interrupt
 
