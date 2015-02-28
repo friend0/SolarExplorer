@@ -35,6 +35,7 @@
 #include "Structs.h"
 #include "InverterVariables.h"
 #include "ADC_Configs.h"
+#include "Inv_ISR.h"
 
 /**
  * Local Function Prototypes
@@ -232,15 +233,31 @@ void main(void)
 	/**
 	 * Tasks State-machine init
 	 * Need to get rid of these, or find out how to make only the DC-DC stage run with this
-	 * @TODO reconcile this with new implementation
+	 * @TODO What does each of these 'parallel' state machines do?
 	 */
 	Alpha_State_Ptr = &A0;
+
+	/**
+	 * Machine 'A' is mainly in charge of interfacing with the GUI and the F28027
+	 * A1: Performs the moving average calculations
+	 * A2: Panel Connect disconnect- enables the relay. @TODO: Does the relay choose between PV_EMU and real panel input?
+	 * A3: Communication with panel emulator
+	 */
 	A_Task_Ptr = &A1;
+	/**
+	 * Machine 'B' handles the MPPT routine, links the LED on the control card, and deals with the 
+	 * 'Macro' state of the inverter - much like the HBridge FSM (PowerOn, Off, etc...)
+	 */
 	B_Task_Ptr = &B1;
+	/**
+	 * Machine 'C' is 3/4 spare state, i.e. 'do nothing', but has a curious method that updates coefficients. 
+	 * The strange thing is that it updates using the same logic as when they were initialized, i.e. using Pgain, Igain, etc...
+	 * @TODO: Do these gain terms get updated at any point in the code? How can I tell if this is happening in the CLA?
+	 */
 	C_Task_Ptr = &C1;
 
 	/**
-	 * @TODO:How are these virtual timers incremented?
+	 * These virtual timers are incrememtned in the 'Alpha states' used on the SE
 	 */
 
 	VTimer0[0] = 0;	
@@ -462,6 +479,9 @@ void userInitialization(void){
 	  * @TODO: Commment all of these variables with brief description of usages
 	  */
 
+	/**
+	* These are used a in a moving average filter, to be output to user via GUI
+	*/
 	for(i=0;i<HistorySize;i++)
 	{
 		Hist_Vpv[i]=0;
@@ -479,10 +499,16 @@ void userInitialization(void){
 	iK_Ipv=30981;	
 	K_Light=27034;							//Q15
 
+	/**
+	 * Initialize GUI variables
+	 */
 	Gui_Vpv=0;
 	Gui_Ipv=0;
 	Gui_Vboost=0;
 
+	/**
+	 * SPI send flag
+	 */
 	TransmitData=0;
 	sdata[0]=0;     // Send data buffer
 	sdata[1]=1;
