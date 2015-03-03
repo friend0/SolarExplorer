@@ -13,45 +13,6 @@
 #include <ctype.h>
 #include <execinfo.h>
 
-
-/**************************************************************************
-Inverter FSM - Public Type Definitions for Inverter FSM and Inverter Events
-***************************************************************************/
-/**
-* @brief 'type naming' of the FSM object
-*
-* The 'Inverter' struct is a container for the FSM base class.
-* Other attributes of the class are included. Class methods are
-* implemented following this.
-*/
-struct Inverter
-{
-    Fsm super_; /* extend the Fsm class */
-    //Attributes
-};
-
-struct InverterEvent
-{
-    Event super_; /* extend the Event class */
-    //Attributes
-    char code;
-};
-
-/****************************************************************
-States
-****************************************************************/
-/**
-enum{
-Inverter_initial,
-Inverter_default,
-Inverter_PowerOn,
-Inverter_OutOfParameters,
-Inverter_WithinParameters,
-Inverter_AlmostOutOfParameters,
-Inverter_ShutDown,
-};
-**/
-
 /****************************************************************
 Events
 ****************************************************************/
@@ -75,14 +36,14 @@ void InverterCtor(Inverter *self)
     _FsmCtor_(&self->super_, &Inverter_initial);
 }
 
-void Inverter_initial(Inverter *self, Event const *e)
+void Inverter_initial(Inverter *self, Event *e)
 {
     /* ... initialization of Inverter attributes */
     printf("Inverter initialized");
     _FsmTran_((Fsm *)self, &Inverter_default);
 }
 
-void Inverter_default(Inverter *self, Event const *e)
+void Inverter_default(Inverter *self, Event *e)
 {
     switch (e->signal)
     {
@@ -122,7 +83,7 @@ void Inverter_default(Inverter *self, Event const *e)
 }
 
 
-void Inverter_PowerOn(Inverter *self, Event const *e)
+void Inverter_PowerOn(Inverter *self, Event *e)
 {
     switch (e->signal)
     {
@@ -161,7 +122,7 @@ void Inverter_PowerOn(Inverter *self, Event const *e)
     }
 }
 
-void Inverter_OutOfParameters(Inverter *self, Event const *e)
+void Inverter_OutOfParameters(Inverter *self, Event *e)
 {
     switch (e->signal)
     {
@@ -201,7 +162,7 @@ void Inverter_OutOfParameters(Inverter *self, Event const *e)
     }
 }
 
-void Inverter_WithinParameters(Inverter *self, Event const *e)
+void Inverter_WithinParameters(Inverter *self, Event *e)
 {
     switch (e->signal)
     {
@@ -240,7 +201,7 @@ void Inverter_WithinParameters(Inverter *self, Event const *e)
     }
 }
 
-void Inverter_AlmostOutOfParameters(Inverter *self, Event const *e)
+void Inverter_AlmostOutOfParameters(Inverter *self, Event *e)
 {
     switch (e->signal)
     {
@@ -279,7 +240,7 @@ void Inverter_AlmostOutOfParameters(Inverter *self, Event const *e)
     }
 }
 
-void Inverter_ShutDown(Inverter *self, Event const *e)
+void Inverter_ShutDown(Inverter *self, Event *e)
 {
     switch (e->signal)
     {
@@ -321,6 +282,8 @@ void Inverter_ShutDown(Inverter *self, Event const *e)
 /**
 * @brief Used to determine the event that should be passed to the FsmDispatch function
 *
+* In micro implmeentation, I think this mcould be replaced completely as most of these transitions should be occuring from
+* ADC sample, no need to be passed signals, they can be determined on the fly inside the states. 
 * Using the InverterEvent class, we utilize the data variable 'code' to switch the signal
 * of the Event super-class. Next, we take the updated Event signal and dispatch it to
 * the current state function pointed to by Fsm of the class Inverter.

@@ -12,33 +12,10 @@
 #include <stdio.h>
 #include <ctype.h>
 
+///////////
+//Events //
+///////////
 
-/**************************************************************************
-hBridge FSM - Public Type Definitions for hBridge FSM and hBridge Events
-***************************************************************************/
-/**
-* @brief 'type naming' of the FSM object
-*
-* The 'hBridge' struct is a container for the FSM base class.
-* Other attributes of the class are included. Class methods are
-* implemented following this.
-*/
-struct hBridge
-{
-    Fsm super_; /* extend the Fsm class */
-    //Attributes
-};
-
-struct hBridgeEvent
-{
-    Event super_; /* extend the Event class */
-    //Attributes
-    char code;
-};
-
-/****************************************************************
-Events
-****************************************************************/
 /* signals used by the hBridge FSM */
 enum
 {
@@ -57,14 +34,14 @@ void hBridgeCtor(hBridge *self)
     _FsmCtor_(&self->super_, &hBridge_initial);
 }
 
-void hBridge_initial(hBridge *self, Event const *e)
+void hBridge_initial(hBridge *self, Event *e)
 {
     /* ... initialization of hBridge attributes */
     printf("hBridge initialized");
     _FsmTran_((Fsm *)self, &hBridge_default);
 }
 
-void hBridge_default(hBridge *self, Event const *e)
+void hBridge_default(hBridge *self, Event *e)
 {
     switch (e->signal)
     {
@@ -92,7 +69,7 @@ void hBridge_default(hBridge *self, Event const *e)
 }
 
 
-void hBridge_VDC(hBridge *self, Event const *e)
+void hBridge_VDC(hBridge *self, Event *e)
 {
     switch (e->signal)
     {
@@ -113,7 +90,7 @@ void hBridge_VDC(hBridge *self, Event const *e)
     }
 }
 
-void hBridge_Zero(hBridge *self, Event const *e)
+void hBridge_Zero(hBridge *self, Event *e)
 {
     switch (e->signal)
     {
@@ -135,7 +112,7 @@ void hBridge_Zero(hBridge *self, Event const *e)
     }
 }
 
-void hBridge_negVDC(hBridge *self, Event const *e)
+void hBridge_negVDC(hBridge *self, Event *e)
 {
     switch (e->signal)
     {
@@ -155,6 +132,9 @@ void hBridge_negVDC(hBridge *self, Event const *e)
             break;
     }
 }
+/**
+* End State Definitions
+*/
 
 /**
 * @brief Used to determine the event that should be passed to the FsmDispatch function
@@ -234,6 +214,3 @@ char hBridgeTransitionFunction(hBridge self, hBridgeEvent *e)
     return 0;
 }
 
-/**
-* End State Definitions
-*/

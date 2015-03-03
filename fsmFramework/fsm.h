@@ -1,137 +1,206 @@
 /**
  * @file fsm.h
- * @author Ryan A. Rodriguez
- * @brief Class and Function defintions required to define FSMs using this framework
+ * @author Ryan Rodriguez
+ * @date 12/27/14
+ * @brief Header for FSM base class implementations
  *
- * @TODO put extended description here
- *
- * @TODO put code example here
- * instantiate
- * initialize
- * state definitions
+ * Declaration of the two structs *Event* and *FSM* which serve as
+ * superclasses to FSM classes implemented by the us.
  */
+
 
 #ifndef FSM_H
 #define FSM_H
 
-/**
- * Event Class Definition
- */
-typedef struct Event Event;
 
-/**
- * FSM class definition
- */
+typedef struct Event Event;
 typedef struct Fsm Fsm;
 
-/**
- * @TODO - put a good description of the signal variable here
- */
 typedef short Signal;
 
-/**
- * @TODO need to comb through the C magic going on here and
- * 		 thoroughly document what is going on.
- * The following is a pointer to a state handler function. The state handler is 
- * mereley a function that uses a switch to respond to signals. 
+/*
+    This is, in essence, a variable of type 'function pointer'.
+    It is used to represent the states of our machine.
+    The FSM * argument is the current state.
+
+    Therefore, in the FSM struct itself, we use the member variable 'State'
+    to hold the current state of the FSM. State translates to the 'function being pointed to'
  */
 typedef void (*State)(Fsm *, Event const *);
 
-/** 
-* @brief Event base class
-* @type Event
-* @member signal
-* 
-* This struct is the base class for events. It has a single attribute
-* called signal.
-*
-* We should note that the signal 's' in set K is an invariant, for an
-* input voltage Vin.
-* \f$
-* s \in K, \\
-* K = [0,Vin]
-* \f$
-* More accurately, Vin will be scaled corresponding to the reference voltage
-* at the ADC.
-*/
-struct Event
-{
-Signal signal;
-};
 
-/** 
-* @brief FSM base class
-* @type FSM
-* @member state__
-* 
-* This struct is the base class for Finite State Machines. It has a single attribute
-* called state__. State__, ostensibly, should never be accessed by the client directly.
-*
-*/
+/** @brief Event base class
+ * This struct is the base class for events. It has a single attribute,
+ * state__ of type State, where State is defined .
+ *
+ * We should note that the signal 's' in set K is an invariant, for an
+ * input voltage Vin.
+ * \f$
+ * s \in K, \\
+ * K = [0,Vin]
+ * \f$
+ * More accurately, Vin will be scaled corresponding to the reference voltage
+ * at the ADC.
+ */
 /* Finite State Machine base class */
 struct Fsm
 {
-State state__; /* the current state */
+    /*
+       The function being pointed to, or the 'state'
+     */
+    State state__; /* the current state */
 };
 
 
-/////////////////////////////////////
-// 'Inlined' methods of Fsm class  //
-/////////////////////////////////////
+/** @brief Event base class
+ * This struct is the base class for events. It has a single attribute
+ * called signal.
+ *
+ * We should note that the signal 's' in set K is an invariant, for an
+ * input voltage Vin.
+ * \f$
+ * s \in K, \\
+ * K = [0,Vin]
+ * \f$
+ * More accurately, Vin will be scaled corresponding to the reference voltage
+ * at the ADC.
+ */
+struct Event
+{
+    Signal signal;
+    Signal transition; /* Change to boolean value when supported, will be either true or false*/
+};
+
 
 /**
-* @brief Constructor selfthod, initializes state
-* 
-* Get the state pointed to by the Fsm contained by 'self_' and point it to 
-* desired initial state.
-*
-* @param self_ reference to 'self' object, specifies the object being operated on
-* @param init_ Desired Initial state
+ * "inlined" selfthods of Fsm class
 */
+
+/**
+ * Constructor selfthod, initializes state
+ * Translates to, the state, 'state__', pointed to by self (FSM) is equalt to RHS,
+ * where State is of type 'function pointer'
+ */
 #define _FsmCtor_(self_, init_) ((self_)->state__ = (State)(init_))
 
 /**
-* @brief Initializes state machine
-*
-* Dereference the object wrapping the Fsm, get the current state.
-* The current state is a function to which we can pass arguments.
-*
-* @param self_ reference to 'self' object, specifies the object being operated on
-* @param e_	Initial Event to be passed to the current state function pointed to by Fsm
-*           object being pointed to by 'self_'
-*/
-#define FsmInit(self_, e_) (*(self_)->state__)((self_), (e_))
+ * Initializes state machine, with some event
+ */
+#define FsmInit(self_, e_)     (*(self_)->state__)((self_), (e_))
 
 /**
-* @brief Dispatches events to the state machine
-*
-* Fsm Dispatch should be called after the Event signal is determined. Dispatch function 
-* gets the Fsm object reference by 'self' and passes a new event to the current state. 
-* Note that the current state is actually a function that takes in a reference to self, and a new event. 
-* This state function responds appropriately to new events, and performs transition based on the signal. 
-*
-* EX: (*(self_)->state__) <- is actually a function! A state function to be precise...
-* So, (*(self_)->state__)(args1,..., argsN) calls the function with the given arguments.
-* 
-* @param self_ reference to 'self' object, specifies the object being operated on 
-* @param e_	The Event to be passed to the current state function pointed to by Fsm 
-*           contained by 'self_'
-*/
+ * Dispatches events to the state machine
+ */
 #define FsmDispatch(self_, e_) (*(self_)->state__)((self_), (e_))
 
+#define FunctionDispatch(self_, e) (*self_)(self, (e))
 /**
- * @brief function used to perform a state transition
- * 
-* This makes a state transition, i.e. updates the state to q+. 
-* This function should be called within each individual state base upon 
-* input event, and current state. 
-*
-* State transitions are accomplished by retrieving the current sate pointed to by 'self_', 
-* then setting it equal to the desired nextState targ_.
-*
-* @param self eference to 'self' object, specifies the object being operated on 
-* @param targ_ The target state to be transitioned to
+ * This takes a state transition, i.e. updates the state
+ * q+
+ */
+#define _FsmTran_(self_, targ_) ((self_)->state__ = (State)(targ_))
+
+#endif
+/**
+ * @file fsm.h
+ * @author Ryan Rodriguez
+ * @date 12/27/14
+ * @brief Header for FSM base class implementations
+ *
+ * Declaration of the two structs *Event* and *FSM* which serve as
+ * superclasses to FSM classes implemented by the us.
+ */
+
+
+#ifndef FSM_H
+#define FSM_H
+
+
+typedef struct Event Event;
+typedef struct Fsm Fsm;
+
+typedef short Signal;
+
+/*
+    This is, in essence, a variable of type 'function pointer'.
+    It is used to represent the states of our machine.
+    The FSM * argument is the current state.
+
+    Therefore, in the FSM struct itself, we use the member variable 'State'
+    to hold the current state of the FSM. State translates to the 'function being pointed to'
+ */
+typedef void (*State)(Fsm *, Event const *);
+
+
+/** @brief Event base class
+ * This struct is the base class for events. It has a single attribute,
+ * state__ of type State, where State is defined .
+ *
+ * We should note that the signal 's' in set K is an invariant, for an
+ * input voltage Vin.
+ * \f$
+ * s \in K, \\
+ * K = [0,Vin]
+ * \f$
+ * More accurately, Vin will be scaled corresponding to the reference voltage
+ * at the ADC.
+ */
+/* Finite State Machine base class */
+struct Fsm
+{
+    /*
+       The function being pointed to, or the 'state'
+     */
+    State state__; /* the current state */
+};
+
+
+/** @brief Event base class
+ * This struct is the base class for events. It has a single attribute
+ * called signal.
+ *
+ * We should note that the signal 's' in set K is an invariant, for an
+ * input voltage Vin.
+ * \f$
+ * s \in K, \\
+ * K = [0,Vin]
+ * \f$
+ * More accurately, Vin will be scaled corresponding to the reference voltage
+ * at the ADC.
+ */
+struct Event
+{
+    Signal signal;
+    Signal transition; /* Change to boolean value when supported, will be either true or false*/
+};
+
+
+/**
+ * "inlined" selfthods of Fsm class
 */
+
+/**
+ * Constructor selfthod, initializes state
+ * Translates to, the state, 'state__', pointed to by self (FSM) is equalt to RHS,
+ * where State is of type 'function pointer'
+ */
+#define _FsmCtor_(self_, init_) ((self_)->state__ = (State)(init_))
+
+/**
+ * Initializes state machine, with some event
+ */
+#define FsmInit(self_, e_)     (*(self_)->state__)((self_), (e_))
+
+/**
+ * Dispatches events to the state machine
+ */
+#define FsmDispatch(self_, e_) (*(self_)->state__)((self_), (e_))
+
+#define FunctionDispatch(self_, e) (*self_)(self, (e))
+/**
+ * This takes a state transition, i.e. updates the state
+ * q+
+ */
 #define _FsmTran_(self_, targ_) ((self_)->state__ = (State)(targ_))
 
 #endif
