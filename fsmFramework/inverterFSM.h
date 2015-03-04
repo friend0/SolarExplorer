@@ -105,7 +105,7 @@ void Inverter_AlmostOutOfParameters(Inverter *self, Event *e);
 void Inverter_ShutDown(Inverter *self, Event *e);
 
 
-void InverterTransitionFunction(Inverter self, InverterEvent *e);
+char InverterTransitionFunction(Inverter self, InverterEvent *e);
 
 #endif
 

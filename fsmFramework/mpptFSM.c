@@ -11,7 +11,9 @@
 #include "mpptFSM.h"
 #include <stdio.h>
 #include <ctype.h>
-#include <execinfo.h>
+#include "stdbool.h"
+
+//#include <execinfo.h>
 
 /**
 * Begin State Defintiions
@@ -25,7 +27,6 @@ void MpptCtor(Mppt *self) {
 //May also need to change others for setting exit transition? will this get handled in transition function?
 void Mppt_initial(Mppt *self, Event *e) {
     /* ... initialization of Mppt attributes */
-    printf("Mppt initialized");
 
     //cannot call this here, the initial event passed is a zero...
     //e->transition = true;
@@ -36,6 +37,8 @@ void Mppt_Execute(Mppt *self, Event *e) {
 
     if (e->transition == true) {
         printf("transition is true!\n");
+
+        //We've executed the entrance code, reset the transition flag
         e->transition = false;
     }
 

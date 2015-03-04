@@ -88,10 +88,16 @@ PAGE 1 :
  
 SECTIONS
 {
+
+	/**
+	*@TODO: Understand the linking section better; why was text taking so much space??
+	*Have modified the .text to cross FLASHA/C/D is there a better way to do this?
+	*HOw to run things from RAM? What is being run in RAM?
+	*/
    /* Allocate program areas: */
    .cinit            : > FLASHA,     PAGE = 0
    .pinit            : > FLASHA,     PAGE = 0
-   .text             : > FLASHA,     PAGE = 0
+   .text             : >> FLASHA | FLASHC | FLASHD,     PAGE = 0
 
    codestart         : > BEGIN       PAGE = 0
    

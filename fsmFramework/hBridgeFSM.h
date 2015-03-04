@@ -1,12 +1,26 @@
 #ifndef H_BRIDGE_FSM_H
 #define H_BRIDGE_FSM_H
 
-//////////////////////////////////////////
-// Declaration of FSM and Event objects //
-//////////////////////////////////////////
+/////////////////////////////////////////
+//Declaration of FSM and Event objects //
+/////////////////////////////////////////
 
 typedef struct hBridge hBridge;
 typedef struct hBridgeEvent hBridgeEvent;
+
+struct hBridge
+{
+    Fsm super_; /* extend the Fsm class */
+    //Attributes
+};
+
+struct hBridgeEvent
+{
+    Event super_; /* extend the Event class */
+    //Attributes
+    char code;
+};
+
 
 ////////////////////////////////////
 // Declaration of state functions //
@@ -38,14 +52,14 @@ void hBridgeCtor(hBridge *self);
 * @param self self reference to hBridgeFSM
 * @param e    event
 */
-void hBridge_initial(hBridge *self, Event const *e);
+void hBridge_initial(hBridge *self, Event *e);
 
 /**
 * Implements the default transition
 * @param self self reference to hBridgeFSM
 * @param e    event
 */
-void hBridge_default(hBridge *self, Event const *e);
+void hBridge_default(hBridge *self, Event *e);
 
 /**
 * Implements the state handler for the case that the H-Bridge
@@ -53,7 +67,7 @@ void hBridge_default(hBridge *self, Event const *e);
 * @param self self reference to hBridgeFSM
 * @param e    event
 */
-void hBridge_VDC(hBridge *self, Event const *e);
+void hBridge_VDC(hBridge *self, Event *e);
 
 /**
 * Implements the state handler for the case that the H-Bridge
@@ -61,7 +75,7 @@ void hBridge_VDC(hBridge *self, Event const *e);
 * @param self self reference to hBridgeFSM
 * @param e    event
 */
-void hBridge_Zero(hBridge *self, Event const *e);
+void hBridge_Zero(hBridge *self, Event *e);
 
 /**
 * Implements the state handler for the case that the H-Bridge
@@ -69,10 +83,17 @@ void hBridge_Zero(hBridge *self, Event const *e);
 * @param self self reference to hBridgeFSM
 * @param e    event
 */
-void hBridge_negVDC(hBridge *self, Event const *e);
+void hBridge_negVDC(hBridge *self, Event *e);
 
+/**
+ * Implements the transition logic for a particular state machine. Uses a switch to
+ * respond to various inputs depending on the current state of the machine.
+ *
+ * @param self self reference to hBridgeFSM
+ * @param e    event
+ */
 
-void hBridgeTransitionFunction(hBridge self, hBridge *e)
+char hBridgeTransitionFunction(hBridge self, hBridgeEvent *e);
 
 #endif
 

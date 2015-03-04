@@ -11,7 +11,9 @@
 #include "inverterFSM.h"
 #include <stdio.h>
 #include <ctype.h>
-#include <execinfo.h>
+#include "stdbool.h"
+
+//#include <execinfo.h>
 
 /****************************************************************
 Events
@@ -24,7 +26,7 @@ enum
     INSIDE_PARAMETERS,
     ALMOST_OUT_OF_PARAMETERS,
     SHUT_DOWN,
-    NO_EVENT,
+    NO_EVENT
 };
 
 /**

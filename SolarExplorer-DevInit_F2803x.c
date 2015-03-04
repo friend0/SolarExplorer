@@ -17,6 +17,7 @@
 // run address using the linker cmd file.                               //
 //////////////////////////////////////////////////////////////////////////
 #pragma CODE_SECTION(InitFlash, "ramfuncs");
+
 #define Device_cal (void   (*)(void))0x3D7C80
 
 // used by CLA Initialaization function
@@ -568,23 +569,6 @@ void PLLset(Uint16 val)
         // Uncomment to disable the watchdog
         WDogDisable();
 
-        while (SysCtrlRegs.PLLSTS.bit.PLLLOCKS != 1) {}
-
-        EALLOW;
-        SysCtrlRegs.PLLSTS.bit.MCLKOFF = 0;
-        EDIS;
-    }
-
-    //divide down SysClk by 2 to increase stability
-    EALLOW;
-    SysCtrlRegs.PLLSTS.bit.DIVSEL = 2;
-    EDIS;
-}
-
-        // Uncomment to disable the watchdog
-        WDogDisable();
-
-        //Wait until PLL locks
         while (SysCtrlRegs.PLLSTS.bit.PLLLOCKS != 1) {}
 
         EALLOW;

@@ -12,12 +12,16 @@ $(GEN_CMDS__FLAG) \
 "./DSP2803x_CodeStartBranch.obj" \
 "./DSP2803x_GlobalVariableDefs.obj" \
 "./DSP2803x_usDelay.obj" \
+"./Inv_ISR.obj" \
 "./PWM_1ch_UpDwnCntCompl_Cnf.obj" \
 "./SolarExplorer-DPL-ISR.obj" \
 "./SolarExplorer-DevInit_F2803x.obj" \
 "./SolarExplorer-Main.obj" \
 "./Util_DLOG4CHC.obj" \
 "./src commros/Commros_user.obj" \
+"./fsmFramework/hBridgeFSM.obj" \
+"./fsmFramework/inverterFSM.obj" \
+"./fsmFramework/mpptFSM.obj" \
 "C:/ti/controlSUITE/libs/dsp/SGEN/v101/lib/C28x_SGEN_Lib_fixed.lib" \
 "C:/ti/controlSUITE/device_support/f2803x/v125/DSP2803x_headers/cmd/DSP2803x_Headers_nonBIOS.cmd" \
 "../F28035_FLASH_SolarExplorer.CMD" \
@@ -34,8 +38,10 @@ RMDIR := RMDIR /S/Q
 -include sources.mk
 -include subdir_vars.mk
 -include src\ commros/subdir_vars.mk
+-include fsmFramework/subdir_vars.mk
 -include subdir_rules.mk
 -include src\ commros/subdir_rules.mk
+-include fsmFramework/subdir_rules.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -155,8 +161,8 @@ SolarExplorer_PVInverter.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
-	-$(RM) "ADC_SOC_Cnf.pp" "DSP2803x_GlobalVariableDefs.pp" "PWM_1ch_UpDwnCntCompl_Cnf.pp" "SolarExplorer-DevInit_F2803x.pp" "SolarExplorer-Main.pp" "src commros\Commros_user.pp" 
-	-$(RM) "ADC_SOC_Cnf.obj" "DSP2803x_CodeStartBranch.obj" "DSP2803x_GlobalVariableDefs.obj" "DSP2803x_usDelay.obj" "PWM_1ch_UpDwnCntCompl_Cnf.obj" "SolarExplorer-DPL-ISR.obj" "SolarExplorer-DevInit_F2803x.obj" "SolarExplorer-Main.obj" "Util_DLOG4CHC.obj" "src commros\Commros_user.obj" 
+	-$(RM) "ADC_SOC_Cnf.pp" "DSP2803x_GlobalVariableDefs.pp" "Inv_ISR.pp" "PWM_1ch_UpDwnCntCompl_Cnf.pp" "SolarExplorer-DevInit_F2803x.pp" "SolarExplorer-Main.pp" "src commros\Commros_user.pp" "fsmFramework\hBridgeFSM.pp" "fsmFramework\inverterFSM.pp" "fsmFramework\mpptFSM.pp" 
+	-$(RM) "ADC_SOC_Cnf.obj" "DSP2803x_CodeStartBranch.obj" "DSP2803x_GlobalVariableDefs.obj" "DSP2803x_usDelay.obj" "Inv_ISR.obj" "PWM_1ch_UpDwnCntCompl_Cnf.obj" "SolarExplorer-DPL-ISR.obj" "SolarExplorer-DevInit_F2803x.obj" "SolarExplorer-Main.obj" "Util_DLOG4CHC.obj" "src commros\Commros_user.obj" "fsmFramework\hBridgeFSM.obj" "fsmFramework\inverterFSM.obj" "fsmFramework\mpptFSM.obj" 
 	-$(RM) "DSP2803x_CodeStartBranch.pp" "DSP2803x_usDelay.pp" "SolarExplorer-DPL-ISR.pp" "Util_DLOG4CHC.pp" 
 	-@echo 'Finished clean'
 	-@echo ' '

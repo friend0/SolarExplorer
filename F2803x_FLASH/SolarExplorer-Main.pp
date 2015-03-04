@@ -41,9 +41,16 @@ SolarExplorer-Main.obj: C:/ti/controlSUITE/libs/app_libs/solar/v1.0/IQ/mppt_incc
 SolarExplorer-Main.obj: C:/ti/controlSUITE/libs/app_libs/solar/v1.0/IQ/mppt_pno.h
 SolarExplorer-Main.obj: C:/ti/controlSUITE/libs/app_libs/solar/v1.0/IQ/SPLL_1ph.h
 SolarExplorer-Main.obj: C:/ti/controlSUITE/libs/app_libs/drivers/v1.0/F2803x/Util_DLOG4CH.h
-SolarExplorer-Main.obj: C:/workspace/SolarExplorer_PVInverter_F2803x/src\ commros/Commros_user.h
-SolarExplorer-Main.obj: C:/workspace/SolarExplorer_PVInverter_F2803x/src\ commros/ProcessorDependent.h
-SolarExplorer-Main.obj: C:/workspace/SolarExplorer_PVInverter_F2803x/src\ commros/commros_regular.h
+SolarExplorer-Main.obj: Y:/Documents/GitHub/SolarExplorer/src\ commros/Commros_user.h
+SolarExplorer-Main.obj: Y:/Documents/GitHub/SolarExplorer/src\ commros/ProcessorDependent.h
+SolarExplorer-Main.obj: Y:/Documents/GitHub/SolarExplorer/src\ commros/commros_regular.h
+SolarExplorer-Main.obj: Y:/Documents/GitHub/SolarExplorer/fsmFramework/fsm.h
+SolarExplorer-Main.obj: Y:/Documents/GitHub/SolarExplorer/fsmFramework/inverterFSM.h
+SolarExplorer-Main.obj: Y:/Documents/GitHub/SolarExplorer/fsmFramework/hbridgeFSM.h
+SolarExplorer-Main.obj: Y:/Documents/GitHub/SolarExplorer/fsmFramework/mpptFSM.h
+SolarExplorer-Main.obj: ../Structs.h
+SolarExplorer-Main.obj: ../ADC_Configs.h
+SolarExplorer-Main.obj: ../Inv_ISR.h
 
 ../SolarExplorer-Main.c: 
 ../SolarExplorer-Includes.h: 
@@ -86,6 +93,13 @@ C:/ti/controlSUITE/libs/app_libs/solar/v1.0/IQ/mppt_incc.h:
 C:/ti/controlSUITE/libs/app_libs/solar/v1.0/IQ/mppt_pno.h: 
 C:/ti/controlSUITE/libs/app_libs/solar/v1.0/IQ/SPLL_1ph.h: 
 C:/ti/controlSUITE/libs/app_libs/drivers/v1.0/F2803x/Util_DLOG4CH.h: 
-C:/workspace/SolarExplorer_PVInverter_F2803x/src\ commros/Commros_user.h: 
-C:/workspace/SolarExplorer_PVInverter_F2803x/src\ commros/ProcessorDependent.h: 
-C:/workspace/SolarExplorer_PVInverter_F2803x/src\ commros/commros_regular.h: 
+Y:/Documents/GitHub/SolarExplorer/src\ commros/Commros_user.h: 
+Y:/Documents/GitHub/SolarExplorer/src\ commros/ProcessorDependent.h: 
+Y:/Documents/GitHub/SolarExplorer/src\ commros/commros_regular.h: 
+Y:/Documents/GitHub/SolarExplorer/fsmFramework/fsm.h: 
+Y:/Documents/GitHub/SolarExplorer/fsmFramework/inverterFSM.h: 
+Y:/Documents/GitHub/SolarExplorer/fsmFramework/hbridgeFSM.h: 
+Y:/Documents/GitHub/SolarExplorer/fsmFramework/mpptFSM.h: 
+../Structs.h: 
+../ADC_Configs.h: 
+../Inv_ISR.h: 

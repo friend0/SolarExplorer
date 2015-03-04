@@ -14,15 +14,39 @@
 #define VL_FB			AdcResult.ADCRESULT10
 #define LIGHT_FB		AdcResult.ADCRESULT11
 
+/**
+ * ADC configuration vars
+ */
+int 	ChSel[16] =   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+int		TrigSel[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+int     ACQPS[16] =   {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
+
+/**
+ * @brief ADC 'Start of Conversion' config
+ *
+ * ADC configuration to support up to 16 conversions on
+ * Start of Conversion(SOC) based ADCs (type 3) found on F2802x and F3803x devices.
+ * Independent selection of Channel, Trigger and acquisition window using ChSel[],TrigSel[] and ACQPS[].
+ *
+ * @param ChSel    Channel Selection made via a channel # array passed as an argument
+ * @param Trigsel  Source for triggering conversion of a channel,
+ *                 selction made via a trigger # array passed as an arguments
+ * @param ACQPS    AcqWidth is the S/H aperture in #ADCCLKS, #array passed as arguments
+ * @param IntChSel Channel number that would trigger an ADC interrupt 1 on completion (EOC)
+ * @param mode     Operating Mode:	0 = Start/Stop mode, needs a trigger event
+ *                 					1 = Continuous Mode, no trigger needed
+*                 				  	2 = CLA Mode, start stop mode with auto clr INT flag
+ */
+void ADC_SOC_CNF(int ChSel[], int Trigsel[], int ACQPS[], int IntChSel, int mode);
+
+
+
 void ADC_Init(void){
 
 	/**
 	 * Map channel to ADC Pin the dummy reads are to account for first sample issue in Rev 0 silicon
 	 * Please refer to the Errata and the datasheet, this would be fixed in later versions of the silicon
 	 */
-
-
-
 	ChSel[0] = 14;						 // B6 - Iboostsw-FB, DC-DC Boost switch current, not routed on Rev 1, dummy read
 	ChSel[1] = 14;						 // B6 - Iboostsw-FB, DC-DC Boost switch current, not routed on Rev 1  
 	ChSel[2] = 4;						 // A4 - Ileg1,

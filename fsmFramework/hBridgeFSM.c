@@ -11,6 +11,7 @@
 #include "hBridgeFSM.h"
 #include <stdio.h>
 #include <ctype.h>
+#include "stdbool.h"
 
 ///////////
 //Events //
@@ -22,7 +23,7 @@ enum
     NEG_VDC,    //q = -1
     ZERO_VDC,   //q = 0
     VDC,        //q = 1
-    NO_EVENT,   //qDot = 0
+    NO_EVENT   //qDot = 0
 };
 
 /**

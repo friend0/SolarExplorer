@@ -32,8 +32,9 @@
 #include "SolarExplorer-Includes.h"
 #include "fsm.h"
 #include "inverterFSM.h"
+#include "hbridgeFSM.h"
+#include "mpptFSM.h"
 #include "Structs.h"
-#include "InverterVariables.h"
 #include "ADC_Configs.h"
 #include "Inv_ISR.h"
 
@@ -53,6 +54,25 @@
  * -MemCopy
  */
 void DeviceInit(void);
+
+void pwmPhaseConfig(void);
+
+void userInitialization(void);
+
+void netConnections(void);
+
+void controllerCoefficientInits(void);
+
+void netVariableInits(void);
+
+void sigGenInit(void);
+
+void dataLoggingInits(void);
+
+void ISR_Init(void);
+
+void SPI_init(void);
+
 #ifdef FLASH
 	/**
  * Flash Control Register Intis
@@ -93,25 +113,6 @@ interrupt void spiRxFifoIsr(void);
 void PWM_1ch_UpDwnCntCompl_CNF(int16 n, int16 period, int16 mode, int16 phase);
 
 /**
- * @brief ADC 'Start of Conversion' config
- *
- * ADC configuration to support up to 16 conversions on 
- * Start of Conversion(SOC) based ADCs (type 3) found on F2802x and F3803x devices.  
- * Independent selection of Channel, Trigger and acquisition window using ChSel[],TrigSel[] and ACQPS[].
- * 	
- * @param ChSel    Channel Selection made via a channel # array passed as an argument
- * @param Trigsel  Source for triggering conversion of a channel, 
- *                 selction made via a trigger # array passed as an arguments
- * @param ACQPS    AcqWidth is the S/H aperture in #ADCCLKS, #array passed as arguments	
- * @param IntChSel Channel number that would trigger an ADC interrupt 1 on completion (EOC)
- * @param mode     Operating Mode:	0 = Start/Stop mode, needs a trigger event
- *                 					1 = Continuous Mode, no trigger needed
-*                 				  	2 = CLA Mode, start stop mode with auto clr INT flag
- */
-void ADC_SOC_CNF(int ChSel[], int Trigsel[], int ACQPS[], int IntChSel, int mode);
-
-
-/**
  * State Machine Framework
  * Declaration of states occurs in hBridgeFSM.h and InverterFSM.h
  *
@@ -119,19 +120,7 @@ void ADC_SOC_CNF(int ChSel[], int Trigsel[], int ACQPS[], int IntChSel, int mode
  * @TODO: Include State machine implementation here
  */
 
-	//Declare the variable 'inverter' to be of the type 'Inverter', where 'Inverter' is the class
-	//wrapping the FSM object. Note that the FSM object is a pointer to the current state. 
-	Inverter inverter;
-	hBridge hBridge;
 
-	//Take the instance of the 'Inverter' class inverter, get the FSM it contains, and point it to an initialization state
-	InverterCtor(&inverter);
-	hBridgeCtor(&hBridge);
-
-	//Derference the Fsm object pointed to by inverter, initialize it with an initial event
-	//@TODO: need to figure the best initial event to send the machine
-	FsmInit((Fsm *)&inverter, 0);
-	FsmInit((Fsm *)&hBridge, 0);
 
 
 	//Now the inverter is initialized, and pointing to an initial state function
@@ -162,14 +151,6 @@ extern Uint16 *RamfuncsLoadStart, *RamfuncsLoadEnd, *RamfuncsRunStart;
 // Used for copying CLA code from load location to RUN location 
 extern Uint16 Cla1funcsLoadStart, Cla1funcsLoadEnd, Cla1funcsRunStart;
 
-
-/**
- * ADC configuration vars
- */
-int 	ChSel[16] =   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-int		TrigSel[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-int     ACQPS[16] =   {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
-
 /**
  * EPWM Struct and COMP_REGS struct declared in Structs.h
  */
@@ -183,15 +164,220 @@ int     ACQPS[16] =   {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
  * Inverter Variables included in 'Invertervariables.h'
  */
 
+// ---------------------------------- USER -----------------------------------------
+// ---------------------------- DPLIB Net Pointers ---------------------------------
+// Declare net pointers that are used to connect the DP Lib Macros  here
+
+// ADCDRV_1ch
+extern volatile long *ADCDRV_1ch_Rlt1;	//instance #1
+extern volatile long *ADCDRV_1ch_Rlt5; 	// instance #5
+extern volatile long *ADCDRV_1ch_Rlt6; 	// instance #6
+extern volatile long *ADCDRV_1ch_Rlt7; 	// instance #7
+
+// PWMDRV_1ch
+//extern volatile long *PWMDRV_1ch_Duty3;	// instance #3, EPWM3
+extern volatile long *PWMDRV_1ch_UpDwnCntCompl_Duty3;
+extern volatile long PWMDRV_1ch_UpDwnCntCompl_Period3;
+
+// CONTROL_2P2Z
+extern volatile long *CNTL_2P2Z_Ref1;	// instance #1
+extern volatile long *CNTL_2P2Z_Out1;	// instance #1
+extern volatile long *CNTL_2P2Z_Fdbk1;	// instance #1
+extern volatile long *CNTL_2P2Z_Coef1; 	// instance #1
+extern volatile long CNTL_2P2Z_DBUFF1[5];
+
+// CONTROL_2P2Z
+extern volatile long *CNTL_2P2Z_Ref2;	// instance #1
+extern volatile long *CNTL_2P2Z_Out2;	// instance #1
+extern volatile long *CNTL_2P2Z_Fdbk2;	// instance #1
+extern volatile long *CNTL_2P2Z_Coef2; 	// instance #1
+extern volatile long CNTL_2P2Z_DBUFF2[5];
+
+//MATH_EMAVG - instance #1
+extern volatile long *MATH_EMAVG_In1;
+extern volatile long *MATH_EMAVG_Out1;
+extern volatile long MATH_EMAVG_Multiplier1;
+
+//MATH_EMAVG - instance #2
+extern volatile long *MATH_EMAVG_In2;
+extern volatile long *MATH_EMAVG_Out2;
+extern volatile long MATH_EMAVG_Multiplier2;
+
+// ---------------------------- DPLIB Variables ---------------------------------
+// Declare the net variables being used by the DP Lib Macro here
+
+volatile long Duty3A,Duty3A_fixed;
+volatile long VboostRead;
+volatile long VpvRef;
+volatile long VpvRead, IpvRead;
+volatile long VpvRead_EMAVG, IpvRead_EMAVG;
+volatile long IboostswRead;
+volatile long IboostSwRef;
+volatile long VpvRef_MPPT;
+
+#pragma DATA_SECTION(CNTL_2P2Z_CoefStruct1, "CNTL_2P2Z_Coef");
+struct CNTL_2P2Z_CoefStruct CNTL_2P2Z_CoefStruct1;
+
+#pragma DATA_SECTION(CNTL_2P2Z_CoefStruct2, "CNTL_2P2Z_Coef");
+struct CNTL_2P2Z_CoefStruct CNTL_2P2Z_CoefStruct2;
+
+long Pgain_V,Igain_V,Dgain_V,Dmax_V;
+long Pgain_I,Igain_I,Dgain_I,Dmax_I;
+
+int16 UpdateCoef;
+
+// DC-DC MPPT Variables
+int16 PanelBoostConnect;	// 0 when Panel is connected to battery input
+							// 1 when panel is connected to boost input
+
+//-------------------------- MPPT tracking PnO and Incc ---------------------------
+mppt_incc mppt_incc1 = mppt_incc_DEFAULTS;
+mppt_pno  mppt_pno1 = mppt_pno_DEFAULTS;
+
+int16 MPPT_slew;
+int16 Run_MPPT;
+int16 MPPT_ENABLE;
+//-----------------------------Inverter Variables ----------------------------------
+
+//--------------------------------- SINE GEN LIB ------------------------------------
+SGENHP_2 sgen = SGENHP_2_DEFAULTS;
+
+//-------------------------------- PWM DAC driver -----------------------------------
+int16 PwmDacCh1=0;
+int16 PwmDacCh2=0;
+int16 PwmDacCh3=0;
+int16 PwmDacCh4=0;
+
+PWMDAC pwmdac1 = PWMDAC_DEFAULTS;
+
+//-------------- PID GRANDO INSTANCE Voltage Loop and Current Loop   -----------------
+
+PID_GRANDO_CONTROLLER	pidGRANDO_Iinv = {PID_TERM_DEFAULTS, PID_PARAM_DEFAULTS, PID_DATA_DEFAULTS};
+PID_GRANDO_CONTROLLER	pidGRANDO_Vinv = {PID_TERM_DEFAULTS, PID_PARAM_DEFAULTS, PID_DATA_DEFAULTS};
+
+// ------------- Solar Sine Analyzer Block to measure RMS, frequency and ZCD ---------
+SineAnalyzer_diff sine_mainsV = SineAnalyzer_diff_DEFAULTS;
+
+// ------------- Software PLL for Grid Tie Applications ------------------------------
+SPLL_1ph spll1;
+
+// ------------- Data Logger --------------------------------------------------------
+// Datalogger options and instance creation
+int16 DlogCh1 = 0;
+int16 DlogCh2 = 0;
+int16 DlogCh3 = 0;
+int16 DlogCh4 = 0;
+
+DLOG_4CH dlog = DLOG_4CH_DEFAULTS;
+
+_iq24 inv_ref_vol_inst,inv_meas_vol_inst;
+_iq24 inv_ref_cur_inst;
+_iq24 inv_meas_cur_diff_inst;
+_iq24 inv_meas_cur_lleg1_inst;
+_iq24 inv_meas_cur_lleg2_inst;
+
+int16 CloseVloopInv;
+int16 CloseIloopInv;
+
+// for open loop operation of the inverter
+_iq24	InvModIndex;				// Q15 format - 0..1.99 ( > 1 is overmodulation)
+
+_iq24 inv_Iset;
+
+_iq15 InvSine;
+
+int16 ClearInvTrip;
+
+int16 ResetPLL;
+
+int32 Grid_Freq=GRID_FREQ;
+int32 Vac_in;
+int32 Offset_Volt;
+
+_iq15 VrmsReal, VavgReal, Temp2;
+_iq15 ScaleFactor;
+
+int16 PVInverterState;
+
+// Stand Alone Flash Image Instrumentation, GPIO toggles for different states
+int16  LedBlinkCnt,LedBlinkCnt2;
+int16 timer1;
+
+int16 TransmitData;
+Uint16 sdata[2];     // Send data buffer
+// Display Values
+
+// Monitor ("Get")						// Display as:
+_iq	Gui_Vpv;							// Q10
+_iq Gui_Ipv;							// Q12
+_iq	Gui_Vboost;							// Q9
+_iq	Gui_PanelPower;						// Q9
+_iq Gui_PanelPower_Theoretical;         //
+_iq Gui_MPPTTrackingEff;
+_iq	Gui_Light;						// Q13
+_iq	Gui_LightRatio;					// Q13
+_iq	Gui_LightRatio_Avg;				// Q13
+
+_iq  Gui_LightCommand;				//Q13
+Uint16  Gui_MPPTEnable;
+Uint16  Gui_InvStart;
+Uint16  Gui_InvStop;
+
+
+
+
+Uint16  Gui_LightCommand_Prev;
+
+// History arrays are used for Running Average calculation (boxcar filter)
+// Used for CCS display and GUI only, not part of control loop processing
+int16	Hist_Vpv[HistorySize];
+int16	Hist_Ipv[HistorySize];
+int16	Hist_Light[HistorySize];
+int16	Hist_Vboost[HistorySize];
+
+//Scaling Constants (values found via spreadsheet; exact value calibrated per board)
+int16	K_Vpv;							// Q15
+int16	K_Ipv;							// Q15
+int16	K_Vboost;						// Q15
+int16	K_Light;						// Q15
+
+int16	iK_Vboost;						// Q15
+int16	iK_Ipv;						// Q15
+
+// Variables for background support only (no need to access)
+int16	i;								// common use incrementer
+Uint32	HistPtr, temp_Scratch; 			// Temp here means Temporary
+
+Uint16 VloopTicker=0;
+
+Uint16 ZCDDetect=0;
+int16 sine_prev=0;
+
+
 /**********************************************************
- _       __    _   _          __  _____   __    ___  _____ 
-| |\/|  / /\  | | | |\ |     ( (`  | |   / /\  | |_)  | |  
-|_|  | /_/--\ |_| |_| \|     _)_)  |_|  /_/--\ |_| \  |_|         
+ _       __    _   _          __  _____   __    ___  _____
+| |\/|  / /\  | | | |\ |     ( (`  | |   / /\  | |_)  | |
+|_|  | /_/--\ |_| |_| \|     _)_)  |_|  /_/--\ |_| \  |_|
 
  **********************************************************/
 
 void main(void)
 {
+
+	//Declare the variable 'inverter' to be of the type 'Inverter', where 'Inverter' is the class
+	//wrapping the FSM object. Note that the FSM object is a pointer to the current state.
+	Inverter inverter;
+	hBridge hBridge;
+
+	//Take the instance of the 'Inverter' class inverter, get the FSM it contains, and point it to an initialization state
+	InverterCtor(&inverter);
+	hBridgeCtor(&hBridge);
+
+	//Derference the Fsm object pointed to by inverter, initialize it with an initial event
+	//@TODO: need to figure the best initial event to send the machine
+	FsmInit((Fsm *)&inverter, 0);
+	FsmInit((Fsm *)&hBridge, 0);
+
 
 /**
  * Device and Variable Inits
@@ -231,35 +417,8 @@ void main(void)
 	CpuTimer2Regs.PRD.all =  mSec1000;	// C tasks
 
 	/**
-	 * Tasks State-machine init
-	 * Need to get rid of these, or find out how to make only the DC-DC stage run with this
-	 * @TODO What does each of these 'parallel' state machines do?
-	 */
-	Alpha_State_Ptr = &A0;
-
-	/**
-	 * Machine 'A' is mainly in charge of interfacing with the GUI and the F28027
-	 * A1: Performs the moving average calculations
-	 * A2: Panel Connect disconnect- enables the relay. @TODO: Does the relay choose between PV_EMU and real panel input?
-	 * A3: Communication with panel emulator
-	 */
-	A_Task_Ptr = &A1;
-	/**
-	 * Machine 'B' handles the MPPT routine, links the LED on the control card, and deals with the 
-	 * 'Macro' state of the inverter - much like the HBridge FSM (PowerOn, Off, etc...)
-	 */
-	B_Task_Ptr = &B1;
-	/**
-	 * Machine 'C' is 3/4 spare state, i.e. 'do nothing', but has a curious method that updates coefficients. 
-	 * The strange thing is that it updates using the same logic as when they were initialized, i.e. using Pgain, Igain, etc...
-	 * @TODO: Do these gain terms get updated at any point in the code? How can I tell if this is happening in the CLA?
-	 */
-	C_Task_Ptr = &C1;
-
-	/**
 	 * These virtual timers are incrememtned in the 'Alpha states' used on the SE
 	 */
-
 	VTimer0[0] = 0;	
 	VTimer1[0] = 0;
 	VTimer2[0] = 0;
@@ -788,7 +947,7 @@ void ISR_Init(void){
  * @TODO find out what SPI is being used for
  * @TODO consider the impact of moving this function to DevInit file
  */
-void SPI_init()
+void SPI_init(void)
 {
 	// Initialize SPI FIFO registers
    SpibRegs.SPICCR.bit.SPISWRESET=0; // Reset SPI

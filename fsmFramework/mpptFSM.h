@@ -29,7 +29,7 @@ struct MpptEvent {
 enum {
     EXECUTE,
     DISABLE,
-    NO_EVENT,
+    NO_EVENT
 };
 
 ////////////////////////////////////
@@ -69,52 +69,27 @@ void Mppt_initial(Mppt *self, Event *e);
 * @param self self reference to MpptFSM
 * @param e    event
 */
-void Mppt_default(Mppt *self, Event *e);
+void Mppt_Execute(Mppt *self, Event *e);
 
 /**
-* Implements the state handler for the case that the H-Bridge
-* is supplying +Vdc to the input of the RLC filter.
-* @param self self reference to MpptFSM
-* @param e    event
-*/
-void Mppt_PowerOn(Mppt *self, Event *e);
-
-/**
-* Implements the state handler for the case that the H-Bridge
-* is supplying zero volts DC to the input of the RLC filter.
-* @param self self reference to MpptFSM
-* @param e    event
-*/
-void Mppt_OutOfParameters(Mppt *self, Event *e);
-
-/**
-* Implements the state handler for the case that the H-Bridge
-* is supplying -Vdc to the input of the RLC filter.
-* @param self self reference to MpptFSM
-* @param e    event
-*/
-void Mppt_WithinParameters(Mppt *self, Event *e);
-
-/**
-* Implements the state handler for a source that has a trajectory
-* headed outside the allowable parameters for the Mppt to deliver the 
-* desired voltage and current
+* Implements the state handler for the LED blink routine; provides
+* user feedback, shows that MPPT is running.
 * 
 * @param self self reference to MpptFSM
 * @param e    event
 */
-void Mppt_AlmostOutOfParameters(Mppt *self, Event *e);
+void Mppt_Blink(Mppt *self, Event *e);
 
 /**
-* Implements the state handler for an Mppt that is about to shut down.
-* Right now I'm not exactly sure what needs to happen here.
+* Implements the state handler for the case that the MPPT
+* algorithm is no longer running.
 * 
 * @param self self reference to MpptFSM
 * @param e    event
 */
-void Mppt_ShutDown(Mppt *self, Event *e);
+void Mppt_Disable(Mppt *self, Event *e);
 
 
-void MpptTransitionFunction(Mppt self, MpptEvent *e);
+char MpptTransitionFunction(Mppt self, MpptEvent *e);
 
 #endif
