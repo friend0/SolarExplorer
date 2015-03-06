@@ -13,6 +13,8 @@
 #include <ctype.h>
 #include "stdbool.h"
 
+//#include "SolarExplorer-Includes.h"
+
 //#include <execinfo.h>
 
 /**
@@ -32,80 +34,6 @@ void Mppt_initial(Mppt *self, Event *e) {
     //e->transition = true;
     _FsmTran_((Fsm *) self, &Mppt_Disable);
 }
-
-void Mppt_Execute(Mppt *self, Event *e) {
-
-    if (e->transition == true) {
-        printf("transition is true!\n");
-
-        //We've executed the entrance code, reset the transition flag
-        e->transition = false;
-    }
-
-    switch (e->signal) {
-        case DISABLE:
-            printf("Disable");
-            _FsmTran_((Fsm *) self, &Mppt_Disable);
-            break;
-
-        case NO_EVENT:
-            printf("defaultNOEVENT");
-            break;
-
-        default:
-            _FsmTran_((Fsm *) self, &Mppt_Blink);
-            break;
-    }
-}
-
-void Mppt_Blink(Mppt *self, Event *e) {
-
-    if (e->transition == true) {
-        printf("transition is true!\n");
-        e->transition = false;
-    }
-
-    switch (e->signal) {
-
-        case DISABLE:
-            printf("Disable");
-            _FsmTran_((Fsm *) self, &Mppt_Disable);
-            break;
-
-        case NO_EVENT:
-            printf("defaultNOEVENT");
-            break;
-
-        default:
-            printf("Blink");
-            _FsmTran_((Fsm *) self, &Mppt_Execute);
-            break;
-
-    }
-}
-
-void Mppt_Disable(Mppt *self, Event *e) {
-
-    if (e->transition == true) {
-        printf("transition is true!\n");
-        e->transition = false;
-    }
-
-    switch (e->signal) {
-        case EXECUTE:
-            printf("H-bridge to negVDC");
-            _FsmTran_((Fsm *) self, &Mppt_Execute);
-            break;
-
-        case NO_EVENT:
-            printf("defaultNOEVENT");
-            break;
-
-        default:;
-            break;
-    }
-}
-
 
 /**
 * @brief Used to determine the event that should be passed to the FsmDispatch function
