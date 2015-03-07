@@ -12,7 +12,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "stdbool.h"
-
+#include "InverterVariables.h"
+#include "Inverter.h"
 /**
 * Begin State Defintiions
 */
@@ -30,6 +31,143 @@ void Panel_initial(Panel *self, Event *e) {
     //cannot call this here, the initial event passed is a zero...
     //e->transition = true;
     _FsmTran_((Fsm *) self, &Panel_Dashboard);
+}
+
+void Panel_Dashboard(Panel *self, Event *e) {
+
+    if (e->transition == true) {
+	// Dashboard measurement calculated by:
+	//	Gui_Vbout = VboutAvg * K_Vbout, where VboutAvg = sum of 8 Vbout samples
+	//	Gui_Iinb = IinbAvg * K_Iinb, where IinbAvg = sum of 8 Iinb samples
+
+		HistPtr++;
+		if (HistPtr >= HistorySize)	HistPtr = 0;
+
+		// BoxCar Averages - Input Raw samples into BoxCar arrays
+		//----------------------------------------------------------------
+		Hist_Vpv[HistPtr]    = 	Vpv_FB;
+		Hist_Ipv[HistPtr]    = 	Ipv_FB;
+		Hist_Vboost[HistPtr] = 	Vboost_FB;
+		Hist_Light[HistPtr]  =  LIGHT_FB;
+
+		temp_Scratch=0;
+		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Vpv[i];
+		Gui_Vpv = ( (long) temp_Scratch * (long) K_Vpv ) >> 15;
+
+		temp_Scratch=0;
+		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Ipv[i];
+		Gui_Ipv = ( (long) temp_Scratch * (long) K_Ipv ) >> 15;
+
+		temp_Scratch=0;
+		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Vboost[i];
+		Gui_Vboost = ( (long) temp_Scratch * (long) K_Vboost ) >> 15;
+
+		temp_Scratch=0;
+		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Light[i];
+		Gui_Light = ( (long) temp_Scratch * (long) K_Light ) >> 15;
+
+		Gui_LightRatio =_IQ13mpy(Gui_Light,LIGHTSENSOR_MAX_INV);
+
+		Gui_PanelPower=_IQ9mpy(((Gui_Vpv-_IQ9(0.20))>_IQ9(0.0)?(Gui_Vpv-_IQ9(0.20)):_IQ9(0.0)),(((long)(Gui_Ipv-_IQ12(0.03))>>3)>_IQ9(0.0)?((long)(Gui_Ipv-_IQ12(0.03))>>3):_IQ9(0.0)));
+
+		if(Gui_PanelPower_Theoretical!=0)
+			Gui_MPPTTrackingEff =_IQ9mpy(_IQ9div(Gui_PanelPower,Gui_PanelPower_Theoretical),_IQ9(100.0));
+		else
+			Gui_MPPTTrackingEff=0;
+
+        e->transition = false;
+    }
+
+    switch (e->signal) {
+        case TIMER_PANEL:
+            printf("Disable");
+            _FsmTran_((Fsm *) self, &Panel_Connect);
+            break;
+
+        case NO_EVENT_PANEL:
+            printf("defaultNOEVENT");
+            break;
+
+        default:
+            break;
+    }
+}
+
+void Panel_Connect(Panel *self, Event *e) {
+
+    if (e->transition == true) {
+
+    	if(PanelBoostConnect==0)
+    	{
+    		GpioDataRegs.GPACLEAR.bit.GPIO12=0x1;
+    	}
+    	else if (PanelBoostConnect==1)
+    	{
+    		GpioDataRegs.GPASET.bit.GPIO12=0x1;
+    	}
+
+        e->transition = false;
+    }
+
+    switch (e->signal) {
+
+        case TIMER_PANEL:
+            printf("Disable");
+            _FsmTran_((Fsm *) self, &Panel_Emulator);
+            break;
+
+        case NO_EVENT_PANEL:
+            printf("defaultNOEVENT");
+            break;
+
+        default:
+            break;
+
+    }
+}
+
+void Panel_Emulator(Panel *self, Event *e) {
+
+    if (e->transition == true) {
+    	if(Gui_LightCommand != Gui_LightCommand_Prev)
+    	{
+    	 sdata[0]=1; //1 indicates it is the command for the light value
+
+    	 // saturate the light command to 0.8 because of power capacity of the DC power supply shipped with the kit
+    	 if(Gui_LightCommand>_IQ13(0.8))
+    	 	Gui_LightCommand=_IQ13(0.8);
+
+    	  if(Gui_LightCommand<_IQ13(0.0))
+    	 	Gui_LightCommand=_IQ13(0.0);
+
+    	 sdata[1]=Gui_LightCommand;	// Value of light that needs to be sent to the emulator
+
+    	 Gui_LightCommand_Prev=Gui_LightCommand;
+
+    	 SpibRegs.SPITXBUF=sdata[0];      // Send data
+    	 SpibRegs.SPITXBUF=sdata[1];
+
+    	 SpiaRegs.SPIFFTX.bit.TXFIFO=1;
+
+    	 Gui_PanelPower_Theoretical=_IQ9mpy(_IQ9(36.02),((long)Gui_LightCommand>>4)); // Panel Max power * Luminance Ratio
+
+    	}
+    	e->transition = false;
+    }
+
+    switch (e->signal) {
+        case TIMER_PANEL:
+            printf("H-bridge to negVDC");
+            _FsmTran_((Fsm *) self, &Panel_Dashboard);
+            break;
+
+        case NO_EVENT_PANEL:
+            printf("defaultNOEVENT");
+            break;
+
+        default:;
+            break;
+    }
 }
 
 
@@ -67,8 +205,8 @@ char PanelTransitionFunction(Panel self, PanelEvent *e) {
         printf("\nPanel Power On!\n");
         switch (e->code)                  //This switch uses the data attribute 'code' of the Panel Event
         {
-            case 'E' :
-                e->super_.signal = TIMER;
+            case 'T' :
+                e->super_.signal = TIMER_PANEL;
                 e->super_.transition = true;
                 break;
             case '.' :
@@ -85,7 +223,7 @@ char PanelTransitionFunction(Panel self, PanelEvent *e) {
         switch (e->code)                  //This switch uses the data attribute 'code' of the Panel Event
         {
             case 'T' :
-                e->super_.signal = TIMER;
+                e->super_.signal = TIMER_PANEL;
                 e->super_.transition = true;
                 break;
             case '.' :
@@ -101,7 +239,7 @@ char PanelTransitionFunction(Panel self, PanelEvent *e) {
         switch (e->code)                  //This switch uses the data attribute 'code' of the Panel Event
         {
             case 'T' :
-                e->super_.signal = TIMER;
+                e->super_.signal = TIMER_PANEL;
                 e->super_.transition = true;
                 break;
             case '.' :

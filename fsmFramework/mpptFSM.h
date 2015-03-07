@@ -27,6 +27,7 @@ struct MpptEvent {
 
 /* signals used by the Mppt FSM - Algorithm either runs, or it does not. This is a submachine of the inverterFSM.*/
 enum {
+	TIMER_MPPT,
     EXECUTE,
     DISABLE,
     NO_EVENT
@@ -79,6 +80,11 @@ void Mppt_Execute(Mppt *self, Event *e);
 * @param e    event
 */
 void Mppt_Blink(Mppt *self, Event *e);
+
+/**
+ *
+ */
+void Mppt_StateMachine(Mppt *self, Event *e);
 
 /**
 * Implements the state handler for the case that the MPPT

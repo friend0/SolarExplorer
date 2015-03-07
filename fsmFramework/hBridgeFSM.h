@@ -5,16 +5,16 @@
 //Declaration of FSM and Event objects //
 /////////////////////////////////////////
 
-typedef struct hBridge hBridge;
-typedef struct hBridgeEvent hBridgeEvent;
+typedef struct HBridge HBridge;
+typedef struct HBridgeEvent HBridgeEvent;
 
-struct hBridge
+struct HBridge
 {
     Fsm super_; /* extend the Fsm class */
     //Attributes
 };
 
-struct hBridgeEvent
+struct HBridgeEvent
 {
     Event super_; /* extend the Event class */
     //Attributes
@@ -30,70 +30,70 @@ struct hBridgeEvent
 * @brief Constructor Function
 * This function is to be used for 'instantiating' state machines
 * @code(.c)
-*     hBridge hBridge;
-*     hBridgeCtor(&hBridge);
+*     HBridge HBridge;
+*     HBridgeCtor(&HBridge);
 * @endcode
-* hBridgeCtor is a wrapper function for a call to:
+* HBridgeCtor is a wrapper function for a call to:
 * @code
-*     _FsmCtor_(&self->super_, &hBridge_initial);
+*     _FsmCtor_(&self->super_, &HBridge_initial);
 * @endcode
 * which uses the 'super class'
 *
 * @param self
 */
-void hBridgeCtor(hBridge *self);
+void HBridgeCtor(HBridge *self);
 /**
 * @brief Entry state to be used for initialization and setup of the state machine.
 * 
-* Implements the initial transition of the hBridge FSM. To be used for initializations
+* Implements the initial transition of the HBridge FSM. To be used for initializations
 * and setup of the machine. Can also serve no function but to transition to the default or
 * zero states. 
 *
-* @param self self reference to hBridgeFSM
+* @param self self reference to HBridgeFSM
 * @param e    event
 */
-void hBridge_initial(hBridge *self, Event *e);
+void HBridge_initial(HBridge *self, Event *e);
 
 /**
 * Implements the default transition
-* @param self self reference to hBridgeFSM
+* @param self self reference to HBridgeFSM
 * @param e    event
 */
-void hBridge_default(hBridge *self, Event *e);
+void HBridge_default(HBridge *self, Event *e);
 
 /**
 * Implements the state handler for the case that the H-Bridge
 * is supplying +Vdc to the input of the RLC filter.
-* @param self self reference to hBridgeFSM
+* @param self self reference to HBridgeFSM
 * @param e    event
 */
-void hBridge_VDC(hBridge *self, Event *e);
+void HBridge_VDC(HBridge *self, Event *e);
 
 /**
 * Implements the state handler for the case that the H-Bridge
 * is supplying zero volts DC to the input of the RLC filter.
-* @param self self reference to hBridgeFSM
+* @param self self reference to HBridgeFSM
 * @param e    event
 */
-void hBridge_Zero(hBridge *self, Event *e);
+void HBridge_Zero(HBridge *self, Event *e);
 
 /**
 * Implements the state handler for the case that the H-Bridge
 * is supplying -Vdc to the input of the RLC filter.
-* @param self self reference to hBridgeFSM
+* @param self self reference to HBridgeFSM
 * @param e    event
 */
-void hBridge_negVDC(hBridge *self, Event *e);
+void HBridge_negVDC(HBridge *self, Event *e);
 
 /**
  * Implements the transition logic for a particular state machine. Uses a switch to
  * respond to various inputs depending on the current state of the machine.
  *
- * @param self self reference to hBridgeFSM
+ * @param self self reference to HBridgeFSM
  * @param e    event
  */
 
-char hBridgeTransitionFunction(hBridge self, hBridgeEvent *e);
+char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e);
 
 #endif
 

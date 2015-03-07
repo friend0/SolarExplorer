@@ -42,6 +42,9 @@
          be combined if required to create a larger memory block.
 */
 
+//Suppress  'build attribute vendor section TI missing' warning
+--diag_suppress=16002
+
 MEMORY
 {
 /* Note that the memory allocation below does not create sections as necessary for
@@ -98,6 +101,11 @@ SECTIONS
    .cinit            : > FLASHA,     PAGE = 0
    .pinit            : > FLASHA,     PAGE = 0
    .text             : >> FLASHA | FLASHC | FLASHD,     PAGE = 0
+
+   /*
+   * Added .cio according to http://e2e.ti.com/support/microcontrollers/c2000/f/171/p/92716/334409
+   */
+   //.cio              : > FLASHB,        PAGE = 1
 
    codestart         : > BEGIN       PAGE = 0
    

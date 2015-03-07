@@ -57,7 +57,7 @@
 
 void main(void)
 {
-	
+	initializeInverter();
 	/**
 	 * Background (BG) Loop
 	 */
