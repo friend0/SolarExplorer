@@ -1,0 +1,42 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ANY_KEY_SIG	inverterFSM.c	/^    ANY_KEY_SIG,$/;"	e	enum:__anon1	file:
+Event	fsm.h	/^struct Event$/;"	s
+Event	fsm.h	/^typedef struct Event Event;$/;"	t	typeref:struct:Event
+FSM_H	fsm.h	/^#define FSM_H$/;"	d
+Fsm	fsm.h	/^struct Fsm$/;"	s
+Fsm	fsm.h	/^typedef struct Fsm Fsm;$/;"	t	typeref:struct:Fsm
+FsmDispatch	fsm.h	/^#define FsmDispatch(/;"	d
+FsmInit	fsm.h	/^#define FsmInit(/;"	d
+INVERTERFSM	inverterFSM.h	/^#define INVERTERFSM$/;"	d
+Inverter	inverterFSM.c	/^struct Inverter$/;"	s	file:
+Inverter	inverterFSM.h	/^typedef struct Inverter Inverter;$/;"	t	typeref:struct:Inverter
+InverterCtor	inverterFSM.c	/^void InverterCtor(Inverter *self)$/;"	f
+InverterEvent	inverterFSM.c	/^struct InverterEvent$/;"	s	file:
+InverterEvent	inverterFSM.h	/^typedef struct InverterEvent InverterEvent;$/;"	t	typeref:struct:InverterEvent
+Inverter_VDC	inverterFSM.c	/^void Inverter_VDC(Inverter *self, Event const *e)$/;"	f
+Inverter_Zero	inverterFSM.c	/^void Inverter_Zero(Inverter *self, Event const *e)$/;"	f
+Inverter_default	inverterFSM.c	/^void Inverter_default(Inverter *self, Event const *e)$/;"	f
+Inverter_initial	inverterFSM.c	/^void Inverter_initial(Inverter *self, Event const *e)$/;"	f
+Inverter_negVDC	inverterFSM.c	/^void Inverter_negVDC(Inverter *self, Event const *e)$/;"	f
+Inverter_shifted	inverterFSM.c	/^void Inverter_shifted(Inverter *self, Event const *e)$/;"	f
+NEG_VDC	inverterFSM.c	/^    NEG_VDC,    \/\/q = -1$/;"	e	enum:__anon1	file:
+NO_EVENT	inverterFSM.c	/^    NO_EVENT,$/;"	e	enum:__anon1	file:
+SHIFT_DEPRESSED_SIG	inverterFSM.c	/^    SHIFT_DEPRESSED_SIG,$/;"	e	enum:__anon1	file:
+SHIFT_RELEASED_SIG	inverterFSM.c	/^    SHIFT_RELEASED_SIG,$/;"	e	enum:__anon1	file:
+Signal	fsm.h	/^typedef short Signal;$/;"	t
+State	fsm.h	/^typedef void (*State)(Fsm *, Event const *);$/;"	t
+VDC	inverterFSM.c	/^    VDC,        \/\/q = 1$/;"	e	enum:__anon1	file:
+ZERO_VDC	inverterFSM.c	/^    ZERO_VDC,   \/\/q = 0$/;"	e	enum:__anon1	file:
+_FsmCtor_	fsm.h	/^#define _FsmCtor_(/;"	d
+_FsmTran_	fsm.h	/^#define _FsmTran_(/;"	d
+code	inverterFSM.c	/^    char code;$/;"	m	struct:InverterEvent	file:
+main	inverterFSM.c	/^int main()$/;"	f
+signal	fsm.h	/^Signal signal;$/;"	m	struct:Event
+state__	fsm.h	/^State state__; \/* the current state *\/$/;"	m	struct:Fsm
+super_	inverterFSM.c	/^    Event super_; \/* extend the Event class *\/$/;"	m	struct:InverterEvent	file:
+super_	inverterFSM.c	/^    Fsm super_; \/* extend the Fsm class *\/$/;"	m	struct:Inverter	file:
