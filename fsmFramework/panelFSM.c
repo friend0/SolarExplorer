@@ -80,12 +80,10 @@ void Panel_Dashboard(Panel *self, Event *e) {
 
     switch (e->signal) {
         case TIMER_PANEL:
-            printf("Disable");
             _FsmTran_((Fsm *) self, &Panel_Connect);
             break;
 
         case NO_EVENT_PANEL:
-            printf("defaultNOEVENT");
             break;
 
         default:
@@ -112,12 +110,10 @@ void Panel_Connect(Panel *self, Event *e) {
     switch (e->signal) {
 
         case TIMER_PANEL:
-            printf("Disable");
             _FsmTran_((Fsm *) self, &Panel_Emulator);
             break;
 
         case NO_EVENT_PANEL:
-            printf("defaultNOEVENT");
             break;
 
         default:
@@ -157,12 +153,10 @@ void Panel_Emulator(Panel *self, Event *e) {
 
     switch (e->signal) {
         case TIMER_PANEL:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *) self, &Panel_Dashboard);
             break;
 
         case NO_EVENT_PANEL:
-            printf("defaultNOEVENT");
             break;
 
         default:;
@@ -202,7 +196,6 @@ char PanelTransitionFunction(Panel self, PanelEvent *e) {
     //backtrace_symbols_fd(&funptr, 1, 1);
 
     if (funptr == &Panel_Dashboard) {
-        printf("\nPanel Power On!\n");
         switch (e->code)                  //This switch uses the data attribute 'code' of the Panel Event
         {
             case 'T' :
@@ -219,7 +212,6 @@ char PanelTransitionFunction(Panel self, PanelEvent *e) {
         }
     }
     else if (funptr == &Panel_Connect) {
-        printf("\nPanel Out of Parameters!\n");
         switch (e->code)                  //This switch uses the data attribute 'code' of the Panel Event
         {
             case 'T' :
@@ -235,7 +227,6 @@ char PanelTransitionFunction(Panel self, PanelEvent *e) {
         }
     }
     else if (funptr == &Panel_Emulator) {
-        printf("\nPanel Within Parameters!\n");
         switch (e->code)                  //This switch uses the data attribute 'code' of the Panel Event
         {
             case 'T' :

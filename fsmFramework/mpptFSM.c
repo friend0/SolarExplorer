@@ -33,7 +33,7 @@ void Mppt_initial(Mppt *self, Event *e) {
 
     //cannot call this here, the initial event passed is a zero...
     //e->transition = true;
-    _FsmTran_((Fsm *) self, &Mppt_Disable);
+    _FsmTran_((Fsm *) self, &Mppt_Execute);
 }
 
 void Mppt_Execute(Mppt *self, Event *e) {
@@ -100,7 +100,6 @@ void Mppt_Execute(Mppt *self, Event *e) {
 
     switch (e->signal) {
         case TIMER_MPPT:
-            printf("Disable");
             _FsmTran_((Fsm *) self, &Mppt_Blink);
             break;
 
@@ -129,7 +128,6 @@ void Mppt_Blink(Mppt *self, Event *e) {
 
     switch (e->signal) {
         case TIMER_MPPT:
-            printf("Disable");
             _FsmTran_((Fsm *) self, &Mppt_StateMachine);
             break;
         default:
@@ -334,12 +332,10 @@ void Mppt_StateMachine(Mppt *self, Event *e) {
 
     switch (e->signal) {
         case TIMER_MPPT:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *) self, &Mppt_Execute);
             break;
 
         case NO_EVENT:
-            printf("defaultNOEVENT");
             break;
 
         default:;
@@ -356,12 +352,10 @@ void Mppt_Disable(Mppt *self, Event *e) {
 
     switch (e->signal) {
         case EXECUTE:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *) self, &Mppt_Execute);
             break;
 
         case NO_EVENT:
-            printf("defaultNOEVENT");
             break;
 
         default:;
@@ -422,7 +416,6 @@ char MpptTransitionFunction(Mppt self, MpptEvent *e) {
         }
     }
     else if (funptr == &Mppt_Disable) {
-        printf("\nMppt Within Parameters!\n");
         switch (e->code)                  //This switch uses the data attribute 'code' of the Mppt Event
         {
             case 'T' :

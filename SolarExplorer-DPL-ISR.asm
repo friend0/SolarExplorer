@@ -32,6 +32,7 @@ ZeroNet	 .usect "ZeroNet_Section",2,1,1	; output terminal 1
 
 		.text
 _DPL_Init:
+
 		ZAPA
 		MOVL	XAR0, #ZeroNet
 		MOVL	*XAR0, ACC

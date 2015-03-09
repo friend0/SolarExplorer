@@ -32,10 +32,6 @@ void MemCopy();
 #pragma CODE_SECTION(Inv_ISR,"ramfuncs");
 #endif
 
-interrupt void Inv_ISR(void);
-interrupt void spiTxFifoIsr(void);
-interrupt void spiRxFifoIsr(void);
-
 void SPI_init();
 
 void initializeInverter(void);

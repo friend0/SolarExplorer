@@ -8,9 +8,9 @@
 /**
  * Private Function Definitions
  */
+#include "InverterVariables.h"
 #include "SolarExplorer-Includes.h"
 #include "Inverter.h"
-#include "InverterVariables.h"
 
 #include "fsm.h"
 #include "inverterFSM.h"
@@ -43,19 +43,27 @@ void SPI_init(void);
 
 void ADC_Init(void);
 
+#ifdef FLASH		
+	void InitFlash();
+#endif
+void MemCopy();
+
+#ifdef FLASH
+#pragma CODE_SECTION(Inv_ISR,"ramfuncs");
+#endif
+
+interrupt void Inv_ISR(void);
+interrupt void spiTxFifoIsr(void);
+interrupt void spiRxFifoIsr(void);
+
 //-------------------------------- DPLIB --------------------------------------------
 void PWM_1ch_UpDwnCntCompl_CNF(int16 n, int16 period, int16 mode, int16 phase);
 void ADC_SOC_CNF(int ChSel[], int Trigsel[], int ACQPS[], int IntChSel, int mode);
 
-// -------------------------------- FRAMEWORK --------------------------------------
-// State Machine function prototypes all declared in _FSM.h files
-//----------------------------------------------------------------------------------
 
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// VARIABLE DECLARATIONS - GENERAL
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// -------------------------------- FRAMEWORK --------------------------------------
+/**
+ * General Variable Declarations
+ */
 
 int16	VTimer0[4];					// Virtual Timers slaved off CPU Timer 0
 int16	VTimer1[4];					// Virtual Timers slaved off CPU Timer 1
@@ -259,9 +267,6 @@ Uint16  Gui_MPPTEnable;
 Uint16  Gui_InvStart;
 Uint16  Gui_InvStop;
 
-
-
-
 Uint16  Gui_LightCommand_Prev;
 
 // History arrays are used for Running Average calculation (boxcar filter)
@@ -424,7 +429,6 @@ void initializeInverter(void){
 		 */
 		dataLoggingInits();
 
-
 		// Initialize PWMDAC module
 		pwmdac1.PeriodMax = 500;   // 3000->10kHz, 1500->20kHz, 1000-> 30kHz, 500->60kHz
 		pwmdac1.PwmDacInPointer0 = &PwmDacCh1;
@@ -457,8 +461,6 @@ void initializeInverter(void){
 		inv_meas_cur_diff_inst=0;
 		VrmsReal=0;
 
-
-
 		UpdateCoef=0;
 		timer1=0;
 		Offset_Volt=_IQ21(0.5); // the input sinusoid is offset with 1.65 V
@@ -475,10 +477,10 @@ void initializeInverter(void){
 
 		Gui_LightCommand=_IQ13(0.0);
 		Gui_LightCommand_Prev=_IQ13(0.0);
+
 		/**
 		 * Init Virtual Timers 0-2 here
 		 */
-
 
 		#ifdef FLASH
 		// Initiate Commros
@@ -489,7 +491,6 @@ void initializeInverter(void){
 		 * Finally, initialize the ISRs, clear flags, setup PIE,
 		 */
 		ISR_Init();
-
 
 		/**
 		 * Hardware init of SPI function - works in tandem with Rx/Tx FIFO ISR declarations
@@ -544,17 +545,18 @@ void runInverter(void){
 		static int count = 0;
 		count++;
 
-		if((count % 4 == 1) && (count != 0)){
+		if((count % 4 == 0) && (count != 0)){
 			count = 0;
+			printf("update coeffs\n");
 		/**
 		 * This is the only thing that 'C' does, so I will just do this for now
 		 */
 			//Update Coefficients
 			if(UpdateCoef==1)
 			{
-			CNTL_2P2Z_CoefStruct2.b2   =Dgain_I;                            // B2
-			CNTL_2P2Z_CoefStruct2.b1   =(Igain_I-Pgain_I-Dgain_I-Dgain_I);  // B1
-			CNTL_2P2Z_CoefStruct2.b0   =(Pgain_I + Igain_I + Dgain_I);      // B0
+			CNTL_2P2Z_CoefStruct2.b2  = Dgain_I;                            // B2
+			CNTL_2P2Z_CoefStruct2.b1  = (Igain_I-Pgain_I-Dgain_I-Dgain_I);  // B1
+			CNTL_2P2Z_CoefStruct2.b0  = (Pgain_I + Igain_I + Dgain_I);      // B0
 			UpdateCoef=0;
 			}
 		}
