@@ -9,7 +9,7 @@
 
 #include "fsm.h"
 #include "PanelFSM.h"
-#include <stdio.h>
+//#include <stdio.h>
 #include <ctype.h>
 #include "stdbool.h"
 #include "InverterVariables.h"

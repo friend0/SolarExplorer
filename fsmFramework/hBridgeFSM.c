@@ -9,7 +9,7 @@
 
 #include "fsm.h"
 #include "HBridgeFSM.h"
-#include <stdio.h>
+//#include <stdio.h>
 #include <ctype.h>
 #include "stdbool.h"
 
@@ -38,7 +38,6 @@ void HBridgeCtor(HBridge *self)
 void HBridge_initial(HBridge *self, Event *e)
 {
     /* ... initialization of HBridge attributes */
-    printf("HBridge initialized");
     _FsmTran_((Fsm *)self, &HBridge_default);
 }
 
@@ -48,22 +47,18 @@ void HBridge_default(HBridge *self, Event *e)
     {
 
         case NEG_VDC:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *)self, &HBridge_negVDC);
             break;
 
         case ZERO_VDC:
-            printf("H-bridge to zero");
             _FsmTran_((Fsm *)self, &HBridge_Zero);
             break;
 
         case VDC:
-            printf("H-bridge to VDC");
             _FsmTran_((Fsm *)self, &HBridge_VDC);
             break;
 
         case NO_EVENT:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &HBridge_Zero);
             break;
     }
@@ -75,17 +70,14 @@ void HBridge_VDC(HBridge *self, Event *e)
     switch (e->signal)
     {
         case NEG_VDC:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *)self, &HBridge_negVDC);
             break;
 
         case ZERO_VDC:
-            printf("H-bridge to zero");
             _FsmTran_((Fsm *)self, &HBridge_Zero);
             break;
 
         default:
-            printf("HBridge_VDC");
             _FsmTran_((Fsm *)self, &HBridge_VDC);
             break;
     }
@@ -96,17 +88,14 @@ void HBridge_Zero(HBridge *self, Event *e)
     switch (e->signal)
     {
         case VDC:
-            printf("H-bridge to VDC");
             _FsmTran_((Fsm *)self, &HBridge_VDC);
             break;
 
         case NEG_VDC:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *)self, &HBridge_negVDC);
             break;
 
         default:
-            printf("HBridge_Zero");
             _FsmTran_((Fsm *)self, &HBridge_Zero);
             break;
 
@@ -118,17 +107,14 @@ void HBridge_negVDC(HBridge *self, Event *e)
     switch (e->signal)
     {
         case VDC:
-            printf("H-bridge to VDC");
             _FsmTran_((Fsm *)self, &HBridge_VDC);
             break;
 
         case ZERO_VDC:
-            printf("H-bridge to zero");
             _FsmTran_((Fsm *)self, &HBridge_Zero);
             break;
 
         default:
-            printf("HBridge_negVDC");
             _FsmTran_((Fsm *)self, &HBridge_negVDC);
             break;
     }

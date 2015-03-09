@@ -9,7 +9,7 @@
 
 #include "fsm.h"
 #include "inverterFSM.h"
-#include <stdio.h>
+//#include <stdio.h>
 #include <ctype.h>
 #include "stdbool.h"
 
@@ -50,32 +50,26 @@ void Inverter_default(Inverter *self, Event *e)
     switch (e->signal)
     {
         case POWER_ON:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *)self, &Inverter_PowerOn);
             break;
 
         case OUTSIDE_PARAMETERS:
-            printf("H-bridge to zero");
             _FsmTran_((Fsm *)self, &Inverter_OutOfParameters);
             break;
 
         case INSIDE_PARAMETERS:
-            printf("H-bridge to VDC");
             _FsmTran_((Fsm *)self, &Inverter_WithinParameters);
             break;
 
         case ALMOST_OUT_OF_PARAMETERS:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_AlmostOutOfParameters);
             break;
 
         case SHUT_DOWN:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_ShutDown);
             break;
 
         case NO_EVENT:
-            printf("defaultNOEVENT");
             break;
 
         default:
@@ -90,32 +84,26 @@ void Inverter_PowerOn(Inverter *self, Event *e)
     switch (e->signal)
     {
         case POWER_ON:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *)self, &Inverter_PowerOn);
             break;
 
         case OUTSIDE_PARAMETERS:
-            printf("H-bridge to zero");
             _FsmTran_((Fsm *)self, &Inverter_OutOfParameters);
             break;
 
         case INSIDE_PARAMETERS:
-            printf("H-bridge to VDC");
             _FsmTran_((Fsm *)self, &Inverter_WithinParameters);
             break;
 
         case ALMOST_OUT_OF_PARAMETERS:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_AlmostOutOfParameters);
             break;
 
         case SHUT_DOWN:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_ShutDown);
             break;
 
         case NO_EVENT:
-            printf("defaultNOEVENT");
             break;
 
         default:
@@ -129,32 +117,26 @@ void Inverter_OutOfParameters(Inverter *self, Event *e)
     switch (e->signal)
     {
         case POWER_ON:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *)self, &Inverter_PowerOn);
             break;
 
         case OUTSIDE_PARAMETERS:
-            printf("H-bridge to zero");
             _FsmTran_((Fsm *)self, &Inverter_OutOfParameters);
             break;
 
         case INSIDE_PARAMETERS:
-            printf("H-bridge to VDC");
             _FsmTran_((Fsm *)self, &Inverter_WithinParameters);
             break;
 
         case ALMOST_OUT_OF_PARAMETERS:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_AlmostOutOfParameters);
             break;
 
         case SHUT_DOWN:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_ShutDown);
             break;
 
         case NO_EVENT:
-            printf("defaultNOEVENT");
             break;
 
         default:
@@ -169,32 +151,26 @@ void Inverter_WithinParameters(Inverter *self, Event *e)
     switch (e->signal)
     {
         case POWER_ON:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *)self, &Inverter_PowerOn);
             break;
 
         case OUTSIDE_PARAMETERS:
-            printf("H-bridge to zero");
             _FsmTran_((Fsm *)self, &Inverter_OutOfParameters);
             break;
 
         case INSIDE_PARAMETERS:
-            printf("H-bridge to VDC");
             _FsmTran_((Fsm *)self, &Inverter_WithinParameters);
             break;
 
         case ALMOST_OUT_OF_PARAMETERS:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_AlmostOutOfParameters);
             break;
 
         case SHUT_DOWN:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_ShutDown);
             break;
 
         case NO_EVENT:
-            printf("defaultNOEVENT");
             break;
 
         default:
@@ -208,32 +184,26 @@ void Inverter_AlmostOutOfParameters(Inverter *self, Event *e)
     switch (e->signal)
     {
         case POWER_ON:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *)self, &Inverter_PowerOn);
             break;
 
         case OUTSIDE_PARAMETERS:
-            printf("H-bridge to zero");
             _FsmTran_((Fsm *)self, &Inverter_OutOfParameters);
             break;
 
         case INSIDE_PARAMETERS:
-            printf("H-bridge to VDC");
             _FsmTran_((Fsm *)self, &Inverter_WithinParameters);
             break;
 
         case ALMOST_OUT_OF_PARAMETERS:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_AlmostOutOfParameters);
             break;
 
         case SHUT_DOWN:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_ShutDown);
             break;
 
         case NO_EVENT:
-            printf("defaultNOEVENT");
             break;
 
         default:
@@ -247,32 +217,26 @@ void Inverter_ShutDown(Inverter *self, Event *e)
     switch (e->signal)
     {
         case POWER_ON:
-            printf("H-bridge to negVDC");
             _FsmTran_((Fsm *)self, &Inverter_PowerOn);
             break;
 
         case OUTSIDE_PARAMETERS:
-            printf("H-bridge to zero");
             _FsmTran_((Fsm *)self, &Inverter_OutOfParameters);
             break;
 
         case INSIDE_PARAMETERS:
-            printf("H-bridge to VDC");
             _FsmTran_((Fsm *)self, &Inverter_WithinParameters);
             break;
 
         case ALMOST_OUT_OF_PARAMETERS:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_AlmostOutOfParameters);
             break;
 
         case SHUT_DOWN:
-            printf("defaultNOEVENT");
             _FsmTran_((Fsm *)self, &Inverter_ShutDown);
             break;
 
         case NO_EVENT:
-            printf("defaultNOEVENT");
             break;
 
         default:
@@ -315,7 +279,6 @@ char InverterTransitionFunction(Inverter self, InverterEvent *e)
     //backtrace_symbols_fd(&funptr, 1, 1);
 
     if(funptr == &Inverter_default){
-        printf("\nInverter Default\n");
         switch (e->code)                  //This switch uses the data attribute 'code' of the Inverter Event
         {
 
@@ -331,7 +294,6 @@ char InverterTransitionFunction(Inverter self, InverterEvent *e)
         }
     }
     else if(funptr  == &Inverter_PowerOn){
-        printf("\nInverter Power On!\n");
         switch (e->code)                  //This switch uses the data attribute 'code' of the Inverter Event
         {
             case 'P' : e->super_.signal = POWER_ON; break;
@@ -346,7 +308,6 @@ char InverterTransitionFunction(Inverter self, InverterEvent *e)
         }
     }
     else if(funptr  == &Inverter_OutOfParameters){
-        printf("\nInverter Out of Parameters!\n");
         switch (e->code)                  //This switch uses the data attribute 'code' of the Inverter Event
         {
             case 'P' : e->super_.signal = POWER_ON; break;
@@ -360,7 +321,6 @@ char InverterTransitionFunction(Inverter self, InverterEvent *e)
         }
     }
     else if(funptr  == &Inverter_WithinParameters){
-        printf("\nInverter Within Parameters!\n");
         switch (e->code)                  //This switch uses the data attribute 'code' of the Inverter Event
         {
             case 'P' : e->super_.signal = POWER_ON; break;
@@ -375,7 +335,6 @@ char InverterTransitionFunction(Inverter self, InverterEvent *e)
         }
     }
     else if(funptr  == &Inverter_AlmostOutOfParameters){
-        printf("\nInverter VDC!\n");
         switch (e->code)                  //This switch uses the data attribute 'code' of the Inverter Event
         {
             case 'P' : e->super_.signal = POWER_ON; break;
@@ -390,7 +349,6 @@ char InverterTransitionFunction(Inverter self, InverterEvent *e)
         }
     }
     else if(funptr  == &Inverter_ShutDown){
-        printf("\nInverter Shut Down!\n");
         switch (e->code)                  //This switch uses the data attribute 'code' of the Inverter Event
         {
             case 'P' : e->super_.signal = POWER_ON; break;

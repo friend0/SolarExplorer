@@ -173,4 +173,12 @@ extern Uint16 VloopTicker;
 extern Uint16 ZCDDetect;
 extern int16 sine_prev;
 
+
+/**
+ * ADC configuration vars
+ */
+extern int 	ChSel[16];
+extern int	TrigSel[16];
+extern int  ACQPS[16];
+
 #endif

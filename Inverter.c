@@ -8,9 +8,10 @@
 /**
  * Private Function Definitions
  */
-#include "InverterVariables.h"
 #include "SolarExplorer-Includes.h"
 #include "Inverter.h"
+#include "InverterVariables.h"
+
 
 #include "fsm.h"
 #include "inverterFSM.h"
@@ -18,7 +19,7 @@
 #include "mpptFSM.h"
 #include "panelFSM.h"
 #include "stdbool.h"
-#include "stdio.h"
+//#include "stdio.h"
 
 
 void DeviceInit(void);
@@ -299,6 +300,7 @@ HBridge hBridge;
 Mppt mppt;
 Panel panel;
 
+
 void initializeInverter(void){
 
 	/**
@@ -429,12 +431,28 @@ void initializeInverter(void){
 		 */
 		dataLoggingInits();
 
+	//	pidGRANDO_Iinv.param.Kp=_IQ(1.2);
+		pidGRANDO_Iinv.param.Kp=_IQ(0.8);
+	//	pidGRANDO_Iinv.param.Ki=_IQ(0.052);
+		pidGRANDO_Iinv.param.Ki=_IQ(0.15);
+		pidGRANDO_Iinv.param.Kd=_IQ(0.0);
+		pidGRANDO_Iinv.param.Kr=_IQ(1.0);
+		pidGRANDO_Iinv.param.Umax=_IQ(1.0);
+		pidGRANDO_Iinv.param.Umin=_IQ(-1.0);
+
 		// Initialize PWMDAC module
 		pwmdac1.PeriodMax = 500;   // 3000->10kHz, 1500->20kHz, 1000-> 30kHz, 500->60kHz
 		pwmdac1.PwmDacInPointer0 = &PwmDacCh1;
 		pwmdac1.PwmDacInPointer1 = &PwmDacCh2;
 		pwmdac1.PwmDacInPointer2 = &PwmDacCh3;
 		pwmdac1.PwmDacInPointer3 = &PwmDacCh4;
+
+		pidGRANDO_Vinv.param.Kp=_IQ(3.0);
+		pidGRANDO_Vinv.param.Ki=_IQ(0.005);
+		pidGRANDO_Vinv.param.Kd=_IQ(0.0);
+		pidGRANDO_Vinv.param.Kr=_IQ(1.0);
+		pidGRANDO_Vinv.param.Umax=_IQ(0.95);
+		pidGRANDO_Vinv.param.Umin=_IQ(0.000);
 
 		PWMDAC_INIT_MACRO(pwmdac1)
 
@@ -547,7 +565,6 @@ void runInverter(void){
 
 		if((count % 4 == 0) && (count != 0)){
 			count = 0;
-			printf("update coeffs\n");
 		/**
 		 * This is the only thing that 'C' does, so I will just do this for now
 		 */
@@ -664,18 +681,6 @@ void netConnections(void){
 	MATH_EMAVG_In2=&VpvRead;
 	MATH_EMAVG_Out2=&VpvRead_EMAVG;
 	MATH_EMAVG_Multiplier2=_IQ30(0.001); // a 1000 point moving average filter
-
-	//connect the 2P2Z connections, for the inner current Loop
-	CNTL_2P2Z_Ref2 = &IboostSwRef;
-	CNTL_2P2Z_Out2 = &Duty3A;
-	CNTL_2P2Z_Fdbk2= &IboostswRead;
-	CNTL_2P2Z_Coef2 = &CNTL_2P2Z_CoefStruct2.b2;
-
-	//connect the 2P2Z connections, for the outer Voltage Loop
-	CNTL_2P2Z_Ref1 = &VpvRead;
-	CNTL_2P2Z_Fdbk1 = &VpvRef;
-	CNTL_2P2Z_Out1 = &IboostSwRef;
-	CNTL_2P2Z_Coef1 = &CNTL_2P2Z_CoefStruct1.b2;
 
 }
 
@@ -951,13 +956,6 @@ void SPI_init(void)
 }
 
 void ADC_Init(void){
-
-	/**
-	 * ADC configuration vars
-	 */
-	int 	ChSel[16] =   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-	int		TrigSel[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-	int     ACQPS[16] =   {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
 
 	/**
 	 * Map channel to ADC Pin the dummy reads are to account for first sample issue in Rev 0 silicon

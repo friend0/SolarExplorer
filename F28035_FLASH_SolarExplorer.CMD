@@ -44,6 +44,7 @@
 
 //Suppress  'build attribute vendor section TI missing' warning
 --diag_suppress=16002
+--heap_size=1024
 
 MEMORY
 {
@@ -100,12 +101,12 @@ SECTIONS
    /* Allocate program areas: */
    .cinit            : > FLASHA,     PAGE = 0
    .pinit            : > FLASHA,     PAGE = 0
-   .text             : >> FLASHA | FLASHC | FLASHD,     PAGE = 0
+   .text             : >> FLASHE | FLASHF,     PAGE = 0
 
    /*
    * Added .cio according to http://e2e.ti.com/support/microcontrollers/c2000/f/171/p/92716/334409
    */
-   //.cio              : > FLASHB,        PAGE = 1
+   .cio              : > RAML2,        PAGE = 1
 
    codestart         : > BEGIN       PAGE = 0
    
@@ -123,7 +124,7 @@ SECTIONS
    /* Allocate uninitalized data sections: */
    .stack            : > RAMM0,      PAGE = 1
    .ebss             : > RAML0,    	 PAGE = 1
-   .esysmem          : > RAMM1,      PAGE = 1
+   .esysmem          : > FLASHB,      PAGE = 1
 	
    /* Initalized sections go in Flash */
    /* For SDFlash to program these, they must be allocated to page 0 */

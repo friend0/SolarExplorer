@@ -28,11 +28,6 @@
 #endif
 void MemCopy();
 
-#ifdef FLASH
-#pragma CODE_SECTION(Inv_ISR,"ramfuncs");
-#endif
-
-void SPI_init();
 
 void initializeInverter(void);
 

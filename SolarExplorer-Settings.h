@@ -31,7 +31,7 @@
 // BUILD 2   Closed Current Loop Inverter, internally generated sine with MPPT and DC bus Regulation 
 // BUILD 3   Closed Current Loop Inverter, internally generated sine with MPPT and DC bus Regulation, PLL
 
-#define INCR_BUILD 1
+#define INCR_BUILD 2
 		
 //==================================================================================
 // System Settings
