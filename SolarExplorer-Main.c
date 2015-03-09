@@ -47,6 +47,13 @@
 //----------------------------------------------------------------------------------
 
 #include "SolarExplorer-Includes.h"
+#include "stdbool.h"
+
+#include "fsm.h"
+#include "panelFSM.h"
+#include "mpptFSM.h"
+#include "hBridgeFSM.h"
+#include "inverterFSM.h"
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // FUNCTION PROTOTYPES
@@ -75,6 +82,7 @@ void ADC_SOC_CNF(int ChSel[], int Trigsel[], int ACQPS[], int IntChSel, int mode
 // -------------------------------- FRAMEWORK --------------------------------------
 // State Machine function prototypes
 //----------------------------------------------------------------------------------
+
 // Alpha states
 void A0(void);	//state A0
 void B0(void);	//state B0
@@ -342,6 +350,11 @@ Uint16 VloopTicker=0;
 Uint16 ZCDDetect=0;
 int16 sine_prev=0;
          
+Inverter inverter;
+HBridge hBridge;
+Mppt mppt;
+Panel panel;
+
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // MAIN CODE - starts here
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -350,6 +363,22 @@ void main(void)
 //=================================================================================
 //	INITIALISATION - General
 //=================================================================================
+	/**
+		 * State Machine Constructors
+		 */
+		InverterCtor(&inverter);
+		HBridgeCtor(&hBridge);
+		MpptCtor(&mppt);
+		PanelCtor(&panel);
+
+		/**
+		 * Statem Machine Initializations
+		 */
+		FsmInit((Fsm *)&inverter, 0);
+		FsmInit((Fsm *)&hBridge, 0);
+		FsmInit((Fsm *)&mppt, 0);
+		FsmInit((Fsm *)&panel, 0);
+
 
 	// The DeviceInit() configures the clocks and pin mux registers 
 	// The function is declared in {ProjectName}-DevInit_F2803/2x.c,
@@ -811,8 +840,72 @@ void main(void)
 	{
 		// State machine entry & exit point
 		//===========================================================
-		(*Alpha_State_Ptr)();	// jump to an Alpha state (A0,B0,...)
+		//(*Alpha_State_Ptr)();	// jump to an Alpha state (A0,B0,...)
 		//===========================================================
+
+		static char returner = 0;
+			// loop rate synchronizer for panel tasks
+			if(CpuTimer0Regs.TCR.bit.TIF == 1)
+			{
+				CpuTimer0Regs.TCR.bit.TIF = 1;	// clear flag
+
+				PanelEvent panelEvent;
+				panelEvent.code = 'T';
+				panelEvent.super_.transition = true;
+				/**
+				 * Put transition function here
+				 * @TODO: update transitions to work from timers
+				 */
+				returner = PanelTransitionFunction(panel, &panelEvent);
+				//if(returner == -1) return 0;
+				FsmDispatch((Fsm *)&panel, (Event *)&panelEvent);  //dispatch
+
+				VTimer0[0]++;			// virtual timer 0, instance 0 (spare)
+			}
+
+			// loop rate synchronizer for MPPT and 'Macro State Machine'
+			if(CpuTimer1Regs.TCR.bit.TIF == 1)
+			{
+				CpuTimer1Regs.TCR.bit.TIF = 1;				// clear flag
+
+				MpptEvent mpptEvent;
+				mpptEvent.code = 'T';
+				mpptEvent.super_.transition = true;
+
+				/**
+				 * Put transition function here
+				 * @TODO: update transitions to work from timers
+				 */
+				returner = MpptTransitionFunction(mppt, &mpptEvent);
+				//if(returner == -1) return 0;
+				FsmDispatch((Fsm *)&mppt, (Event *)&mpptEvent);  //dispatch
+
+				VTimer1[0]++;			// virtual timer 1, instance 0 (spare)
+			}
+
+			// loop rate synchronizer for coefficients tasks
+			if(CpuTimer2Regs.TCR.bit.TIF == 1)
+			{
+				CpuTimer2Regs.TCR.bit.TIF = 1;				// clear flag
+				static int count = 0;
+				count++;
+
+				if((count % 4 == 0) && (count != 0)){
+					count = 0;
+				/**
+				 * This is the only thing that 'C' does, so I will just do this for now
+				 */
+					//Update Coefficients
+					if(UpdateCoef==1)
+					{
+					CNTL_2P2Z_CoefStruct2.b2  = Dgain_I;                            // B2
+					CNTL_2P2Z_CoefStruct2.b1  = (Igain_I-Pgain_I-Dgain_I-Dgain_I);  // B1
+					CNTL_2P2Z_CoefStruct2.b0  = (Pgain_I + Igain_I + Dgain_I);      // B0
+					UpdateCoef=0;
+					}
+				}
+				VTimer2[0]++;			//virtual timer 2, instance 0 (spare)
+			}
 
 #ifdef FLASH
 		ServiceRoutine(&commros); 
@@ -1533,6 +1626,477 @@ interrupt void Inv_ISR()
   	return;
   	
 }
+
+
+/**
+* Begin State Defintiions
+*/
+
+void Mppt_Execute(Mppt *self, Event *e) {
+
+    if (e->transition == true) {
+    	if(Run_MPPT==1)
+    	{
+    		// MPPT routine
+    		mppt_incc1.Ipv = IpvRead_EMAVG; //IpvRead;
+    		mppt_incc1.Vpv = VpvRead_EMAVG; //VpvRead;
+
+    		mppt_incc_MACRO(mppt_incc1);
+
+    		VpvRef_MPPT = mppt_incc1.VmppOut;
+
+    		mppt_pno1.Ipv = IpvRead_EMAVG; //IpvRead;
+    		mppt_pno1.Vpv = VpvRead_EMAVG; //VpvRead;
+
+    		mppt_pno_MACRO(mppt_pno1);
+
+    		//VpvRef_MPPT = mppt_pno1.VmppOut;
+
+    		if(VpvRef_MPPT<_IQ24(0.0))
+    		{
+    			VpvRef_MPPT=_IQ24(0.0);
+    		}
+    		else if(VpvRef_MPPT>_IQ24(0.9))
+    		{
+    			VpvRef_MPPT=_IQ24(0.9);
+    		}
+
+    		VpvRef=VpvRef_MPPT;
+
+    		Run_MPPT=0;
+    	}
+
+    //MPPT is a slow task, the following code enables to modulate the rate at which the MPPT is called
+
+    	if(MPPT_slew==0)
+    	{
+    		if(MPPT_ENABLE==1)
+    		{
+    			Run_MPPT=1;
+    			mppt_incc1.mppt_enable=1;
+    		}
+    		MPPT_slew=0;
+    	}
+    	else
+    		MPPT_slew--;
+
+    	// Toggle LD2 on the control card if MPPT enabled
+    	if(MPPT_ENABLE==1)
+    	{
+    		if(LedBlinkCnt2==0)
+    			{
+    				GpioDataRegs.GPATOGGLE.bit.GPIO31 = 1;	//turn on/off LD2 on the controlCARD
+    				LedBlinkCnt2=1;
+    			}
+    		else
+    			LedBlinkCnt2--;
+    	}
+        e->transition = false;
+    }
+
+    switch (e->signal) {
+        case TIMER_MPPT:
+            _FsmTran_((Fsm *) self, &Mppt_Blink);
+            break;
+
+        case MPPT_NO_EVENT:
+            break;
+
+        default:
+            //_FsmTran_((Fsm *) self, &Mppt_Blink);
+            break;
+    }
+}
+
+void Mppt_Blink(Mppt *self, Event *e) {
+
+    if (e->transition == true) {
+    	// Toggle LD3 on control card to show execution of code
+    	if(LedBlinkCnt==0)
+    	{
+    		GpioDataRegs.GPBTOGGLE.bit.GPIO34 = 1;	//turn on/off LD3 on the controlCARD
+    		LedBlinkCnt=4;
+    	}
+    	else
+    		LedBlinkCnt--;
+		e->transition = false;
+    }
+
+    switch (e->signal) {
+        case TIMER_MPPT:
+            _FsmTran_((Fsm *) self, &Mppt_StateMachine);
+            break;
+        default:
+            //_FsmTran_((Fsm *) self, &Mppt_StateMachine);
+            break;
+    }
+}
+
+void Mppt_StateMachine(Mppt *self, Event *e) {
+
+    if (e->transition == true) {
+		#if (INCR_BUILD == 2)
+			// Inverter State ==0 , wait for the command to start production of power
+			// Inverter State ==1 , Check if panel voltage is available, i.e. Vpv > 5V
+			//						if true enable MPPT
+			// Inverter State ==2 , Check if Gui_Vboost>33V
+			//						enable closed voltage loop regulation and current loop regulation
+			// Inverter State ==3, wait for stop command, if stop, trip all PWM's, shut down MPPT and return to state 0, reset all values
+
+			switch(PVInverterState)
+			{
+				case 0: // wait for the command to start the inverter
+						if(Gui_InvStart==1)
+						{
+							PVInverterState=1;
+							Gui_InvStart=0;
+						}
+						break;
+				case 1: // check if PV is present
+						if(Gui_Vpv>_IQ9(3.0))
+						{
+							PVInverterState=2;
+							//Enable MPPT
+							MPPT_ENABLE=1;
+							ClearInvTrip=1;
+							InvModIndex=_IQ24(0.0);
+							pidGRANDO_Vinv.term.Fbk = VdcRef; // 30V/ 39.97
+							mppt_incc1.Stepsize = _IQ(0.02);
+						}
+
+						if(Gui_InvStop==1)
+						{
+							PVInverterState=3;
+						}
+						break;
+				case 2: // Check if DC Bus is greater than 33V , as currently the inverter is off this woudl happen quickly
+						if(Gui_Vboost>_IQ9(31.0))
+						{
+							PVInverterState=3;
+							CloseVloopInv=1;
+							CloseIloopInv=1;
+							mppt_incc1.Stepsize = _IQ(0.005);
+						}
+						if(Gui_InvStop==1)
+						{
+							PVInverterState=3;
+						}
+						break;
+				case 3: // Wait for shut down sequence
+						if(Gui_InvStop==1)
+						{
+							// switch off MPPT and also open the loop for current and voltage
+							// the open loop index on the inverter is used to discharge the boost till it is close to the input panle voltage
+
+							MPPT_ENABLE=0;
+							mppt_incc1.mppt_first=1;
+							mppt_pno1.mppt_first=1;
+
+							VpvRef=_IQ24(0.9);
+
+							// Run the reset sequence
+							// Trip the PWM for the inverter
+							// software force the trip of inverter to disable the inverter completely
+							EALLOW;
+							EPwm1Regs.TZFRC.bit.OST=0x1;
+							EPwm2Regs.TZFRC.bit.OST=0x1;
+							EDIS;
+
+							// Wait for the command to be restarted
+							PVInverterState=0;
+
+							CloseVloopInv=0;
+							CloseIloopInv=0;
+
+							Gui_InvStop=0;
+
+						}
+
+						break;
+				default:
+						break;
+			}
+
+		#endif
+
+		#if (INCR_BUILD == 3)
+
+			// Inverter State ==1 , Check grid voltage, i.e. Vrms Real > _IQ15(12)
+			// Inverter State ==2 , Check if panel voltage is available, i.e. Vpv > 3V
+			//						if true enable MPPT
+			// Inverter State ==3 , Check if Gui_Vboost>31V
+			//						enable closed voltage loop regulation and current loop regulation
+			// Inverter State == 4, Check if inv_Iset > 0.1 pu, Clear Inverter Trip
+			// Inverter State == 5, wait for stop command, if stop, trip all PWM's, shut down MPPT and return to state 0, reset all values
+
+			switch(PVInverterState)
+			{
+				case 0: // wait for the command to start the inverter
+						if(Gui_InvStart==1)
+						{
+							PVInverterState=1;
+							Gui_InvStart=0;
+						}
+						break;
+				case 1: // once the inverter command is issued check if the grid is present
+						if(VrmsReal>_IQ15(12.0))
+						{
+							PVInverterState=2;
+							// take the PLL out of reset
+						}
+						break;
+				case 2: // AC is present, check if PV is present
+						if(Gui_Vpv>_IQ9(3.0))
+						{
+							PVInverterState=3;
+							//Enable MPPT
+							MPPT_ENABLE=1;
+							mppt_incc1.Stepsize = _IQ(0.02);
+						}
+						break;
+				case 3: // Check if DC Bus is greater than 31V , as currently the inverter is off this woudl happen quickly
+						if(Gui_Vboost>_IQ9(31.0))
+						{
+							PVInverterState=4;
+							CloseVloopInv=1;
+							CloseIloopInv=1;
+							mppt_incc1.Stepsize = _IQ(0.005);
+						}
+						break;
+				case 4: // Check if there is enough current command then only connect the grid
+						// this is for safety, as the board does not have reverse current sense,
+						if(inv_Iset>_IQ24(0.1))
+						{
+							PVInverterState=5;
+							ClearInvTrip=1;
+						}
+						break;
+				case 5: // Wait for shut down sequence
+						if(Gui_InvStop==1)
+						{
+							Gui_InvStop=0;
+							// Run the reset sequence
+							// Trip the PWM for the inverter
+							// software force the trip of inverter to disable the inverter completely
+							EALLOW;
+							EPwm1Regs.TZFRC.bit.OST=0x1;
+							EPwm2Regs.TZFRC.bit.OST=0x1;
+							EDIS;
+
+							MPPT_ENABLE=0;
+							mppt_incc1.mppt_first=1;
+							mppt_pno1.mppt_first=1;
+
+							VpvRef=_IQ24(0.9);
+
+							// Wait for the command to be restarted
+							PVInverterState=0;
+
+							CloseVloopInv=0;
+							CloseIloopInv=0;
+
+						}
+						break;
+				case 6: // wait for the power sequence
+						break;
+				default:
+						break;
+			}
+
+			if(VrmsReal<_IQ15(10.0) && PVInverterState<3)
+			{
+				ResetPLL=1;
+			}
+			else
+				ResetPLL=0;
+
+		#endif
+
+			if(timer1<20)
+				timer1++;
+
+			if(timer1==20)
+			{
+				PanelBoostConnect=1;
+				Gui_LightCommand=_IQ13(0.2);
+				timer1++;
+			}
+
+			//reset transition flag
+			e->transition = false;
+    }
+
+    switch (e->signal) {
+        case TIMER_MPPT:
+            _FsmTran_((Fsm *) self, &Mppt_Execute);
+            break;
+
+        case MPPT_NO_EVENT:
+            break;
+
+        default:;
+            break;
+    }
+}
+
+// @TODO: Figure out whta needs to be done with this. Dont think we need a seperate state for MPPT disable, this i smore on the macro level...
+void Mppt_Disable(Mppt *self, Event *e) {
+
+    if (e->transition == true) {
+			e->transition = false;
+    }
+
+    switch (e->signal) {
+        case EXECUTE:
+            _FsmTran_((Fsm *) self, &Mppt_Execute);
+            break;
+
+        case MPPT_NO_EVENT:
+            break;
+
+        default:;
+            break;
+    }
+}
+
+
+
+/**
+ * Begin Panel State Definitions
+ */
+
+
+void Panel_Dashboard(Panel *self, Event *e) {
+
+    if (e->transition == true) {
+	// Dashboard measurement calculated by:
+	//	Gui_Vbout = VboutAvg * K_Vbout, where VboutAvg = sum of 8 Vbout samples
+	//	Gui_Iinb = IinbAvg * K_Iinb, where IinbAvg = sum of 8 Iinb samples
+
+		HistPtr++;
+		if (HistPtr >= HistorySize)	HistPtr = 0;
+
+		// BoxCar Averages - Input Raw samples into BoxCar arrays
+		//----------------------------------------------------------------
+		Hist_Vpv[HistPtr]    = 	Vpv_FB;
+		Hist_Ipv[HistPtr]    = 	Ipv_FB;
+		Hist_Vboost[HistPtr] = 	Vboost_FB;
+		Hist_Light[HistPtr]  =  LIGHT_FB;
+
+		temp_Scratch=0;
+		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Vpv[i];
+		Gui_Vpv = ( (long) temp_Scratch * (long) K_Vpv ) >> 15;
+
+		temp_Scratch=0;
+		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Ipv[i];
+		Gui_Ipv = ( (long) temp_Scratch * (long) K_Ipv ) >> 15;
+
+		temp_Scratch=0;
+		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Vboost[i];
+		Gui_Vboost = ( (long) temp_Scratch * (long) K_Vboost ) >> 15;
+
+		temp_Scratch=0;
+		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Light[i];
+		Gui_Light = ( (long) temp_Scratch * (long) K_Light ) >> 15;
+
+		Gui_LightRatio =_IQ13mpy(Gui_Light,LIGHTSENSOR_MAX_INV);
+
+		Gui_PanelPower=_IQ9mpy(((Gui_Vpv-_IQ9(0.20))>_IQ9(0.0)?(Gui_Vpv-_IQ9(0.20)):_IQ9(0.0)),(((long)(Gui_Ipv-_IQ12(0.03))>>3)>_IQ9(0.0)?((long)(Gui_Ipv-_IQ12(0.03))>>3):_IQ9(0.0)));
+
+		if(Gui_PanelPower_Theoretical!=0)
+			Gui_MPPTTrackingEff =_IQ9mpy(_IQ9div(Gui_PanelPower,Gui_PanelPower_Theoretical),_IQ9(100.0));
+		else
+			Gui_MPPTTrackingEff=0;
+
+        e->transition = false;
+    }
+
+    switch (e->signal) {
+        case TIMER_PANEL:
+            _FsmTran_((Fsm *) self, &Panel_Connect);
+            break;
+
+        case NO_EVENT_PANEL:
+            break;
+
+        default:
+            break;
+    }
+}
+
+void Panel_Connect(Panel *self, Event *e) {
+
+    if (e->transition == true) {
+
+    	if(PanelBoostConnect==0)
+    	{
+    		GpioDataRegs.GPACLEAR.bit.GPIO12=0x1;
+    	}
+    	else if (PanelBoostConnect==1)
+    	{
+    		GpioDataRegs.GPASET.bit.GPIO12=0x1;
+    	}
+
+        e->transition = false;
+    }
+
+    switch (e->signal) {
+
+        case TIMER_PANEL:
+            _FsmTran_((Fsm *) self, &Panel_Emulator);
+            break;
+
+        case NO_EVENT_PANEL:
+            break;
+
+        default:
+            break;
+
+    }
+}
+
+void Panel_Emulator(Panel *self, Event *e) {
+
+    if (e->transition == true) {
+    	if(Gui_LightCommand != Gui_LightCommand_Prev)
+    	{
+    	 sdata[0]=1; //1 indicates it is the command for the light value
+
+    	 // saturate the light command to 0.8 because of power capacity of the DC power supply shipped with the kit
+    	 if(Gui_LightCommand>_IQ13(0.8))
+    	 	Gui_LightCommand=_IQ13(0.8);
+
+    	  if(Gui_LightCommand<_IQ13(0.0))
+    	 	Gui_LightCommand=_IQ13(0.0);
+
+    	 sdata[1]=Gui_LightCommand;	// Value of light that needs to be sent to the emulator
+
+    	 Gui_LightCommand_Prev=Gui_LightCommand;
+
+    	 SpibRegs.SPITXBUF=sdata[0];      // Send data
+    	 SpibRegs.SPITXBUF=sdata[1];
+
+    	 SpiaRegs.SPIFFTX.bit.TXFIFO=1;
+
+    	 Gui_PanelPower_Theoretical=_IQ9mpy(_IQ9(36.02),((long)Gui_LightCommand>>4)); // Panel Max power * Luminance Ratio
+
+    	}
+    	e->transition = false;
+    }
+
+    switch (e->signal) {
+        case TIMER_PANEL:
+            _FsmTran_((Fsm *) self, &Panel_Dashboard);
+            break;
+
+        case NO_EVENT_PANEL:
+            break;
+
+        default:;
+            break;
+    }
+}
+
 
 
 void SPI_init()

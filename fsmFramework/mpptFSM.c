@@ -13,11 +13,6 @@
 #include <ctype.h>
 #include "stdbool.h"
 
-//#include "SolarExplorer-Includes.h"
-
-#include "InverterVariables.h"		//Included last!
-#include "Inverter.h"
-
 /**
 * Begin State Defintiions
 */
@@ -36,6 +31,7 @@ void Mppt_initial(Mppt *self, Event *e) {
     _FsmTran_((Fsm *) self, &Mppt_Execute);
 }
 
+/**
 void Mppt_Execute(Mppt *self, Event *e) {
 
     if (e->transition == true) {
@@ -362,6 +358,7 @@ void Mppt_Disable(Mppt *self, Event *e) {
             break;
     }
 }
+**/
 
 /**
 * @brief Used to determine the event that should be passed to the FsmDispatch function

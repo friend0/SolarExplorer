@@ -30,7 +30,7 @@ enum {
 	TIMER_MPPT,
     EXECUTE,
     DISABLE,
-    NO_EVENT
+    MPPT_NO_EVENT
 };
 
 ////////////////////////////////////

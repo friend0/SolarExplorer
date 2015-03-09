@@ -40,8 +40,6 @@ void InverterCtor(Inverter *self)
 
 void Inverter_initial(Inverter *self, Event *e)
 {
-    /* ... initialization of Inverter attributes */
-    printf("Inverter initialized");
     _FsmTran_((Fsm *)self, &Inverter_default);
 }
 

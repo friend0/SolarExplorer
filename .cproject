@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule configRelations="2" moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="com.ti.ccstudio.buildDefinitions.C2000.Debug.327632721">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.ti.ccstudio.buildDefinitions.C2000.Debug.327632721" moduleId="org.eclipse.cdt.core.settings" name="F2803x_FLASH">
 				<macros>
 					<stringMacro name="CONTROLSUITE_SGENLIB_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/dsp/SGEN/v101"/>
 					<stringMacro name="CONTROLSUITE_MOTORLIB_MATH_IQMATH_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/app_libs/motor_control/math_blocks/v2.0"/>
-					<stringMacro name="CONTROLSUITE_INSTALL_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../.."/>
-					<stringMacro name="CONTROLSUITE_F2803x_DEVICE_SUPPORT_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../device_support/f2803x/v125"/>
-					<stringMacro name="CONTROLSUITE_DSP_FIXPOINT_LIB_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/dsp/FixedPointLib/v101"/>
 					<stringMacro name="ORIGINAL_PROJECT_ROOT" type="VALUE_PATH_DIR" value="C:/ti/controlSUITE/development_kits/SolarExplorer_v1.0/SolarExplorer_PVInverter_F2803x"/>
+					<stringMacro name="CONTROLSUITE_DSP_FIXPOINT_LIB_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/dsp/FixedPointLib/v101"/>
+					<stringMacro name="CONTROLSUITE_F2803x_DEVICE_SUPPORT_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../device_support/f2803x/v125"/>
+					<stringMacro name="CONTROLSUITE_INSTALL_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../.."/>
 					<stringMacro name="CONTROLSUITE_F2803x_APPLIB_DRIVERS_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/app_libs/drivers/v1.0/F2803x"/>
 					<stringMacro name="CONTROLSUITE_F2803x_POWERLIB_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/app_libs/digital_power/f2803x_v3.3"/>
 					<stringMacro name="CONTROLSUITE_IQMATH_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/math/IQmath/v160"/>
@@ -19,10 +17,10 @@
 				</macros>
 				<externalSettings/>
 				<extensions>
-					<extension id="com.ti.ccstudio.binaryparser.CoffParser" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="com.ti.ccstudio.errorparser.CoffErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="com.ti.ccstudio.errorparser.LinkErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="com.ti.ccstudio.errorparser.AsmErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="com.ti.ccstudio.binaryparser.CoffParser" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -61,6 +59,7 @@
 									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_DEVICE_SUPPORT_ROOT}\DSP2803x_common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_INSTALL_ROOT}\development_kits\~SupportFiles\F2803x_headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SolarExplorer_PVInverter_F2803x/src commros}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;Y:\Documents\GitHub\SolarExplorer\fsmFramework&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_IQMATH_ROOT}\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_POWERLIB_ROOT}\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_POWERLIB_ROOT}\asm&quot;"/>

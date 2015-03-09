@@ -42,6 +42,8 @@
          be combined if required to create a larger memory block.
 */
 
+--diag_suppress=16002
+
 MEMORY
 {
 /* Note that the memory allocation below does not create sections as necessary for
@@ -91,7 +93,7 @@ SECTIONS
    /* Allocate program areas: */
    .cinit            : > FLASHA,     PAGE = 0
    .pinit            : > FLASHA,     PAGE = 0
-   .text             : > FLASHA,     PAGE = 0
+   .text             : >> FLASHE | FLASHF,     PAGE = 0
 
    codestart         : > BEGIN       PAGE = 0
    
@@ -107,6 +109,7 @@ SECTIONS
    csm_rsvd          : > CSM_RSVD    PAGE = 0
    
    /* Allocate uninitalized data sections: */
+   .cio 			 : > RAML2, 	 PAGE = 1
    .stack            : > RAMM0,      PAGE = 1
    .ebss             : > RAML0,    	 PAGE = 1
    .esysmem          : > RAMM1,      PAGE = 1
