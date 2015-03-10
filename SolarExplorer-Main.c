@@ -48,6 +48,7 @@
 
 #include "SolarExplorer-Includes.h"
 #include "stdbool.h"
+#include "inverterVariables.h"
 
 #include "fsm.h"
 #include "panelFSM.h"
@@ -83,34 +84,6 @@ void ADC_SOC_CNF(int ChSel[], int Trigsel[], int ACQPS[], int IntChSel, int mode
 // State Machine function prototypes
 //----------------------------------------------------------------------------------
 
-// Alpha states
-void A0(void);	//state A0
-void B0(void);	//state B0
-void C0(void);	//state C0
-
-// A branch states
-void A1(void);	//state A1
-void A2(void);	//state A2
-void A3(void);	//state A3
-void A4(void);	//state A4
-
-// B branch states
-void B1(void);	//state B1
-void B2(void);	//state B2
-void B3(void);	//state B3
-void B4(void);	//state B4
-
-// C branch states
-void C1(void);	//state C1
-void C2(void);	//state C2
-void C3(void);	//state C3
-void C4(void);	//state C4
-
-// Variable declarations
-void (*Alpha_State_Ptr)(void);	// Base States pointer
-void (*A_Task_Ptr)(void);		// State pointer A branch
-void (*B_Task_Ptr)(void);		// State pointer B branch
-void (*C_Task_Ptr)(void);		// State pointer C branch
 //----------------------------------------------------------------------------------
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -132,7 +105,7 @@ int 	ChSel[16] =   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 int		TrigSel[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 int     ACQPS[16] =   {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
 
-//---------------------------------------------------------------------------
+//---------------------L------------------------------------------------------
 // Used to indirectly access all EPWM modules
 volatile struct EPWM_REGS *ePWM[] = 
  				  { &EPwm1Regs,			//intentional: (ePWM[0] not used)
@@ -412,12 +385,6 @@ void main(void)
 	CpuTimer1Regs.PRD.all =  mSec50;	// B tasks
 	CpuTimer2Regs.PRD.all =  mSec1000;	// C tasks
 
-// Tasks State-machine init
-	Alpha_State_Ptr = &A0;
-	A_Task_Ptr = &A1;
-	B_Task_Ptr = &B1;
-	C_Task_Ptr = &C1;
-
 	VTimer0[0] = 0;	
 	VTimer1[0] = 0;
 	VTimer2[0] = 0;
@@ -478,18 +445,7 @@ void main(void)
    	// ADC Channel Selection for Configuring the ADC
 	// The following configuration would configure the ADC for parameters needed for 
 	
-	// ADC Channel Selection for Configuring the ADC
-	// The following configuration would configure the ADC for parameters needed for 
-	#define Iboostsw_FB		AdcResult.ADCRESULT1
-	#define Ileg1_fb 		AdcResult.ADCRESULT3
-	#define Ileg2_fb		AdcResult.ADCRESULT4
-	#define Vboost_FB  		AdcResult.ADCRESULT5
-	#define Ipv_FB			AdcResult.ADCRESULT6
-	#define Vpv_FB			AdcResult.ADCRESULT7
-	#define Vac_FB			AdcResult.ADCRESULT8
-	#define VN_FB			AdcResult.ADCRESULT9
-	#define VL_FB			AdcResult.ADCRESULT10
-	#define LIGHT_FB		AdcResult.ADCRESULT11
+
 	
 	//Map channel to ADC Pin
 	// the dummy reads are to account for first sample issue in Rev 0 silicon
@@ -852,10 +808,6 @@ void main(void)
 				PanelEvent panelEvent;
 				panelEvent.code = 'T';
 				panelEvent.super_.transition = true;
-				/**
-				 * Put transition function here
-				 * @TODO: update transitions to work from timers
-				 */
 				returner = PanelTransitionFunction(panel, &panelEvent);
 				//if(returner == -1) return 0;
 				FsmDispatch((Fsm *)&panel, (Event *)&panelEvent);  //dispatch
@@ -871,11 +823,6 @@ void main(void)
 				MpptEvent mpptEvent;
 				mpptEvent.code = 'T';
 				mpptEvent.super_.transition = true;
-
-				/**
-				 * Put transition function here
-				 * @TODO: update transitions to work from timers
-				 */
 				returner = MpptTransitionFunction(mppt, &mpptEvent);
 				//if(returner == -1) return 0;
 				FsmDispatch((Fsm *)&mppt, (Event *)&mpptEvent);  //dispatch
@@ -921,514 +868,6 @@ void main(void)
 //	STATE-MACHINE SEQUENCING AND SYNCRONIZATION
 //=================================================================================
 
-//--------------------------------- FRAMEWORK -------------------------------------
-void A0(void)
-{
-	// loop rate synchronizer for A-tasks
-	if(CpuTimer0Regs.TCR.bit.TIF == 1)
-	{
-		CpuTimer0Regs.TCR.bit.TIF = 1;	// clear flag
-
-		//-----------------------------------------------------------
-		(*A_Task_Ptr)();		// jump to an A Task (A1,A2,A3,...)
-		//-----------------------------------------------------------
-
-		VTimer0[0]++;			// virtual timer 0, instance 0 (spare)
-	}
-
-	Alpha_State_Ptr = &B0;		// Comment out to allow only A tasks
-}
-
-void B0(void)
-{
-	// loop rate synchronizer for B-tasks
-	if(CpuTimer1Regs.TCR.bit.TIF == 1)
-	{
-		CpuTimer1Regs.TCR.bit.TIF = 1;				// clear flag
-
-		//-----------------------------------------------------------
-		(*B_Task_Ptr)();		// jump to a B Task (B1,B2,B3,...)
-		//-----------------------------------------------------------
-		VTimer1[0]++;			// virtual timer 1, instance 0 (spare)
-	}
-
-	Alpha_State_Ptr = &C0;		// Allow C state tasks
-}
-
-void C0(void)
-{
-	// loop rate synchronizer for C-tasks
-	if(CpuTimer2Regs.TCR.bit.TIF == 1)
-	{
-		CpuTimer2Regs.TCR.bit.TIF = 1;				// clear flag
-
-		//-----------------------------------------------------------
-		(*C_Task_Ptr)();		// jump to a C Task (C1,C2,C3,...)
-		//-----------------------------------------------------------
-		VTimer2[0]++;			//virtual timer 2, instance 0 (spare)
-	}
-
-	Alpha_State_Ptr = &A0;	// Back to State A0
-}
-
-//=================================================================================
-//	A - TASKS
-//=================================================================================
-//--------------------------------------------------------
-void A1(void)  // Dash Board Measurements
-//--------------------------------------------------------
-{
-// Dashboard measurement calculated by:
-//	Gui_Vbout = VboutAvg * K_Vbout, where VboutAvg = sum of 8 Vbout samples
-//	Gui_Iinb = IinbAvg * K_Iinb, where IinbAvg = sum of 8 Iinb samples
-
-	HistPtr++;
-	if (HistPtr >= HistorySize)	HistPtr = 0;
-
-	// BoxCar Averages - Input Raw samples into BoxCar arrays
-	//----------------------------------------------------------------
-	Hist_Vpv[HistPtr]    = 	Vpv_FB;
-	Hist_Ipv[HistPtr]    = 	Ipv_FB;
-	Hist_Vboost[HistPtr] = 	Vboost_FB;
-	Hist_Light[HistPtr]  =  LIGHT_FB;
-	
-		
-	temp_Scratch=0;
-	for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Vpv[i];
-	Gui_Vpv = ( (long) temp_Scratch * (long) K_Vpv ) >> 15;
-	
-	temp_Scratch=0;
-	for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Ipv[i];
-	Gui_Ipv = ( (long) temp_Scratch * (long) K_Ipv ) >> 15;
-	
-	temp_Scratch=0;
-	for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Vboost[i];
-	Gui_Vboost = ( (long) temp_Scratch * (long) K_Vboost ) >> 15;
-	
-	temp_Scratch=0;
-	for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Light[i];
-	Gui_Light = ( (long) temp_Scratch * (long) K_Light ) >> 15;
-	
-	Gui_LightRatio =_IQ13mpy(Gui_Light,LIGHTSENSOR_MAX_INV);
-	
-	Gui_PanelPower=_IQ9mpy(((Gui_Vpv-_IQ9(0.20))>_IQ9(0.0)?(Gui_Vpv-_IQ9(0.20)):_IQ9(0.0)),(((long)(Gui_Ipv-_IQ12(0.03))>>3)>_IQ9(0.0)?((long)(Gui_Ipv-_IQ12(0.03))>>3):_IQ9(0.0)));
-	
-	if(Gui_PanelPower_Theoretical!=0)
-		Gui_MPPTTrackingEff =_IQ9mpy(_IQ9div(Gui_PanelPower,Gui_PanelPower_Theoretical),_IQ9(100.0));
-	else
-		Gui_MPPTTrackingEff=0;
-	
-	//-------------------
-	//the next time CpuTimer0 'counter' reaches Period value go to A2
-	A_Task_Ptr = &A2;
-	//-------------------
-}
-
-//--------------------------------------------------------
-void A2(void)  // Panel Connect Disconnect
-//-----------------------------------------------------------------
-{	 
-	if(PanelBoostConnect==0)
-	{
-		GpioDataRegs.GPACLEAR.bit.GPIO12=0x1;
-	}
-	else if (PanelBoostConnect==1)
-	{
-		GpioDataRegs.GPASET.bit.GPIO12=0x1;
-	} 
-	
-	//-------------------
-	//the next time CpuTimer0 'counter' reaches Period value go to A1
-	A_Task_Ptr = &A3;
-	//-------------------
-}
-
-//--------------------------------------------------------
-void A3(void)  // Talk to the Panel Emulator
-//-----------------------------------------
-{	
-	if(Gui_LightCommand != Gui_LightCommand_Prev)
-	{
-	 sdata[0]=1; //1 indicates it is the command for the light value
-	 
-	 // saturate the light command to 0.8 because of power capacity of the DC power supply shipped with the kit
-	 if(Gui_LightCommand>_IQ13(0.8))
-	 	Gui_LightCommand=_IQ13(0.8);
-	 	
-	  if(Gui_LightCommand<_IQ13(0.0))
-	 	Gui_LightCommand=_IQ13(0.0);
-	 	
-	 sdata[1]=Gui_LightCommand;	// Value of light that needs to be sent to the emulator
-	 
-	 Gui_LightCommand_Prev=Gui_LightCommand;
-	    	
-	 SpibRegs.SPITXBUF=sdata[0];      // Send data
-	 SpibRegs.SPITXBUF=sdata[1];
-	 
-	 SpiaRegs.SPIFFTX.bit.TXFIFO=1;
-	  	
-	 Gui_PanelPower_Theoretical=_IQ9mpy(_IQ9(36.02),((long)Gui_LightCommand>>4)); // Panel Max power * Luminance Ratio
-	    
-	}
-	//-----------------
-	//the next time CpuTimer0 'counter' reaches Period value go to A1
-	A_Task_Ptr = &A4;
-	//-----------------
-}
-
-//--------------------------------------------------------
-void A4(void)  // Spare
-//--------------------------------------------------------
-{
-	//-----------------
-	//the next time CpuTimer0 'counter' reaches Period value go to A1
-	A_Task_Ptr = &A1;
-	//-----------------
-}
-
-
-//=================================================================================
-//	B - TASKS
-//=================================================================================
-//----------------------------------------
-void B1(void)  // MPPT Execution 
-//----------------------------------------
-{	
-	if(Run_MPPT==1)
-	{
-		// MPPT routine
-		mppt_incc1.Ipv = IpvRead_EMAVG; //IpvRead;
-		mppt_incc1.Vpv = VpvRead_EMAVG; //VpvRead;
-
-		mppt_incc_MACRO(mppt_incc1);
-		
-		VpvRef_MPPT = mppt_incc1.VmppOut;
-		
-		mppt_pno1.Ipv = IpvRead_EMAVG; //IpvRead; 
-		mppt_pno1.Vpv = VpvRead_EMAVG; //VpvRead; 
-	
-		mppt_pno_MACRO(mppt_pno1);
-
-		//VpvRef_MPPT = mppt_pno1.VmppOut;
-		
-		if(VpvRef_MPPT<_IQ24(0.0))
-		{
-			VpvRef_MPPT=_IQ24(0.0);
-		}
-		else if(VpvRef_MPPT>_IQ24(0.9))
-		{
-			VpvRef_MPPT=_IQ24(0.9);
-		}
-		
-		VpvRef=VpvRef_MPPT;
-		
-		Run_MPPT=0;
-	}
-
-//MPPT is a slow task, the following code enables to modulate the rate at which the MPPT is called
-	
-	if(MPPT_slew==0)
-	{
-		if(MPPT_ENABLE==1)
-		{
-			Run_MPPT=1;
-			mppt_incc1.mppt_enable=1;
-		}
-		MPPT_slew=0;
-	}
-	else
-		MPPT_slew--;
-	
-	// Toggle LD2 on the control card if MPPT enabled
-	if(MPPT_ENABLE==1)
-	{
-		if(LedBlinkCnt2==0)
-			{
-				GpioDataRegs.GPATOGGLE.bit.GPIO31 = 1;	//turn on/off LD2 on the controlCARD
-				LedBlinkCnt2=1;
-			}
-		else
-			LedBlinkCnt2--;
-	}
-	//-----------------
-	//the next time CpuTimer1 'counter' reaches Period value go to B2
-	B_Task_Ptr = &B2;	
-	//-----------------
-}
-
-//----------------------------------------
-void B2(void) // Blink LED on the control CArd
-//----------------------------------------
-{
-	// Toggle LD3 on control card to show execution of code
-	if(LedBlinkCnt==0)
-	{
-		GpioDataRegs.GPBTOGGLE.bit.GPIO34 = 1;	//turn on/off LD3 on the controlCARD
-		LedBlinkCnt=4;
-	}
-	else
-		LedBlinkCnt--;
-			
-	//-----------------
-	//the next time CpuTimer1 'counter' reaches Period value go to B3
-	B_Task_Ptr = &B3;
-	//-----------------
-}
-
-//----------------------------------------
-void B3(void) // State Machine, Enable Disable Loops, User Controls  
-//----------------------------------------
-{
-	
-
-#if (INCR_BUILD == 2)
-	// Inverter State ==0 , wait for the command to start production of power
-	// Inverter State ==1 , Check if panel voltage is available, i.e. Vpv > 5V
-	//						if true enable MPPT 
-	// Inverter State ==2 , Check if Gui_Vboost>33V
-	//						enable closed voltage loop regulation and current loop regulation							
-	// Inverter State ==3, wait for stop command, if stop, trip all PWM's, shut down MPPT and return to state 0, reset all values   
-	
-	switch(PVInverterState)
-	{
-		case 0: // wait for the command to start the inverter
-				if(Gui_InvStart==1)
-				{
-					PVInverterState=1;
-					Gui_InvStart=0;
-				}	
-				break;
-		case 1: // check if PV is present
-				if(Gui_Vpv>_IQ9(3.0))
-				{
-					PVInverterState=2;
-					//Enable MPPT
-					MPPT_ENABLE=1;
-					ClearInvTrip=1;
-					InvModIndex=_IQ24(0.0);
-					pidGRANDO_Vinv.term.Fbk = VdcRef; // 30V/ 39.97
-					mppt_incc1.Stepsize = _IQ(0.02);
-				}
-			
-				if(Gui_InvStop==1)
-				{
-					PVInverterState=3;
-				}
-				break;
-		case 2: // Check if DC Bus is greater than 33V , as currently the inverter is off this woudl happen quickly
-				if(Gui_Vboost>_IQ9(31.0))
-				{
-					PVInverterState=3;
-					CloseVloopInv=1;
-					CloseIloopInv=1;
-					mppt_incc1.Stepsize = _IQ(0.005);
-				}
-				if(Gui_InvStop==1)
-				{
-					PVInverterState=3;
-				}
-				break;
-		case 3: // Wait for shut down sequence
-				if(Gui_InvStop==1)
-				{
-					// switch off MPPT and also open the loop for current and voltage
-					// the open loop index on the inverter is used to discharge the boost till it is close to the input panle voltage
-				
-					MPPT_ENABLE=0;				
-					mppt_incc1.mppt_first=1;
-					mppt_pno1.mppt_first=1;
-					
-					VpvRef=_IQ24(0.9);
-			
-					// Run the reset sequence
-					// Trip the PWM for the inverter
-					// software force the trip of inverter to disable the inverter completely
-					EALLOW;
-					EPwm1Regs.TZFRC.bit.OST=0x1;
-					EPwm2Regs.TZFRC.bit.OST=0x1;
-					EDIS;	
-					
-					// Wait for the command to be restarted 
-					PVInverterState=0;
-					
-					CloseVloopInv=0;
-					CloseIloopInv=0;
-					
-					Gui_InvStop=0;		
-					
-				}
-				
-				break;
-		default:
-				break;
-	}
-	
-#endif
-
-#if (INCR_BUILD == 3)
-
-	// Inverter State ==1 , Check grid voltage, i.e. Vrms Real > _IQ15(12) 
-	// Inverter State ==2 , Check if panel voltage is available, i.e. Vpv > 3V
-	//						if true enable MPPT							
-	// Inverter State ==3 , Check if Gui_Vboost>31V
-	//						enable closed voltage loop regulation and current loop regulation
-	// Inverter State == 4, Check if inv_Iset > 0.1 pu, Clear Inverter Trip
-	// Inverter State == 5, wait for stop command, if stop, trip all PWM's, shut down MPPT and return to state 0, reset all values   
-	
-	switch(PVInverterState)
-	{
-		case 0: // wait for the command to start the inverter
-				if(Gui_InvStart==1)
-				{
-					PVInverterState=1;
-					Gui_InvStart=0;
-				}	
-				break;
-		case 1: // once the inverter command is issued check if the grid is present
-				if(VrmsReal>_IQ15(12.0))
-				{
-					PVInverterState=2;
-					// take the PLL out of reset
-				}
-				break;
-		case 2: // AC is present, check if PV is present
-				if(Gui_Vpv>_IQ9(3.0))
-				{
-					PVInverterState=3;
-					//Enable MPPT
-					MPPT_ENABLE=1;
-					mppt_incc1.Stepsize = _IQ(0.02);
-				}
-				break;
-		case 3: // Check if DC Bus is greater than 31V , as currently the inverter is off this woudl happen quickly
-				if(Gui_Vboost>_IQ9(31.0))
-				{
-					PVInverterState=4;
-					CloseVloopInv=1;
-					CloseIloopInv=1;
-					mppt_incc1.Stepsize = _IQ(0.005);
-				}
-				break;
-		case 4: // Check if there is enough current command then only connect the grid
-				// this is for safety, as the board does not have reverse current sense, 
-				if(inv_Iset>_IQ24(0.1))
-				{
-					PVInverterState=5;
-					ClearInvTrip=1;
-				}
-				break;
-		case 5: // Wait for shut down sequence
-				if(Gui_InvStop==1)
-				{
-					Gui_InvStop=0;
-					// Run the reset sequence
-					// Trip the PWM for the inverter
-					// software force the trip of inverter to disable the inverter completely
-					EALLOW;
-					EPwm1Regs.TZFRC.bit.OST=0x1;
-					EPwm2Regs.TZFRC.bit.OST=0x1;
-					EDIS;
-					
-					MPPT_ENABLE=0;				
-					mppt_incc1.mppt_first=1;
-					mppt_pno1.mppt_first=1;
-					
-					VpvRef=_IQ24(0.9);
-					
-					// Wait for the command to be restarted 
-					PVInverterState=0;
-					
-					CloseVloopInv=0;
-					CloseIloopInv=0;
-					
-				}
-				break;
-		case 6: // wait for the power sequence
-				break;
-		default:
-				break;
-	}
-	
-	if(VrmsReal<_IQ15(10.0) && PVInverterState<3)
-	{
-		ResetPLL=1;
-	}
-	else
-		ResetPLL=0;
-		
-#endif
-	
-	if(timer1<20)
-		timer1++; 
-	
-	if(timer1==20)
-	{
-		PanelBoostConnect=1;
-		Gui_LightCommand=_IQ13(0.2);
-		timer1++;
-	}
-	
-	//-----------------
-	//the next time CpuTimer1 'counter' reaches Period value go to B4
-	B_Task_Ptr = &B1;	
-	//-----------------
-}
-
-//=================================================================================
-//	C - TASKS
-//=================================================================================
-//------------------------------------------------------
-void C1(void) 	 // Spare
-//------------------------------------------------------
-{	
-	
-    
-	//-----------------
-	//the next time CpuTimer2 'counter' reaches Period value go to C2
-	C_Task_Ptr = &C2;	
-	//-----------------
-
-}
-
-//----------------------------------------
-void C2(void)   // Update Coefficients of the loops 
-//----------------------------------------
-{
-	//Update Coefficients
-	if(UpdateCoef==1)
-	{
-	CNTL_2P2Z_CoefStruct2.b2   =Dgain_I;                            // B2
-    CNTL_2P2Z_CoefStruct2.b1   =(Igain_I-Pgain_I-Dgain_I-Dgain_I);  // B1
-    CNTL_2P2Z_CoefStruct2.b0   =(Pgain_I + Igain_I + Dgain_I);      // B0
-    UpdateCoef=0;
-	}   
-		
-	//-----------------
-	//the next time CpuTimer2 'counter' reaches Period value go to C3
-	C_Task_Ptr = &C3;	
-	//-----------------
-}
-
-//-----------------------------------------
-void C3(void)   // SPARE
-//-----------------------------------------
-{
-
-	//-----------------
-	//the next time CpuTimer2 'counter' reaches Period value go to C4
-	C_Task_Ptr = &C4;	
-	//-----------------
-}
-
-//-----------------------------------------
-void C4(void) //  SPARE
-//-----------------------------------------
-{
-	//-----------------
-	//the next time CpuTimer2 'counter' reaches Period value go to C1
-	C_Task_Ptr = &C1;	
-	//-----------------
-}
 
 // ISR for inverter 
 interrupt void Inv_ISR()
@@ -1632,6 +1071,7 @@ interrupt void Inv_ISR()
 * Begin State Defintiions
 */
 
+/**
 void Mppt_Execute(Mppt *self, Event *e) {
 
     if (e->transition == true) {
@@ -1959,13 +1399,13 @@ void Mppt_Disable(Mppt *self, Event *e) {
     }
 }
 
-
+**/
 
 /**
  * Begin Panel State Definitions
  */
 
-
+/**
 void Panel_Dashboard(Panel *self, Event *e) {
 
     if (e->transition == true) {
@@ -2096,7 +1536,7 @@ void Panel_Emulator(Panel *self, Event *e) {
             break;
     }
 }
-
+**/
 
 
 void SPI_init()

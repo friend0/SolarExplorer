@@ -9,6 +9,7 @@
 
 #include "fsm.h"
 #include "mpptFSM.h"
+#include "inverterVariables.h"
 //#include <stdio.h>
 #include <ctype.h>
 #include "stdbool.h"
@@ -31,7 +32,7 @@ void Mppt_initial(Mppt *self, Event *e) {
     _FsmTran_((Fsm *) self, &Mppt_Execute);
 }
 
-/**
+
 void Mppt_Execute(Mppt *self, Event *e) {
 
     if (e->transition == true) {
@@ -99,7 +100,7 @@ void Mppt_Execute(Mppt *self, Event *e) {
             _FsmTran_((Fsm *) self, &Mppt_Blink);
             break;
 
-        case NO_EVENT:
+        case MPPT_NO_EVENT:
             break;
 
         default:
@@ -331,7 +332,7 @@ void Mppt_StateMachine(Mppt *self, Event *e) {
             _FsmTran_((Fsm *) self, &Mppt_Execute);
             break;
 
-        case NO_EVENT:
+        case MPPT_NO_EVENT:
             break;
 
         default:;
@@ -351,14 +352,14 @@ void Mppt_Disable(Mppt *self, Event *e) {
             _FsmTran_((Fsm *) self, &Mppt_Execute);
             break;
 
-        case NO_EVENT:
+        case MPPT_NO_EVENT:
             break;
 
         default:;
             break;
     }
 }
-**/
+
 
 /**
 * @brief Used to determine the event that should be passed to the FsmDispatch function

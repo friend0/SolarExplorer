@@ -9,6 +9,7 @@
 
 #include "fsm.h"
 #include "PanelFSM.h"
+#include "inverterVariables.h"
 //#include <stdio.h>
 #include <ctype.h>
 #include "stdbool.h"
@@ -32,7 +33,7 @@ void Panel_initial(Panel *self, Event *e) {
     _FsmTran_((Fsm *) self, &Panel_Dashboard);
 }
 
-/**
+
 void Panel_Dashboard(Panel *self, Event *e) {
 
     if (e->transition == true) {
@@ -164,7 +165,7 @@ void Panel_Emulator(Panel *self, Event *e) {
     }
 }
 
-**/
+
 
 /**
 * @brief Used to determine the event that should be passed to the FsmDispatch function
