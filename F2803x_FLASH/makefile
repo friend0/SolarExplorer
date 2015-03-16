@@ -4,9 +4,10 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2
+CG_TOOL_ROOT := c:/ti/ccsv6/tools/compiler/c2000_6.2.7
 
 ORDERED_OBJS += \
+$(GEN_CMDS__FLAG) \
 "./ADC_SOC_Cnf.obj" \
 "./DSP2803x_CodeStartBranch.obj" \
 "./DSP2803x_GlobalVariableDefs.obj" \
@@ -26,7 +27,6 @@ ORDERED_OBJS += \
 "../F28035_FLASH_SolarExplorer.CMD" \
 "C:/ti/controlSUITE/libs/math/IQmath/v160/lib/IQmath.lib" \
 "../commros_28xx_c_regular.lib" \
-$(GEN_CMDS__FLAG) \
 -l"libc.a" \
 
 -include ../makefile.init
@@ -69,11 +69,11 @@ endif
 ifneq ($(strip $(C67_DEPS)),)
 -include $(C67_DEPS)
 endif
-ifneq ($(strip $(CLA_DEPS)),)
--include $(CLA_DEPS)
-endif
 ifneq ($(strip $(C??_DEPS)),)
 -include $(C??_DEPS)
+endif
+ifneq ($(strip $(CLA_DEPS)),)
+-include $(CLA_DEPS)
 endif
 ifneq ($(strip $(CPP_DEPS)),)
 -include $(CPP_DEPS)
@@ -102,9 +102,6 @@ endif
 ifneq ($(strip $(C43_DEPS)),)
 -include $(C43_DEPS)
 endif
-ifneq ($(strip $(INO_DEPS)),)
--include $(INO_DEPS)
-endif
 ifneq ($(strip $(S67_DEPS)),)
 -include $(S67_DEPS)
 endif
@@ -116,9 +113,6 @@ ifneq ($(strip $(S43_DEPS)),)
 endif
 ifneq ($(strip $(OPT_DEPS)),)
 -include $(OPT_DEPS)
-endif
-ifneq ($(strip $(PDE_DEPS)),)
--include $(PDE_DEPS)
 endif
 ifneq ($(strip $(S64_DEPS)),)
 -include $(S64_DEPS)
@@ -154,13 +148,13 @@ all: SolarExplorer_PVInverter.out
 SolarExplorer_PVInverter.out: $(OBJS) $(CMD_SRCS) $(CMD_UPPER_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: C2000 Linker'
-	"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/bin/cl2000" -v28 -ml -mt --cla_support=cla0 -g --define="_DEBUG" --define="FLASH" --define="LARGE_MODEL" --diag_warning=225 -z -m"ProjectName.map" --stack_size=0x380 --warn_sections -i"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/include" --reread_libs --xml_link_info="SolarExplorer_PVInverter_linkInfo.xml" --rom_model -o "SolarExplorer_PVInverter.out" $(ORDERED_OBJS)
+	"c:/ti/ccsv6/tools/compiler/c2000_6.2.7/bin/cl2000" -v28 -ml -mt --cla_support=cla0 -g --define="_DEBUG" --define="FLASH" --define="LARGE_MODEL" --diag_warning=225 -z -m"ProjectName.map" --stack_size=0x380 --warn_sections -i"c:/ti/ccsv6/tools/compiler/c2000_6.2.7/lib" -i"c:/ti/ccsv6/tools/compiler/c2000_6.2.7/include" --reread_libs --xml_link_info="SolarExplorer_PVInverter_linkInfo.xml" --rom_model -o "SolarExplorer_PVInverter.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 SolarExplorer_PVInverter.hex: $(EXE_OUTPUTS)
 	@echo 'Invoking: C2000 Hex Utility'
-	"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/bin/hex2000"  -o "SolarExplorer_PVInverter.hex" $(EXE_OUTPUTS__QUOTED)
+	"c:/ti/ccsv6/tools/compiler/c2000_6.2.7/bin/hex2000"  -o "SolarExplorer_PVInverter.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $@'
 	@echo ' '
 

@@ -1,50 +1,33 @@
-//----------------------------------------------------------------------------------
-//	FILE:			SolarExplorer-Main.C
-//
-//	Description:	DCDC MPPT + Inverter Project for Solar Explorer R5  
-//
-//	Version: 		1.0
-//
-//  Target:  		TMS320F2803x(PiccoloB), 
-//
-//----------------------------------------------------------------------------------
-//  Copyright Texas Instruments © 2004-2011
-//----------------------------------------------------------------------------------
-//  Revision History:
-//----------------------------------------------------------------------------------
-//  Date	  | Description / Status
-//----------------------------------------------------------------------------------
-//  Aug 15 2011 , Manish Bhardwaj, Bharathi Subharmanya
-//----------------------------------------------------------------------------------
-//
-// PLEASE READ - Useful notes about this Project
-// Although this project is made up of several files, the most important ones are:
-//	 "{ProjectName}-Main.C"	- this file
-//		- Application Initialization, Peripheral config,
-//		- Application management
-//		- Slower background code loops and Task scheduling
-//	 "{ProjectName}-DevInit_F28xxx.C
-//		- Device Initialization, e.g. Clock, PLL, WD, GPIO mapping
-//		- Peripheral clock enables
-//		- DevInit file will differ per each F28xxx device series, e.g. F280x, F2833x,
-//	 "{ProjectName}-DPL-ISR.asm
-//		- Assembly level library Macros and any cycle critical functions are found here
-//	 "{ProjectName}-Settings.h"
-//		- Global defines (settings) project selections are found here
-//		- This file is referenced by both C and ASM files.
-//	 "{ProjectName}-CLAShared.h.h"
-//		- Variable defines and header includes that are shared b/w CLA and C28x 
-//
-// Code is made up of sections, e.g. "FUNCTION PROTOTYPES", "VARIABLE DECLARATIONS" ,..etc
-//	each section has FRAMEWORK and USER areas.
-//  FRAMEWORK areas provide useful ready made "infrastructure" code which for the most part
-//	does not need modification, e.g. Task scheduling, ISR call, GUI interface support,...etc
-//  USER areas have functional example code which can be modified by USER to fit their appl.
-//
-// Code can be compiled with various build options (Incremental Builds IBx), these
-//  options are selected in file "{ProjectName}-Settings.h".  Note: "Rebuild All" compile
-//  tool bar button must be used if this file is modified.
-//----------------------------------------------------------------------------------
+/*
+* @Author: ryanarodriguez
+* @Date:   2015-01-24 18:29:34
+* @Last Modified by:   Ryan A. Rodriguez
+* @Last Modified time: 2015-01-24 19:49:14
+* @File			SolarExplorer-Main.C
+* @Brief:	DCDC MPPT + Inverter Project for Solar Explorer R5
+*                                         ____
+*              |         | ``..     ..'' |    ~.    |`````````, | |``````.
+*              |_________|     ``.''     |____.'_   |'''|'''''  | |       |
+*              |         |       |       |       ~. |    `.     | |       |
+*              |         |       |       |_______.' |      `.   | |......'
+*                                  ____                                 ____
+* | |..          | `.           .' |            |`````````, `````|````` |            |`````````,
+* | |  ``..      |   `.       .'   |______      |'''|'''''       |      |______      |'''|'''''
+* | |      ``..  |     `.   .'     |            |    `.          |      |            |    `.
+* | |          ``|       `.'       |___________ |      `.        |      |___________ |      `.
+*
+*                                 ..'''' |``````.  |`````````,
+*                              .''       |       | |'''''''''
+*                           ..'          |       | |
+*                     ....''             |......'  |
+*
+* This project is the development implemntation of Dr. Ricardo Sanfelice and Jun Chai's hybrid control
+* algorithm for steering the trajectory of a power inverter output to, and holding it within a desired
+* tracking band.
+*
+* @TeamMembers: Ryan Rodriguez, Ben Chainey, Lucas Adams
+* @Email: ryarodri@ucsc.edu, bchainey@ucsc.edu, lhadams@ucsc.edu
+*/
 
 #include "SolarExplorer-Includes.h"
 #include "stdbool.h"
