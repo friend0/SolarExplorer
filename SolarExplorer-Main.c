@@ -59,6 +59,8 @@ interrupt void spiRxFifoIsr(void);
 
 void SPI_init();
 
+StateVariable state;
+
 //-------------------------------- DPLIB --------------------------------------------
 void PWM_1ch_UpDwnCntCompl_CNF(int16 n, int16 period, int16 mode, int16 phase);
 void ADC_SOC_CNF(int ChSel[], int Trigsel[], int ACQPS[], int IntChSel, int mode);
@@ -90,6 +92,7 @@ int     ACQPS[16] =   {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
 
 //---------------------L------------------------------------------------------
 // Used to indirectly access all EPWM modules
+
 volatile struct EPWM_REGS *ePWM[] = 
  				  { &EPwm1Regs,			//intentional: (ePWM[0] not used)
 				  	&EPwm1Regs,
@@ -117,6 +120,7 @@ volatile struct COMP_REGS *Comp[] =
 					&Comp3Regs
 					#endif 
 				  };
+
 // ---------------------------------- USER -----------------------------------------
 // ---------------------------- DPLIB Net Pointers ---------------------------------
 // Declare net pointers that are used to connect the DP Lib Macros  here 
@@ -305,7 +309,7 @@ Uint16 VloopTicker=0;
 
 Uint16 ZCDDetect=0;
 int16 sine_prev=0;
-         
+
 Inverter inverter;
 HBridge hBridge;
 Mppt mppt;
@@ -845,683 +849,6 @@ void main(void)
 	}
 } //END MAIN CODE
 
-
-
-//=================================================================================
-//	STATE-MACHINE SEQUENCING AND SYNCRONIZATION
-//=================================================================================
-
-
-// ISR for inverter 
-interrupt void Inv_ISR()
-{
-	
-	EINT;
-//-------------------------------------------------------------------
-// Inverter State execution
-//-------------------------------------------------------------------
-	
-	VrmsReal = _IQ15mpy (KvInv, sine_mainsV.Vrms); 		    				
-
-//-----------------------------------------------------------------------------------------
-#if (INCR_BUILD == 1 ) // Current command is fixed 	
-//-----------------------------------------------------------------------------------------			
-	// frequency generation using Sine Gen function
-	sgen.calc(&sgen);
-	InvSine     = sgen.out1;
-	
-	if (ClearInvTrip==1)
-	{
-		EALLOW;
-		EPwm1Regs.TZCLR.bit.OST=0x1;
-		EPwm2Regs.TZCLR.bit.OST=0x1;
-		EDIS;
-		ClearInvTrip=0;
-	}  				
-	
-#endif // (INCR_BUILD == 1)
-
-//-----------------------------------------------------------------------------------------
-#if (INCR_BUILD == 2) 	// determine the current command 
-//-----------------------------------------------------------------------------------------			
-	// frequency generation using Sine Gen function
-	sgen.calc(&sgen);
-	InvSine     = sgen.out1;
-	
-	//  Connect inputs of the PID_REG3 module and call the PID IQ controller
-
-	//	Voltage loop 		    
-
-	pidGRANDO_Vinv.term.Ref = VboostRead; //Ref=VDC/sqrt(2) at full modulation index
-	
-	if((sine_prev<=0)&&(sgen.out1>0))
-	{
-		ZCDDetect=1;
-	}
-	if((sine_prev>=0)&&(sgen.out1<0))
-	{
-		ZCDDetect=1;
-	}
-	
-	sine_prev=sgen.out1;		
-	
-	if ( ClearInvTrip==1 && ZCDDetect==1 )
-	{
-		EALLOW;
-		EPwm1Regs.TZCLR.bit.OST=0x1;
-		EPwm2Regs.TZCLR.bit.OST=0x1;
-		EDIS;
-		ClearInvTrip=0;
-	}
-	
-	if ((CloseVloopInv==1) && (ZCDDetect==1))	
-	{
-		PID_GR_MACRO(pidGRANDO_Vinv);
-		inv_Iset=pidGRANDO_Vinv.term.Out;
-		VloopTicker++;
-		ZCDDetect=0;
-	}
-#endif // (INCR_BUILD == 2)
-
-//-----------------------------------------------------------------------------------------
-#if (INCR_BUILD == 3) 	// determine the current command
-//-----------------------------------------------------------------------------------------
-	// PLL Start			
-	Vac_in=(long)((long)Vac_FB<<9)-Offset_Volt;	// shift to convert to Q21
-	
-	spll1.AC_input=Vac_in>>1;
-	
-	SPLL_1ph_MACRO(spll1);
-	
-	InvSine     = (long)(spll1.sin[0])>>6; // InvSine is in Q15
-			
-	//	Voltage loop 		    
-	pidGRANDO_Vinv.term.Fbk = VdcRef; // 30V/ 39.97
-	pidGRANDO_Vinv.term.Ref = VboostRead; //Ref=VDC/sqrt(2) at full modulation index
-			
-	if (CloseVloopInv==1 && sine_mainsV.ZCD==1)
-	{
-		PID_GR_MACRO(pidGRANDO_Vinv);
-		inv_Iset=pidGRANDO_Vinv.term.Out;
-	}
-
-	if (ResetPLL==1)
-	{
-		SPLL_1ph_init(60,_IQ21(0.00005),&spll1);	// Q20
-		ResetPLL=0;
-	}
-			
-	if (sine_mainsV.ZCD==1 && ClearInvTrip==1)
-	{
-		EALLOW;
-		EPwm1Regs.TZCLR.bit.OST=0x1;
-		EPwm2Regs.TZCLR.bit.OST=0x1;
-		EDIS;
-		ClearInvTrip=0;
-	}  					
-#endif // (INCR_BUILD == 3)
-			  
-	inv_ref_cur_inst = _IQ24mpy(inv_Iset, (((int32) (InvSine)) << 9)) ;
-	
-	inv_meas_cur_lleg1_inst=(((int32) Ileg1_fb) <<12)-_IQ24(0.5);
-	inv_meas_cur_lleg2_inst=(((int32) Ileg2_fb) <<12)-_IQ24(0.5);
-		
-	inv_meas_cur_diff_inst = (inv_meas_cur_lleg1_inst - inv_meas_cur_lleg2_inst)<<1;
-	
-	inv_meas_vol_inst =((long)((long)Vac_FB<<12)-_IQ24(0.5))<<1;	// shift to convert to Q24
-		
-	pidGRANDO_Iinv.term.Fbk=inv_meas_cur_diff_inst;
-	pidGRANDO_Iinv.term.Ref=inv_ref_cur_inst;
-			  	
-	if(CloseIloopInv==1)
-	{
-		DINT;
-		PID_GR_MACRO(pidGRANDO_Iinv);
-		EINT;
-	}
-			
-	// Apply inverter o/p correction
-	if (CloseIloopInv ==0)
-	{
-		PWMDRV_1phInv_unipolar(1,_IQ15(1500),_IQ24mpy((InvSine<<9),InvModIndex)); 
-	}
-	else
-	{
-		PWMDRV_1phInv_unipolar(1,_IQ15(1500),pidGRANDO_Iinv.term.Out); 			
-	} 
-		
-// ------------------------------------------------------------------------------
-//    Connect inputs to the sine analyzer block , compute RMS, Freq, ZCD
-// ------------------------------------------------------------------------------
-	sine_mainsV.Vin =(long)((long)Vac_FB<<3)-_IQ15(0.5);	
-	sine_mainsV.Vin = sine_mainsV.Vin <<1;
-	SineAnalyzer_diff_MACRO (sine_mainsV);
-	
-
-// ------------------------------------------------------------------------------
-//    Connect inputs of the Datalogger module 
-// ------------------------------------------------------------------------------
-
-#if (INCR_BUILD == 2 || INCR_BUILD == 1)
-    DlogCh1 = (Uint16)sgen.out1;
-#elif (INCR_BUILD == 3)
-	DlogCh1 = (Uint16)_IQtoIQ15(spll1.sin[0]<<3);  //PLL is in Q21, shift left by 3 to make it Q24
-#endif
-
-	DlogCh2 = (int16)_IQtoIQ15(inv_meas_vol_inst);
-	DlogCh3 = (int16)_IQtoIQ15(inv_meas_cur_diff_inst);
-	DlogCh4 = (int16)_IQtoIQ15(inv_ref_cur_inst);
-	
-    dlog.update(&dlog);
-
-// ------------------------------------------------------------------------------
-//    Connect inputs of the PWMDAC module 
-// ------------------------------------------------------------------------------	
-#if (INCR_BUILD == 2 || INCR_BUILD == 1)
-    PwmDacCh1 = (int16)(sgen.out1);
-#elif (INCR_BUILD == 3)
-	PwmDacCh1 = (int16)_IQtoIQ15(spll1.sin[0]<<3);  //PLL is in Q21
-#endif
-    PwmDacCh2 = (int16)_IQtoIQ15(inv_meas_vol_inst);  
-    PwmDacCh3 = (int16)_IQtoIQ15(inv_meas_cur_diff_inst);
-    PwmDacCh4 = (int16)_IQtoIQ15(inv_ref_cur_inst);
-    			
-// ------------------------------------------------------------------------------
-//    Call the PWMDAC update macro.
-// ------------------------------------------------------------------------------
-	PWMDAC_MACRO(pwmdac1)
-			        		
-#ifdef FLASH
-	//update commros data logger probe 
-	Datalogger(&commros.m_datalogger,1);
-#endif 
-	
-	//-------------------------------------------------------------------
-	//			 Reinitialize for next ADC sequence 
-	//-------------------------------------------------------------------
-	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
-	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
-	//-------------------------------------------------------------------
-	
-	GpioDataRegs.GPACLEAR.bit.GPIO22 = 1;	// Clear the pin
-
-  	return;
-  	
-}
-
-
-/**
-* Begin State Defintiions
-*/
-
-/**
-void Mppt_Execute(Mppt *self, Event *e) {
-
-    if (e->transition == true) {
-    	if(Run_MPPT==1)
-    	{
-    		// MPPT routine
-    		mppt_incc1.Ipv = IpvRead_EMAVG; //IpvRead;
-    		mppt_incc1.Vpv = VpvRead_EMAVG; //VpvRead;
-
-    		mppt_incc_MACRO(mppt_incc1);
-
-    		VpvRef_MPPT = mppt_incc1.VmppOut;
-
-    		mppt_pno1.Ipv = IpvRead_EMAVG; //IpvRead;
-    		mppt_pno1.Vpv = VpvRead_EMAVG; //VpvRead;
-
-    		mppt_pno_MACRO(mppt_pno1);
-
-    		//VpvRef_MPPT = mppt_pno1.VmppOut;
-
-    		if(VpvRef_MPPT<_IQ24(0.0))
-    		{
-    			VpvRef_MPPT=_IQ24(0.0);
-    		}
-    		else if(VpvRef_MPPT>_IQ24(0.9))
-    		{
-    			VpvRef_MPPT=_IQ24(0.9);
-    		}
-
-    		VpvRef=VpvRef_MPPT;
-
-    		Run_MPPT=0;
-    	}
-
-    //MPPT is a slow task, the following code enables to modulate the rate at which the MPPT is called
-
-    	if(MPPT_slew==0)
-    	{
-    		if(MPPT_ENABLE==1)
-    		{
-    			Run_MPPT=1;
-    			mppt_incc1.mppt_enable=1;
-    		}
-    		MPPT_slew=0;
-    	}
-    	else
-    		MPPT_slew--;
-
-    	// Toggle LD2 on the control card if MPPT enabled
-    	if(MPPT_ENABLE==1)
-    	{
-    		if(LedBlinkCnt2==0)
-    			{
-    				GpioDataRegs.GPATOGGLE.bit.GPIO31 = 1;	//turn on/off LD2 on the controlCARD
-    				LedBlinkCnt2=1;
-    			}
-    		else
-    			LedBlinkCnt2--;
-    	}
-        e->transition = false;
-    }
-
-    switch (e->signal) {
-        case TIMER_MPPT:
-            _FsmTran_((Fsm *) self, &Mppt_Blink);
-            break;
-
-        case MPPT_NO_EVENT:
-            break;
-
-        default:
-            //_FsmTran_((Fsm *) self, &Mppt_Blink);
-            break;
-    }
-}
-
-void Mppt_Blink(Mppt *self, Event *e) {
-
-    if (e->transition == true) {
-    	// Toggle LD3 on control card to show execution of code
-    	if(LedBlinkCnt==0)
-    	{
-    		GpioDataRegs.GPBTOGGLE.bit.GPIO34 = 1;	//turn on/off LD3 on the controlCARD
-    		LedBlinkCnt=4;
-    	}
-    	else
-    		LedBlinkCnt--;
-		e->transition = false;
-    }
-
-    switch (e->signal) {
-        case TIMER_MPPT:
-            _FsmTran_((Fsm *) self, &Mppt_StateMachine);
-            break;
-        default:
-            //_FsmTran_((Fsm *) self, &Mppt_StateMachine);
-            break;
-    }
-}
-
-void Mppt_StateMachine(Mppt *self, Event *e) {
-
-    if (e->transition == true) {
-		#if (INCR_BUILD == 2)
-			// Inverter State ==0 , wait for the command to start production of power
-			// Inverter State ==1 , Check if panel voltage is available, i.e. Vpv > 5V
-			//						if true enable MPPT
-			// Inverter State ==2 , Check if Gui_Vboost>33V
-			//						enable closed voltage loop regulation and current loop regulation
-			// Inverter State ==3, wait for stop command, if stop, trip all PWM's, shut down MPPT and return to state 0, reset all values
-
-			switch(PVInverterState)
-			{
-				case 0: // wait for the command to start the inverter
-						if(Gui_InvStart==1)
-						{
-							PVInverterState=1;
-							Gui_InvStart=0;
-						}
-						break;
-				case 1: // check if PV is present
-						if(Gui_Vpv>_IQ9(3.0))
-						{
-							PVInverterState=2;
-							//Enable MPPT
-							MPPT_ENABLE=1;
-							ClearInvTrip=1;
-							InvModIndex=_IQ24(0.0);
-							pidGRANDO_Vinv.term.Fbk = VdcRef; // 30V/ 39.97
-							mppt_incc1.Stepsize = _IQ(0.02);
-						}
-
-						if(Gui_InvStop==1)
-						{
-							PVInverterState=3;
-						}
-						break;
-				case 2: // Check if DC Bus is greater than 33V , as currently the inverter is off this woudl happen quickly
-						if(Gui_Vboost>_IQ9(31.0))
-						{
-							PVInverterState=3;
-							CloseVloopInv=1;
-							CloseIloopInv=1;
-							mppt_incc1.Stepsize = _IQ(0.005);
-						}
-						if(Gui_InvStop==1)
-						{
-							PVInverterState=3;
-						}
-						break;
-				case 3: // Wait for shut down sequence
-						if(Gui_InvStop==1)
-						{
-							// switch off MPPT and also open the loop for current and voltage
-							// the open loop index on the inverter is used to discharge the boost till it is close to the input panle voltage
-
-							MPPT_ENABLE=0;
-							mppt_incc1.mppt_first=1;
-							mppt_pno1.mppt_first=1;
-
-							VpvRef=_IQ24(0.9);
-
-							// Run the reset sequence
-							// Trip the PWM for the inverter
-							// software force the trip of inverter to disable the inverter completely
-							EALLOW;
-							EPwm1Regs.TZFRC.bit.OST=0x1;
-							EPwm2Regs.TZFRC.bit.OST=0x1;
-							EDIS;
-
-							// Wait for the command to be restarted
-							PVInverterState=0;
-
-							CloseVloopInv=0;
-							CloseIloopInv=0;
-
-							Gui_InvStop=0;
-
-						}
-
-						break;
-				default:
-						break;
-			}
-
-		#endif
-
-		#if (INCR_BUILD == 3)
-
-			// Inverter State ==1 , Check grid voltage, i.e. Vrms Real > _IQ15(12)
-			// Inverter State ==2 , Check if panel voltage is available, i.e. Vpv > 3V
-			//						if true enable MPPT
-			// Inverter State ==3 , Check if Gui_Vboost>31V
-			//						enable closed voltage loop regulation and current loop regulation
-			// Inverter State == 4, Check if inv_Iset > 0.1 pu, Clear Inverter Trip
-			// Inverter State == 5, wait for stop command, if stop, trip all PWM's, shut down MPPT and return to state 0, reset all values
-
-			switch(PVInverterState)
-			{
-				case 0: // wait for the command to start the inverter
-						if(Gui_InvStart==1)
-						{
-							PVInverterState=1;
-							Gui_InvStart=0;
-						}
-						break;
-				case 1: // once the inverter command is issued check if the grid is present
-						if(VrmsReal>_IQ15(12.0))
-						{
-							PVInverterState=2;
-							// take the PLL out of reset
-						}
-						break;
-				case 2: // AC is present, check if PV is present
-						if(Gui_Vpv>_IQ9(3.0))
-						{
-							PVInverterState=3;
-							//Enable MPPT
-							MPPT_ENABLE=1;
-							mppt_incc1.Stepsize = _IQ(0.02);
-						}
-						break;
-				case 3: // Check if DC Bus is greater than 31V , as currently the inverter is off this woudl happen quickly
-						if(Gui_Vboost>_IQ9(31.0))
-						{
-							PVInverterState=4;
-							CloseVloopInv=1;
-							CloseIloopInv=1;
-							mppt_incc1.Stepsize = _IQ(0.005);
-						}
-						break;
-				case 4: // Check if there is enough current command then only connect the grid
-						// this is for safety, as the board does not have reverse current sense,
-						if(inv_Iset>_IQ24(0.1))
-						{
-							PVInverterState=5;
-							ClearInvTrip=1;
-						}
-						break;
-				case 5: // Wait for shut down sequence
-						if(Gui_InvStop==1)
-						{
-							Gui_InvStop=0;
-							// Run the reset sequence
-							// Trip the PWM for the inverter
-							// software force the trip of inverter to disable the inverter completely
-							EALLOW;
-							EPwm1Regs.TZFRC.bit.OST=0x1;
-							EPwm2Regs.TZFRC.bit.OST=0x1;
-							EDIS;
-
-							MPPT_ENABLE=0;
-							mppt_incc1.mppt_first=1;
-							mppt_pno1.mppt_first=1;
-
-							VpvRef=_IQ24(0.9);
-
-							// Wait for the command to be restarted
-							PVInverterState=0;
-
-							CloseVloopInv=0;
-							CloseIloopInv=0;
-
-						}
-						break;
-				case 6: // wait for the power sequence
-						break;
-				default:
-						break;
-			}
-
-			if(VrmsReal<_IQ15(10.0) && PVInverterState<3)
-			{
-				ResetPLL=1;
-			}
-			else
-				ResetPLL=0;
-
-		#endif
-
-			if(timer1<20)
-				timer1++;
-
-			if(timer1==20)
-			{
-				PanelBoostConnect=1;
-				Gui_LightCommand=_IQ13(0.2);
-				timer1++;
-			}
-
-			//reset transition flag
-			e->transition = false;
-    }
-
-    switch (e->signal) {
-        case TIMER_MPPT:
-            _FsmTran_((Fsm *) self, &Mppt_Execute);
-            break;
-
-        case MPPT_NO_EVENT:
-            break;
-
-        default:;
-            break;
-    }
-}
-
-// @TODO: Figure out whta needs to be done with this. Dont think we need a seperate state for MPPT disable, this i smore on the macro level...
-void Mppt_Disable(Mppt *self, Event *e) {
-
-    if (e->transition == true) {
-			e->transition = false;
-    }
-
-    switch (e->signal) {
-        case EXECUTE:
-            _FsmTran_((Fsm *) self, &Mppt_Execute);
-            break;
-
-        case MPPT_NO_EVENT:
-            break;
-
-        default:;
-            break;
-    }
-}
-
-**/
-
-/**
- * Begin Panel State Definitions
- */
-
-/**
-void Panel_Dashboard(Panel *self, Event *e) {
-
-    if (e->transition == true) {
-	// Dashboard measurement calculated by:
-	//	Gui_Vbout = VboutAvg * K_Vbout, where VboutAvg = sum of 8 Vbout samples
-	//	Gui_Iinb = IinbAvg * K_Iinb, where IinbAvg = sum of 8 Iinb samples
-
-		HistPtr++;
-		if (HistPtr >= HistorySize)	HistPtr = 0;
-
-		// BoxCar Averages - Input Raw samples into BoxCar arrays
-		//----------------------------------------------------------------
-		Hist_Vpv[HistPtr]    = 	Vpv_FB;
-		Hist_Ipv[HistPtr]    = 	Ipv_FB;
-		Hist_Vboost[HistPtr] = 	Vboost_FB;
-		Hist_Light[HistPtr]  =  LIGHT_FB;
-
-		temp_Scratch=0;
-		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Vpv[i];
-		Gui_Vpv = ( (long) temp_Scratch * (long) K_Vpv ) >> 15;
-
-		temp_Scratch=0;
-		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Ipv[i];
-		Gui_Ipv = ( (long) temp_Scratch * (long) K_Ipv ) >> 15;
-
-		temp_Scratch=0;
-		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Vboost[i];
-		Gui_Vboost = ( (long) temp_Scratch * (long) K_Vboost ) >> 15;
-
-		temp_Scratch=0;
-		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Light[i];
-		Gui_Light = ( (long) temp_Scratch * (long) K_Light ) >> 15;
-
-		Gui_LightRatio =_IQ13mpy(Gui_Light,LIGHTSENSOR_MAX_INV);
-
-		Gui_PanelPower=_IQ9mpy(((Gui_Vpv-_IQ9(0.20))>_IQ9(0.0)?(Gui_Vpv-_IQ9(0.20)):_IQ9(0.0)),(((long)(Gui_Ipv-_IQ12(0.03))>>3)>_IQ9(0.0)?((long)(Gui_Ipv-_IQ12(0.03))>>3):_IQ9(0.0)));
-
-		if(Gui_PanelPower_Theoretical!=0)
-			Gui_MPPTTrackingEff =_IQ9mpy(_IQ9div(Gui_PanelPower,Gui_PanelPower_Theoretical),_IQ9(100.0));
-		else
-			Gui_MPPTTrackingEff=0;
-
-        e->transition = false;
-    }
-
-    switch (e->signal) {
-        case TIMER_PANEL:
-            _FsmTran_((Fsm *) self, &Panel_Connect);
-            break;
-
-        case NO_EVENT_PANEL:
-            break;
-
-        default:
-            break;
-    }
-}
-
-void Panel_Connect(Panel *self, Event *e) {
-
-    if (e->transition == true) {
-
-    	if(PanelBoostConnect==0)
-    	{
-    		GpioDataRegs.GPACLEAR.bit.GPIO12=0x1;
-    	}
-    	else if (PanelBoostConnect==1)
-    	{
-    		GpioDataRegs.GPASET.bit.GPIO12=0x1;
-    	}
-
-        e->transition = false;
-    }
-
-    switch (e->signal) {
-
-        case TIMER_PANEL:
-            _FsmTran_((Fsm *) self, &Panel_Emulator);
-            break;
-
-        case NO_EVENT_PANEL:
-            break;
-
-        default:
-            break;
-
-    }
-}
-
-void Panel_Emulator(Panel *self, Event *e) {
-
-    if (e->transition == true) {
-    	if(Gui_LightCommand != Gui_LightCommand_Prev)
-    	{
-    	 sdata[0]=1; //1 indicates it is the command for the light value
-
-    	 // saturate the light command to 0.8 because of power capacity of the DC power supply shipped with the kit
-    	 if(Gui_LightCommand>_IQ13(0.8))
-    	 	Gui_LightCommand=_IQ13(0.8);
-
-    	  if(Gui_LightCommand<_IQ13(0.0))
-    	 	Gui_LightCommand=_IQ13(0.0);
-
-    	 sdata[1]=Gui_LightCommand;	// Value of light that needs to be sent to the emulator
-
-    	 Gui_LightCommand_Prev=Gui_LightCommand;
-
-    	 SpibRegs.SPITXBUF=sdata[0];      // Send data
-    	 SpibRegs.SPITXBUF=sdata[1];
-
-    	 SpiaRegs.SPIFFTX.bit.TXFIFO=1;
-
-    	 Gui_PanelPower_Theoretical=_IQ9mpy(_IQ9(36.02),((long)Gui_LightCommand>>4)); // Panel Max power * Luminance Ratio
-
-    	}
-    	e->transition = false;
-    }
-
-    switch (e->signal) {
-        case TIMER_PANEL:
-            _FsmTran_((Fsm *) self, &Panel_Dashboard);
-            break;
-
-        case NO_EVENT_PANEL:
-            break;
-
-        default:;
-            break;
-    }
-}
-**/
-
-
 void SPI_init()
 {
 	// Initialize SPI FIFO registers
@@ -1556,6 +883,243 @@ void SPI_init()
    SpibRegs.SPIPRI.bit.FREE=1; 
 }
 
+static int i = 0;
+int plotArray[PlotSize];
+
+// ISR for inverter
+interrupt void Inv_ISR()
+{
+
+#ifdef PWM_MODE
+
+		EINT;
+	//-------------------------------------------------------------------
+	// Inverter State execution
+	//-------------------------------------------------------------------
+
+		VrmsReal = _IQ15mpy (KvInv, sine_mainsV.Vrms);
+
+	//-----------------------------------------------------------------------------------------
+	#if (INCR_BUILD == 1 ) // Current command is fixed
+	//-----------------------------------------------------------------------------------------
+		// frequency generation using Sine Gen function
+		sgen.calc(&sgen);
+		InvSine     = sgen.out1;
+
+		if (ClearInvTrip==1)
+		{
+			EALLOW;
+			EPwm1Regs.TZCLR.bit.OST=0x1;
+			EPwm2Regs.TZCLR.bit.OST=0x1;
+			EDIS;
+			ClearInvTrip=0;
+		}
+
+	#endif // (INCR_BUILD == 1)
+
+	//-----------------------------------------------------------------------------------------
+	#if (INCR_BUILD == 2) 	// determine the current command
+	//-----------------------------------------------------------------------------------------
+		// frequency generation using Sine Gen function
+		sgen.calc(&sgen);
+		InvSine     = sgen.out1;
+
+		//  Connect inputs of the PID_REG3 module and call the PID IQ controller
+
+		//	Voltage loop
+
+		pidGRANDO_Vinv.term.Ref = VboostRead; //Ref=VDC/sqrt(2) at full modulation index
+
+		if((sine_prev<=0)&&(sgen.out1>0))
+		{
+			ZCDDetect=1;
+		}
+		if((sine_prev>=0)&&(sgen.out1<0))
+		{
+			ZCDDetect=1;
+		}
+
+		sine_prev=sgen.out1;
+
+		if ( ClearInvTrip==1 && ZCDDetect==1 )
+		{
+			EALLOW;
+			EPwm1Regs.TZCLR.bit.OST=0x1;
+			EPwm2Regs.TZCLR.bit.OST=0x1;
+			EDIS;
+			ClearInvTrip=0;
+		}
+
+		if ((CloseVloopInv==1) && (ZCDDetect==1))
+		{
+			PID_GR_MACRO(pidGRANDO_Vinv);
+			inv_Iset=pidGRANDO_Vinv.term.Out;
+			VloopTicker++;
+			ZCDDetect=0;
+		}
+	#endif // (INCR_BUILD == 2)
+
+	//-----------------------------------------------------------------------------------------
+	#if (INCR_BUILD == 3) 	// determine the current command
+	//-----------------------------------------------------------------------------------------
+		// PLL Start
+		Vac_in=(long)((long)Vac_FB<<9)-Offset_Volt;	// shift to convert to Q21
+
+		spll1.AC_input=Vac_in>>1;
+
+		SPLL_1ph_MACRO(spll1);
+
+		InvSine     = (long)(spll1.sin[0])>>6; // InvSine is in Q15
+
+		//	Voltage loop
+		pidGRANDO_Vinv.term.Fbk = VdcRef; // 30V/ 39.97
+		pidGRANDO_Vinv.term.Ref = VboostRead; //Ref=VDC/sqrt(2) at full modulation index
+
+		if (CloseVloopInv==1 && sine_mainsV.ZCD==1)
+		{
+			PID_GR_MACRO(pidGRANDO_Vinv);
+			inv_Iset=pidGRANDO_Vinv.term.Out;
+		}
+
+		if (ResetPLL==1)
+		{
+			SPLL_1ph_init(60,_IQ21(0.00005),&spll1);	// Q20
+			ResetPLL=0;
+		}
+
+		if (sine_mainsV.ZCD==1 && ClearInvTrip==1)
+		{
+			EALLOW;
+			EPwm1Regs.TZCLR.bit.OST=0x1;
+			EPwm2Regs.TZCLR.bit.OST=0x1;
+			EDIS;
+			ClearInvTrip=0;
+		}
+	#endif // (INCR_BUILD == 3)
+
+		inv_ref_cur_inst = _IQ24mpy(inv_Iset, (((int32) (InvSine)) << 9)) ;
+
+		inv_meas_cur_lleg1_inst=(((int32) Ileg1_fb) <<12)-_IQ24(0.5);
+		inv_meas_cur_lleg2_inst=(((int32) Ileg2_fb) <<12)-_IQ24(0.5);
+
+		inv_meas_cur_diff_inst = (inv_meas_cur_lleg1_inst - inv_meas_cur_lleg2_inst)<<1;
+
+		inv_meas_vol_inst =((long)((long)Vac_FB<<12)-_IQ24(0.5))<<1;	// shift to convert to Q24
+
+		pidGRANDO_Iinv.term.Fbk=inv_meas_cur_diff_inst;
+		pidGRANDO_Iinv.term.Ref=inv_ref_cur_inst;
+
+		if(CloseIloopInv==1)
+		{
+			DINT;
+			PID_GR_MACRO(pidGRANDO_Iinv);
+			EINT;
+		}
+
+		// Apply inverter o/p correction
+		if (CloseIloopInv ==0)
+		{
+			PWMDRV_1phInv_unipolar(1,_IQ15(1500),_IQ24mpy((InvSine<<9),InvModIndex));
+		}
+		else
+		{
+			PWMDRV_1phInv_unipolar(1,_IQ15(1500),pidGRANDO_Iinv.term.Out);
+		}
+
+	// ------------------------------------------------------------------------------
+	//    Connect inputs to the sine analyzer block , compute RMS, Freq, ZCD
+	// ------------------------------------------------------------------------------
+		sine_mainsV.Vin =(long)((long)Vac_FB<<3)-_IQ15(0.5);
+		sine_mainsV.Vin = sine_mainsV.Vin <<1;
+		SineAnalyzer_diff_MACRO (sine_mainsV);
+
+
+	// ------------------------------------------------------------------------------
+	//    Connect inputs of the Datalogger module
+	// ------------------------------------------------------------------------------
+
+	#if (INCR_BUILD == 2 || INCR_BUILD == 1)
+	    DlogCh1 = (Uint16)sgen.out1;
+	#elif (INCR_BUILD == 3)
+		DlogCh1 = (Uint16)_IQtoIQ15(spll1.sin[0]<<3);  //PLL is in Q21, shift left by 3 to make it Q24
+	#endif
+
+		DlogCh2 = (int16)_IQtoIQ15(inv_meas_vol_inst);
+		DlogCh3 = (int16)_IQtoIQ15(inv_meas_cur_diff_inst);
+		DlogCh4 = (int16)_IQtoIQ15(inv_ref_cur_inst);
+
+	    dlog.update(&dlog);
+
+	// ------------------------------------------------------------------------------
+	//    Connect inputs of the PWMDAC module
+	// ------------------------------------------------------------------------------
+	#if (INCR_BUILD == 2 || INCR_BUILD == 1)
+	    PwmDacCh1 = (int16)(sgen.out1);
+	#elif (INCR_BUILD == 3)
+		PwmDacCh1 = (int16)_IQtoIQ15(spll1.sin[0]<<3);  //PLL is in Q21
+	#endif
+	    PwmDacCh2 = (int16)_IQtoIQ15(inv_meas_vol_inst);
+	    PwmDacCh3 = (int16)_IQtoIQ15(inv_meas_cur_diff_inst);
+	    PwmDacCh4 = (int16)_IQtoIQ15(inv_ref_cur_inst);
+
+	// ------------------------------------------------------------------------------
+	//    Call the PWMDAC update macro.
+	// ------------------------------------------------------------------------------
+		PWMDAC_MACRO(pwmdac1)
+
+	#ifdef FLASH
+		//update commros data logger probe
+		Datalogger(&commros.m_datalogger,1);
+	#endif
+
+		//-------------------------------------------------------------------
+		//			 Reinitialize for next ADC sequence
+		//-------------------------------------------------------------------
+		PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
+		AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
+		//-------------------------------------------------------------------
+
+		GpioDataRegs.GPACLEAR.bit.GPIO22 = 1;	// Clear the pin
+
+#elif HYBRID_MODE
+
+	/**
+	 * Things to determine about the state of the system:
+	 * - Current through the inductor, voltage across the capacitor
+	 * - Phase: determine switching regions based on phase, i.e. M1, M2, Si, So
+	 */
+
+	Vac_in=(long)((long)Vac_FB<<9)-Offset_Volt;	// shift to convert to Q21
+	inv_ref_cur_inst = _IQ24mpy(inv_Iset, (((int32) (InvSine)) << 9)) ;
+
+	inv_meas_cur_lleg1_inst=(((int32) Ileg1_fb) <<12)-_IQ24(0.5);
+	inv_meas_cur_lleg2_inst=(((int32) Ileg2_fb) <<12)-_IQ24(0.5);
+
+	inv_meas_cur_diff_inst = (inv_meas_cur_lleg1_inst - inv_meas_cur_lleg2_inst)<<1;
+
+	inv_meas_vol_inst =((long)((long)Vac_FB<<12)-_IQ24(0.5))<<1;	// shift to convert to Q24
+
+	//phase = atan(inv_meas_vol_inst, inv_meas_cur_diff_inst);
+	//updateState(state, inv_meas_cur_diff_inst, inv_meas_vol_inst, phase);
+
+	/**
+	 * Based on current state, call transition function
+	 * Do this by:
+	 * a) creating an event when determination is made, calling transition function at end of decision logic
+	 * b) call transition function with state variable as parameter
+	 */
+
+	hBridgeEvent hBridgeEvent;
+	hBridgeEvent.code = 'T';
+	panelEvent.super_.transition = true;
+	returner = PanelTransitionFunction(panel, &panelEvent);
+	FsmDispatch((Fsm *)&hBridge, (Event *)&hBridgeEvent);  //dispatch
+	;
+#endif
+
+  	return;
+
+}
 
 
 

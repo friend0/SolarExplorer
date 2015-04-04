@@ -38,6 +38,7 @@
 //----------------------------------------------------------------------------------
 //Add any system specific setting below
 #define HistorySize 8
+#define PlotSize 64
 //#define DLOG_SIZE   200
 
 #define Isqrt2 _IQ24(0.70710678)	// 1/sqrt(2)

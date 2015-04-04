@@ -34,12 +34,28 @@
 	#define VL_FB			AdcResult.ADCRESULT10
 	#define LIGHT_FB		AdcResult.ADCRESULT11
 
+extern int16	VTimer0[4];					// Virtual Timers slaved off CPU Timer 0
+extern int16	VTimer1[4];					// Virtual Timers slaved off CPU Timer 1
+extern int16	VTimer2[4];					// Virtual Timers slaved off CPU Timer 2
+
 // Used for ADC Configuration
 extern int 	ChSel[16];
 extern int	TrigSel[16];
 extern int  ACQPS[16];
 
-//---------------------------------------------------------------------------
+
+/**
+ * Struct for holding state of RLC filter
+ */
+typedef struct {
+	/**
+	 * Will need to be chosen for proper Q values in IQmath
+	 **/
+	int current, voltage, phase;
+}StateVariable;
+
+void updateState(StateVariable *s, int current, int voltage, int phase);
+
 // Used to indirectly access all EPWM modules
 extern volatile struct EPWM_REGS *ePWM[];
 

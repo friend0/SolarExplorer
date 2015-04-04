@@ -5,6 +5,8 @@
 // Include files
 // ======================================================================================
 
+
+
 // Include the IQmath Library First, define Global Q
 #include "IQmathLib.h"
 
@@ -41,10 +43,8 @@
 #include "Util_DLOG4CH.h"			// Include header for the DLOG_4CH object\
 
 #ifdef FLASH
-
 //Commros header file 		
 #include "Commros_user.h"
-
-#endif 
+#endif
 
 #endif

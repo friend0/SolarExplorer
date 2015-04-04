@@ -1,5 +1,5 @@
 #ifndef INVERTERFSM_H
-#define INVERTERFSM
+#define INVERTERFSM_H
 
 //////////////////////////////////////////
 // Declaration of FSM and Event objects //
