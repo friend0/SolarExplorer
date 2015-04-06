@@ -883,9 +883,9 @@ void SPI_init()
    SpibRegs.SPIPRI.bit.FREE=1; 
 }
 
-static int i = 0;
+int i = 0;
 int plotArray[PlotSize];
-
+#define PWM_MODE 1
 // ISR for inverter
 interrupt void Inv_ISR()
 {

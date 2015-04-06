@@ -25,6 +25,7 @@ C:/ti/controlSUITE/libs/app_libs/digital_power/f2803x_v3.3/C/ADC_SOC_Cnf.c \
 C:/ti/controlSUITE/device_support/f2803x/v125/DSP2803x_headers/source/DSP2803x_GlobalVariableDefs.c \
 ../InverterISR.c \
 C:/ti/controlSUITE/libs/app_libs/digital_power/f2803x_v3.3/C/PWM_1ch_UpDwnCntCompl_Cnf.c \
+../SciCommsGui_32bit.c \
 ../SolarExplorer-DevInit_F2803x.c \
 ../SolarExplorer-Main.c \
 ../inverterVariables.c 
@@ -36,6 +37,7 @@ OBJS += \
 ./DSP2803x_usDelay.obj \
 ./InverterISR.obj \
 ./PWM_1ch_UpDwnCntCompl_Cnf.obj \
+./SciCommsGui_32bit.obj \
 ./SolarExplorer-DPL-ISR.obj \
 ./SolarExplorer-DevInit_F2803x.obj \
 ./SolarExplorer-Main.obj \
@@ -53,6 +55,7 @@ C_DEPS += \
 ./DSP2803x_GlobalVariableDefs.pp \
 ./InverterISR.pp \
 ./PWM_1ch_UpDwnCntCompl_Cnf.pp \
+./SciCommsGui_32bit.pp \
 ./SolarExplorer-DevInit_F2803x.pp \
 ./SolarExplorer-Main.pp \
 ./inverterVariables.pp 
@@ -62,6 +65,7 @@ C_DEPS__QUOTED += \
 "DSP2803x_GlobalVariableDefs.pp" \
 "InverterISR.pp" \
 "PWM_1ch_UpDwnCntCompl_Cnf.pp" \
+"SciCommsGui_32bit.pp" \
 "SolarExplorer-DevInit_F2803x.pp" \
 "SolarExplorer-Main.pp" \
 "inverterVariables.pp" 
@@ -73,6 +77,7 @@ OBJS__QUOTED += \
 "DSP2803x_usDelay.obj" \
 "InverterISR.obj" \
 "PWM_1ch_UpDwnCntCompl_Cnf.obj" \
+"SciCommsGui_32bit.obj" \
 "SolarExplorer-DPL-ISR.obj" \
 "SolarExplorer-DevInit_F2803x.obj" \
 "SolarExplorer-Main.obj" \
@@ -90,6 +95,7 @@ C_SRCS__QUOTED += \
 "C:/ti/controlSUITE/device_support/f2803x/v125/DSP2803x_headers/source/DSP2803x_GlobalVariableDefs.c" \
 "../InverterISR.c" \
 "C:/ti/controlSUITE/libs/app_libs/digital_power/f2803x_v3.3/C/PWM_1ch_UpDwnCntCompl_Cnf.c" \
+"../SciCommsGui_32bit.c" \
 "../SolarExplorer-DevInit_F2803x.c" \
 "../SolarExplorer-Main.c" \
 "../inverterVariables.c" 

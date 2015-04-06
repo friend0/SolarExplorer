@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2
+CG_TOOL_ROOT := C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.3
 
 ORDERED_OBJS += \
 "./ADC_SOC_Cnf.obj" \
@@ -13,6 +13,7 @@ ORDERED_OBJS += \
 "./DSP2803x_usDelay.obj" \
 "./InverterISR.obj" \
 "./PWM_1ch_UpDwnCntCompl_Cnf.obj" \
+"./SciCommsGui_32bit.obj" \
 "./SolarExplorer-DPL-ISR.obj" \
 "./SolarExplorer-DevInit_F2803x.obj" \
 "./SolarExplorer-Main.obj" \
@@ -156,21 +157,21 @@ all: SolarExplorer_PVInverter.out
 SolarExplorer_PVInverter.out: $(OBJS) $(CMD_SRCS) $(CMD_UPPER_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: C2000 Linker'
-	"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/bin/cl2000" -v28 -ml -mt --cla_support=cla0 -g --define="_DEBUG" --define="FLASH" --define="LARGE_MODEL" --diag_warning=225 -z -m"ProjectName.map" --stack_size=0x380 --warn_sections -i"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/include" --reread_libs --xml_link_info="SolarExplorer_PVInverter_linkInfo.xml" --rom_model -o "SolarExplorer_PVInverter.out" $(ORDERED_OBJS)
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.3/bin/cl2000" -v28 -ml -mt --cla_support=cla0 -g --define="_DEBUG" --define="FLASH" --define="LARGE_MODEL" --diag_warning=225 -z -m"ProjectName.map" --stack_size=0x380 --warn_sections -i"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.3/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.3/include" --reread_libs --xml_link_info="SolarExplorer_PVInverter_linkInfo.xml" --rom_model -o "SolarExplorer_PVInverter.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 SolarExplorer_PVInverter.hex: $(EXE_OUTPUTS)
 	@echo 'Invoking: C2000 Hex Utility'
-	"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/bin/hex2000"  -o "SolarExplorer_PVInverter.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.3/bin/hex2000"  -o "SolarExplorer_PVInverter.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
-	-$(RM) "ADC_SOC_Cnf.pp" "DSP2803x_GlobalVariableDefs.pp" "InverterISR.pp" "PWM_1ch_UpDwnCntCompl_Cnf.pp" "SolarExplorer-DevInit_F2803x.pp" "SolarExplorer-Main.pp" "inverterVariables.pp" "src commros\Commros_user.pp" "fsmFramework\hBridgeFSM.pp" "fsmFramework\inverterFSM.pp" "fsmFramework\mpptFSM.pp" "fsmFramework\panelFSM.pp" 
-	-$(RM) "ADC_SOC_Cnf.obj" "DSP2803x_CodeStartBranch.obj" "DSP2803x_GlobalVariableDefs.obj" "DSP2803x_usDelay.obj" "InverterISR.obj" "PWM_1ch_UpDwnCntCompl_Cnf.obj" "SolarExplorer-DPL-ISR.obj" "SolarExplorer-DevInit_F2803x.obj" "SolarExplorer-Main.obj" "Util_DLOG4CHC.obj" "inverterVariables.obj" "src commros\Commros_user.obj" "fsmFramework\hBridgeFSM.obj" "fsmFramework\inverterFSM.obj" "fsmFramework\mpptFSM.obj" "fsmFramework\panelFSM.obj" 
+	-$(RM) "ADC_SOC_Cnf.pp" "DSP2803x_GlobalVariableDefs.pp" "InverterISR.pp" "PWM_1ch_UpDwnCntCompl_Cnf.pp" "SciCommsGui_32bit.pp" "SolarExplorer-DevInit_F2803x.pp" "SolarExplorer-Main.pp" "inverterVariables.pp" "src commros\Commros_user.pp" "fsmFramework\hBridgeFSM.pp" "fsmFramework\inverterFSM.pp" "fsmFramework\mpptFSM.pp" "fsmFramework\panelFSM.pp" 
+	-$(RM) "ADC_SOC_Cnf.obj" "DSP2803x_CodeStartBranch.obj" "DSP2803x_GlobalVariableDefs.obj" "DSP2803x_usDelay.obj" "InverterISR.obj" "PWM_1ch_UpDwnCntCompl_Cnf.obj" "SciCommsGui_32bit.obj" "SolarExplorer-DPL-ISR.obj" "SolarExplorer-DevInit_F2803x.obj" "SolarExplorer-Main.obj" "Util_DLOG4CHC.obj" "inverterVariables.obj" "src commros\Commros_user.obj" "fsmFramework\hBridgeFSM.obj" "fsmFramework\inverterFSM.obj" "fsmFramework\mpptFSM.obj" "fsmFramework\panelFSM.obj" 
 	-$(RM) "DSP2803x_CodeStartBranch.pp" "DSP2803x_usDelay.pp" "SolarExplorer-DPL-ISR.pp" "Util_DLOG4CHC.pp" 
 	-@echo 'Finished clean'
 	-@echo ' '
