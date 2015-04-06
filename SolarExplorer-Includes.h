@@ -8,7 +8,10 @@
 
 
 // Include the IQmath Library First, define Global Q
-#include "IQmathLib.h"
+#include "Solar_IQ.h"
+//#include "IQmathLib.h"
+
+#include "math.h"
 
 // Include files for device support, F2803x in this case
 #include "PeripheralHeaderIncludes.h"

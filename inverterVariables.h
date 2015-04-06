@@ -18,6 +18,7 @@
 #include "SineAnalyzer_diff.h"
 #include "Util_DLOG4CH.h"
 #include "pid_grando.h"
+#include "SFRA_IQ_Include.h"
 
 //#include "SPLL_1ph.h"
 
@@ -61,9 +62,6 @@ extern volatile struct EPWM_REGS *ePWM[];
 
 // Used to indirectly access all Comparator modules
 extern volatile struct COMP_REGS *Comp[];
-// ---------------------------------- USER -----------------------------------------
-// ---------------------------- DPLIB Net Pointers ---------------------------------
-// Declare net pointers that are used to connect the DP Lib Macros  here
 
 // ADCDRV_1ch
 extern volatile long *ADCDRV_1ch_Rlt1;	//instance #1
@@ -112,10 +110,8 @@ extern volatile long IboostswRead;
 extern volatile long IboostSwRef;
 extern volatile long VpvRef_MPPT;
 
-extern struct CNTL_2P2Z_CoefStruct CNTL_2P2Z_CoefStruct1;
 
-extern struct CNTL_2P2Z_CoefStruct CNTL_2P2Z_CoefStruct2;
-
+extern SFRA_IQ SFRA1;
 extern long Pgain_V,Igain_V,Dgain_V,Dmax_V;
 extern long Pgain_I,Igain_I,Dgain_I,Dmax_I;
 

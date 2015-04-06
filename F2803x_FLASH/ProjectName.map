@@ -1,10 +1,10 @@
 ******************************************************************************
-             TMS320C2000 Linker PC v6.4.2                      
+             TMS320C2000 Linker PC v6.4.3                      
 ******************************************************************************
->> Linked Thu Mar 26 23:29:39 2015
+>> Linked Sun Apr 05 21:46:33 2015
 
 OUTPUT FILE NAME:   <SolarExplorer_PVInverter.out>
-ENTRY POINT SYMBOL: "_c_int00"  address: 003efceb
+ENTRY POINT SYMBOL: "_c_int00"  address: 003ec3a5
 
 
 MEMORY CONFIGURATION
@@ -12,15 +12,15 @@ MEMORY CONFIGURATION
          name            origin    length      used     unused   attr    fill
 ----------------------  --------  ---------  --------  --------  ----  --------
 PAGE 0:
-  RAML3                 00009000   00001000  000000f3  00000f0d  RWIX
+  RAML3                 00009000   00001000  000004be  00000b42  RWIX
   OTP                   003d7800   00000400  00000000  00000400  RWIX
   FLASHH                003e8000   00002000  00000000  00002000  RWIX
   FLASHG                003ea000   00002000  00000000  00002000  RWIX
-  FLASHF                003ec000   00002000  00000000  00002000  RWIX
-  FLASHE                003ee000   00002000  00001e6a  00000196  RWIX
-  FLASHD                003f0000   00002000  000000f3  00001f0d  RWIX
+  FLASHF                003ec000   00002000  0000056d  00001a93  RWIX
+  FLASHE                003ee000   00002000  00001ffc  00000004  RWIX
+  FLASHD                003f0000   00002000  000004be  00001b42  RWIX
   FLASHC                003f2000   00002000  00000000  00002000  RWIX
-  FLASHA                003f6000   00001f80  00000237  00001d49  RWIX
+  FLASHA                003f6000   00001f80  00000496  00001aea  RWIX
   CSM_RSVD              003f7f80   00000076  00000000  00000076  RWIX
   BEGIN                 003f7ff6   00000002  00000002  00000000  RWIX
   CSM_PWL               003f7ff8   00000008  00000000  00000008  RWIX
@@ -79,11 +79,11 @@ PAGE 1:
   ADC                   00007100   00000080  00000050  00000030  RWIX
   SPIB                  00007740   00000010  00000010  00000000  RWIX
   I2CA                  00007900   00000040  00000022  0000001e  RWIX
-  RAML0                 00008000   00000800  000005c0  00000240  RWIX
-  dataRAM               00008800   00000400  000001ea  00000216  RWIX
+  RAML0                 00008000   00000800  00000000  00000800  RWIX
+  dataRAM               00008800   00000400  0000020a  000001f6  RWIX
   RAML2                 00008c00   00000400  00000000  00000400  RWIX
   PARTID                003d7e80   00000001  00000001  00000000  RWIX
-  FLASHB                003f4000   00002000  00000101  00001eff  RWIX
+  FLASHB                003f4000   00002000  00000ce1  0000131f  RWIX
   CSM_PWL               003f7ff8   00000008  00000008  00000000  RWIX
 
 
@@ -92,58 +92,78 @@ SECTION ALLOCATION MAP
  output                                  attributes/
 section   page    origin      length       input sections
 --------  ----  ----------  ----------   ----------------
-.text      0    003ee000    00001e6a     
-                  003ee000    00000627     SolarExplorer-Main.obj (.text)
-                  003ee627    000004b2     commros_28xx_c_regular.lib : commros.obj (.text)
-                  003eead9    0000026e     mpptFSM.obj (.text)
-                  003eed47    00000269     inverterFSM.obj (.text)
-                  003eefb0    00000267     commros_28xx_c_regular.lib : Datalogger.obj (.text)
-                  003ef217    00000217     panelFSM.obj (.text)
-                  003ef42e    000001c4     ADC_SOC_Cnf.obj (.text)
-                  003ef5f2    000001bf     SolarExplorer-DevInit_F2803x.obj (.text)
-                  003ef7b1    00000125     commros_28xx_c_regular.lib : ByteProtocol.obj (.text)
-                  003ef8d6    00000111     hBridgeFSM.obj (.text)
-                  003ef9e7    000000d9     PWM_1ch_UpDwnCntCompl_Cnf.obj (.text)
-                  003efac0    000000b0     Commros_user.obj (.text)
-                  003efb70    00000083     rts2800_ml.lib : fd_mpy.obj (.text)
-                  003efbf3    0000005a                    : fs_mpy.obj (.text)
-                  003efc4d    00000053     SolarExplorer-DPL-ISR.obj (.text)
-                  003efca0    0000004b     Util_DLOG4CHC.obj (.text)
-                  003efceb    00000044     rts2800_ml.lib : boot.obj (.text)
-                  003efd2f    0000003a     C28x_SGEN_Lib_fixed.lib : sghp2c.obj (.text)
-                  003efd69    00000022     rts2800_ml.lib : i_div.obj (.text)
-                  003efd8b    0000001f                    : fd_tol.obj (.text)
-                  003efdaa    0000001e                    : ll_cmp.obj (.text)
-                  003efdc8    0000001c                    : fs_tofd.obj (.text)
-                  003efde4    0000001a                    : i_tofs.obj (.text)
-                  003efdfe    00000019                    : args_main.obj (.text)
-                  003efe17    00000019                    : exit.obj (.text)
-                  003efe30    00000018                    : ll_aox.obj (.text)
-                  003efe48    0000000c                    : memset.obj (.text)
-                  003efe54    00000009                    : _lock.obj (.text)
-                  003efe5d    00000008     DSP2803x_CodeStartBranch.obj (.text)
-                  003efe65    00000005     SolarExplorer-DevInit_F2803x.obj (.text:retain)
+.text.1    0    003ec000    0000056d     
+                  003ec000    000000d9     PWM_1ch_UpDwnCntCompl_Cnf.obj (.text)
+                  003ec0d9    000000b0     Commros_user.obj (.text)
+                  003ec189    00000083     rts2800_ml.lib : fd_mpy.obj (.text)
+                  003ec20c    00000083                    : fs_div.obj (.text)
+                  003ec28f    00000078                    : fs_add.obj (.text)
+                  003ec307    00000053     SolarExplorer-DPL.obj (.text)
+                  003ec35a    0000004b     Util_DLOG4CHC.obj (.text)
+                  003ec3a5    00000044     rts2800_ml.lib : boot.obj (.text)
+                  003ec3e9    0000003a     C28x_SGEN_Lib_fixed.lib : sghp2c.obj (.text)
+                  003ec423    0000002a     rts2800_ml.lib : l_div.obj (.text)
+                  003ec44d    00000022                    : i_div.obj (.text)
+                  003ec46f    0000001f                    : fd_tol.obj (.text)
+                  003ec48e    0000001e                    : ll_cmp.obj (.text)
+                  003ec4ac    0000001c                    : fs_tofd.obj (.text)
+                  003ec4c8    0000001a                    : i_tofs.obj (.text)
+                  003ec4e2    0000001a                    : l_tofs.obj (.text)
+                  003ec4fc    00000019                    : args_main.obj (.text)
+                  003ec515    00000019                    : exit.obj (.text)
+                  003ec52e    00000018                    : ll_aox.obj (.text)
+                  003ec546    0000000c                    : memset.obj (.text)
+                  003ec552    00000009                    : _lock.obj (.text)
+                  003ec55b    00000008     DSP2803x_CodeStartBranch.obj (.text)
+                  003ec563    00000005     SolarExplorer-DevInit_F2803x.obj (.text:retain)
+                  003ec568    00000005     rts2800_ml.lib : fs_neg.obj (.text)
 
-ramfuncs   0    003f0000    000000f3     RUN ADDR = 00009000
-                  003f0000    000000cf     SolarExplorer-DPL-ISR.obj (ramfuncs)
-                  003f00cf    0000001b     SolarExplorer-DevInit_F2803x.obj (ramfuncs)
-                  003f00ea    00000005     SolarExplorer-Main.obj (ramfuncs:retain)
-                  003f00ef    00000004     DSP2803x_usDelay.obj (ramfuncs)
+.text.2    0    003ee000    00001ffc     
+                  003ee000    000006cd     SolarExplorer-Main.obj (.text)
+                  003ee6cd    000004b2     commros_28xx_c_regular.lib : commros.obj (.text)
+                  003eeb7f    000002f4     SciCommsGui_32bit.obj (.text)
+                  003eee73    0000026e     mpptFSM.obj (.text)
+                  003ef0e1    00000269     inverterFSM.obj (.text)
+                  003ef34a    00000267     commros_28xx_c_regular.lib : Datalogger.obj (.text)
+                  003ef5b1    0000021b     panelFSM.obj (.text)
+                  003ef7cc    000001e9     SFRA_IQ_Lib.lib : SFRA_IQ_BACKGROUND.obj (.text)
+                  003ef9b5    000001c4     ADC_SOC_Cnf.obj (.text)
+                  003efb79    000001bf     SolarExplorer-DevInit_F2803x.obj (.text)
+                  003efd38    00000125     commros_28xx_c_regular.lib : ByteProtocol.obj (.text)
+                  003efe5d    00000111     hBridgeFSM.obj (.text)
+                  003eff6e    0000008e     SFRA_IQ_Lib.lib : SFRA_IQ_INIT.obj (.text)
 
-.cinit     0    003f6000    00000193     
-                  003f6000    0000017d     SolarExplorer-Main.obj (.cinit)
-                  003f617d    0000000a     rts2800_ml.lib : exit.obj (.cinit)
-                  003f6187    00000005                    : _lock.obj (.cinit:__lock)
-                  003f618c    00000005                    : _lock.obj (.cinit:__unlock)
-                  003f6191    00000002     --HOLE-- [fill = 0]
+ramfuncs   0    003f0000    000004be     RUN ADDR = 00009000
+                  003f0000    0000005a     rts2800_ml.lib : fs_mpy.obj (.text)
+                  003f005a    0000001e     SFRA_IQ_Lib.lib : SFRA_IQ_INJECT.obj (.text)
+                  003f0078    00000045                     : SFRA_IQ_COLLECT.obj (.text)
+                  003f00bd    00000311     SolarExplorer-Main.obj (ramfuncs:retain)
+                  003f03ce    000000d1     SolarExplorer-DPL.obj (ramfuncs)
+                  003f049f    0000001b     SolarExplorer-DevInit_F2803x.obj (ramfuncs)
+                  003f04ba    00000004     DSP2803x_usDelay.obj (ramfuncs)
 
-IQmath     0    003f6193    0000008e     
-                  003f6193    00000047     IQmath.lib : IQ24div.obj (IQmath)
-                  003f61da    00000047                : IQ9div.obj (IQmath)
+IQmath     0    003f6000    000002e9     
+                  003f6000    0000009d     IQmath.lib : IQ16log.obj (IQmath)
+                  003f609d    0000007b                : IQ16atan2.obj (IQmath)
+                  003f6118    00000060                : IQ16mag.obj (IQmath)
+                  003f6178    00000047                : IQ15div.obj (IQmath)
+                  003f61bf    00000047                : IQ24div.obj (IQmath)
+                  003f6206    00000047                : IQ9div.obj (IQmath)
+                  003f624d    00000046                : IQ15isqrt.obj (IQmath)
+                  003f6293    00000042                : IQ15sqrt.obj (IQmath)
+                  003f62d5    00000014                : IQ16toF.obj (IQmath)
 
-.econst    0    003f6222    00000016     
-                  003f6222    00000012     Commros_user.obj (.econst:.string)
-                  003f6234    00000004     SolarExplorer-Main.obj (.econst)
+.cinit     0    003f62e9    0000018f     
+                  003f62e9    00000179     SolarExplorer-Main.obj (.cinit)
+                  003f6462    0000000a     rts2800_ml.lib : exit.obj (.cinit)
+                  003f646c    00000005                    : _lock.obj (.cinit:__lock)
+                  003f6471    00000005                    : _lock.obj (.cinit:__unlock)
+                  003f6476    00000002     --HOLE-- [fill = 0]
+
+.econst    0    003f6478    0000001e     
+                  003f6478    00000012     Commros_user.obj (.econst:.string)
+                  003f648a    00000008     SFRA_IQ_Lib.lib : SFRA_IQ_BACKGROUND.obj (.econst)
+                  003f6492    00000004     SolarExplorer-Main.obj (.econst)
 
 codestart 
 *          0    003f7ff6    00000002     
@@ -340,24 +360,16 @@ I2caRegsFile
 *          1    00007900    00000022     UNINITIALIZED
                   00007900    00000022     DSP2803x_GlobalVariableDefs.obj (I2caRegsFile)
 
-.ebss      1    00008000    000005c0     UNINITIALIZED
-                  00008000    000002c8     Commros_user.obj (.ebss)
-                  000082c8    00000004     rts2800_ml.lib : exit.obj (.ebss)
-                  000082cc    00000002                    : _lock.obj (.ebss:__lock)
-                  000082ce    00000002                    : _lock.obj (.ebss:__unlock)
-                  000082d0    00000030     --HOLE--
-                  00008300    000002c0     SolarExplorer-Main.obj (.ebss)
-
 DLOG       1    00008800    00000190     UNINITIALIZED
                   00008800    00000190     Util_DLOG4CHC.obj (DLOG)
 
-CNTL_2P2Z_Section 
-*          1    00008990    00000024     UNINITIALIZED
-                  00008990    00000024     SolarExplorer-DPL-ISR.obj (CNTL_2P2Z_Section)
+SFRA_IQ_Data 
+*          1    000089c0    00000020     UNINITIALIZED
+                  000089c0    00000020     SFRA_IQ_Lib.lib : SFRA_IQ_INIT.obj (SFRA_IQ_Data)
 
 ADCDRV_1ch_Section 
-*          1    000089dc    00000008     UNINITIALIZED
-                  000089dc    00000008     SolarExplorer-DPL-ISR.obj (ADCDRV_1ch_Section)
+*          1    00008a00    00000008     UNINITIALIZED
+                  00008a00    00000008     SolarExplorer-DPL.obj (ADCDRV_1ch_Section)
 
 PartIdRegsFile 
 *          1    003d7e80    00000001     UNINITIALIZED
@@ -369,29 +381,44 @@ CsmPwlFile
 
 .pinit     0    003f6000    00000000     UNINITIALIZED
 
+.ebss      1    003f4000    00000be0     UNINITIALIZED
+                  003f4000    00000848     SolarExplorer-Main.obj (.ebss)
+                  003f4848    00000004     rts2800_ml.lib : exit.obj (.ebss)
+                  003f484c    00000002     SFRA_IQ_Lib.lib : SFRA_IQ_INIT.obj (.ebss)
+                  003f484e    00000002     rts2800_ml.lib : _lock.obj (.ebss:__lock)
+                  003f4850    00000002                    : _lock.obj (.ebss:__unlock)
+                  003f4852    0000002e     --HOLE--
+                  003f4880    000002c8     Commros_user.obj (.ebss)
+                  003f4b48    00000038     --HOLE--
+                  003f4b80    00000060     SciCommsGui_32bit.obj (.ebss)
+
 .reset     0    003fffc0    00000002     DSECT
                   003fffc0    00000002     rts2800_ml.lib : boot.obj (.reset)
 
 vectors    0    003fffc2    00000000     DSECT
 
-MATH_EMAVG_Section 
-*          1    000089b4    0000000c     UNINITIALIZED
-                  000089b4    0000000c     SolarExplorer-DPL-ISR.obj (MATH_EMAVG_Section)
+CNTL_2P2Z_Section 
+*          1    00008990    00000024     UNINITIALIZED
+                  00008990    00000024     SolarExplorer-DPL.obj (CNTL_2P2Z_Section)
 
 CNTL_2P2Z_Coef 
-*          1    000089c0    0000001c     UNINITIALIZED
-                  000089c0    0000001c     SolarExplorer-Main.obj (CNTL_2P2Z_Coef)
+*          1    000089e0    0000001c     UNINITIALIZED
+                  000089e0    0000001c     SolarExplorer-Main.obj (CNTL_2P2Z_Coef)
+
+SINTBL     1    003f4be0    00000101     
+                  003f4be0    00000101     C28x_SGEN_Lib_fixed.lib : SINTB360.obj (SINTBL)
+
+MATH_EMAVG_Section 
+*          1    000089b4    0000000c     UNINITIALIZED
+                  000089b4    0000000c     SolarExplorer-DPL.obj (MATH_EMAVG_Section)
 
 PWMDRV_1ch_UpDwnCntCompl_Section 
-*          1    000089e4    00000004     UNINITIALIZED
-                  000089e4    00000004     SolarExplorer-DPL-ISR.obj (PWMDRV_1ch_UpDwnCntCompl_Section)
+*          1    000089fc    00000004     UNINITIALIZED
+                  000089fc    00000004     SolarExplorer-DPL.obj (PWMDRV_1ch_UpDwnCntCompl_Section)
 
 ZeroNet_Section 
-*          1    000089e8    00000002     UNINITIALIZED
-                  000089e8    00000002     SolarExplorer-DPL-ISR.obj (ZeroNet_Section)
-
-SINTBL     1    003f4000    00000101     
-                  003f4000    00000101     C28x_SGEN_Lib_fixed.lib : SINTB360.obj (SINTBL)
+*          1    00008a08    00000002     UNINITIALIZED
+                  00008a08    00000002     SolarExplorer-DPL.obj (ZeroNet_Section)
 
 
 GLOBAL DATA SYMBOLS: SORTED BY DATA PAGE
@@ -480,140 +507,6 @@ address     data page           name
 
 00007900     1e4 (00007900)     _I2caRegs
 
-00008000     200 (00008000)     _probes
-00008008     200 (00008000)     _loggerVars
-
-00008040     201 (00008040)     _buffer
-
-00008140     205 (00008140)     _commros
-
-000082c8     20b (000082c0)     ___TI_cleanup_ptr
-000082ca     20b (000082c0)     ___TI_dtors_ptr
-000082cc     20b (000082c0)     __lock
-000082ce     20b (000082c0)     __unlock
-
-00008300     20c (00008300)     _PwmDacCh4
-00008301     20c (00008300)     _PwmDacCh3
-00008302     20c (00008300)     _PwmDacCh2
-00008303     20c (00008300)     _DlogCh2
-00008304     20c (00008300)     _DlogCh1
-00008305     20c (00008300)     _Gui_LightCommand_Prev
-00008306     20c (00008300)     _Gui_InvStop
-00008307     20c (00008300)     _Gui_InvStart
-00008308     20c (00008300)     _PwmDacCh1
-00008309     20c (00008300)     _Gui_MPPTEnable
-0000830a     20c (00008300)     _PVInverterState
-0000830b     20c (00008300)     _LedBlinkCnt
-0000830c     20c (00008300)     _CloseVloopInv
-0000830d     20c (00008300)     _ResetPLL
-0000830e     20c (00008300)     _CloseIloopInv
-0000830f     20c (00008300)     _DlogCh4
-00008310     20c (00008300)     _DlogCh3
-00008311     20c (00008300)     _TransmitData
-00008312     20c (00008300)     _LedBlinkCnt2
-00008313     20c (00008300)     _timer1
-00008314     20c (00008300)     _ClearInvTrip
-00008315     20c (00008300)     _PanelBoostConnect
-00008316     20c (00008300)     _MPPT_slew
-00008317     20c (00008300)     _sine_prev
-00008319     20c (00008300)     _i
-0000831b     20c (00008300)     _UpdateCoef
-0000831c     20c (00008300)     _iK_Vboost
-0000831d     20c (00008300)     _iK_Ipv
-0000831e     20c (00008300)     _K_Light
-0000831f     20c (00008300)     _K_Ipv
-00008320     20c (00008300)     _K_Vboost
-00008321     20c (00008300)     _Run_MPPT
-00008322     20c (00008300)     _MPPT_ENABLE
-00008323     20c (00008300)     _ZCDDetect
-00008324     20c (00008300)     _K_Vpv
-00008325     20c (00008300)     _VloopTicker
-00008326     20c (00008300)     _inv_meas_cur_lleg2_inst
-00008328     20c (00008300)     _InvModIndex
-0000832a     20c (00008300)     _inv_ref_cur_inst
-0000832c     20c (00008300)     _Dmax_I
-0000832e     20c (00008300)     _inv_ref_vol_inst
-00008330     20c (00008300)     _inv_meas_cur_lleg1_inst
-00008332     20c (00008300)     _inv_Iset
-00008334     20c (00008300)     _inv_meas_vol_inst
-00008336     20c (00008300)     _inv_meas_cur_diff_inst
-00008338     20c (00008300)     _InvSine
-0000833a     20c (00008300)     _Gui_LightRatio_Avg
-0000833c     20c (00008300)     _Gui_LightCommand
-0000833e     20c (00008300)     _Gui_LightRatio
-
-00008340     20d (00008340)     _Gui_MPPTTrackingEff
-00008342     20d (00008340)     _Gui_Light
-00008344     20d (00008340)     _Gui_PanelPower_Theoretical
-00008346     20d (00008340)     _mppt
-00008348     20d (00008340)     _panel
-0000834a     20d (00008340)     _hBridge
-0000834c     20d (00008340)     _temp_Scratch
-0000834e     20d (00008340)     _inverter
-00008350     20d (00008340)     _HistPtr
-00008352     20d (00008340)     _VavgReal
-00008354     20d (00008340)     _Temp2
-00008356     20d (00008340)     _VrmsReal
-00008358     20d (00008340)     _Vac_in
-0000835a     20d (00008340)     _Offset_Volt
-0000835c     20d (00008340)     _Grid_Freq
-0000835e     20d (00008340)     _Gui_Vboost
-00008360     20d (00008340)     _Gui_PanelPower
-00008362     20d (00008340)     _Gui_Ipv
-00008364     20d (00008340)     _sdata
-00008366     20d (00008340)     _Gui_Vpv
-00008368     20d (00008340)     _Duty3A_fixed
-0000836a     20d (00008340)     _Duty3A
-0000836c     20d (00008340)     _VpvRef
-0000836e     20d (00008340)     _VboostRead
-00008370     20d (00008340)     _IpvRead_EMAVG
-00008372     20d (00008340)     _IboostswRead
-00008374     20d (00008340)     _ScaleFactor
-00008376     20d (00008340)     _Dgain_I
-00008378     20d (00008340)     _Igain_I
-0000837a     20d (00008340)     _VpvRef_MPPT
-0000837c     20d (00008340)     _IboostSwRef
-0000837e     20d (00008340)     _VpvRead_EMAVG
-
-00008380     20e (00008380)     _Pgain_V
-00008382     20e (00008380)     _VpvRead
-00008384     20e (00008380)     _IpvRead
-00008386     20e (00008380)     _Dmax_V
-00008388     20e (00008380)     _Pgain_I
-0000838a     20e (00008380)     _Igain_V
-0000838c     20e (00008380)     _Dgain_V
-0000838e     20e (00008380)     _state
-00008391     20e (00008380)     _VTimer2
-00008395     20e (00008380)     _VTimer1
-00008399     20e (00008380)     _VTimer0
-0000839d     20e (00008380)     _Hist_Light
-000083a5     20e (00008380)     _Hist_Vpv
-000083ad     20e (00008380)     _Hist_Vboost
-000083b5     20e (00008380)     _Hist_Ipv
-
-000083c0     20f (000083c0)     _Comp
-000083c8     20f (000083c0)     _pwmdac1
-000083d2     20f (000083c0)     _sgen
-000083e0     20f (000083c0)     _ACQPS
-000083f0     20f (000083c0)     _ePWM
-
-00008400     210 (00008400)     _TrigSel
-00008410     210 (00008400)     _ChSel
-00008420     210 (00008400)     _dlog
-
-00008440     211 (00008440)     _mppt_pno1
-00008456     211 (00008440)     _sine_mainsV
-
-00008480     212 (00008480)     _mppt_incc1
-
-000084c0     213 (000084c0)     _pidGRANDO_Iinv
-
-00008500     214 (00008500)     _pidGRANDO_Vinv
-
-00008540     215 (00008540)     _spll1
-
-00008580     216 (00008580)     _plotArray
-
 00008990     226 (00008980)     _CNTL_2P2Z_Ref1
 00008992     226 (00008980)     _CNTL_2P2Z_Fdbk1
 00008994     226 (00008980)     _CNTL_2P2Z_Out1
@@ -631,22 +524,236 @@ address     data page           name
 000089bc     226 (00008980)     _MATH_EMAVG_Out2
 000089be     226 (00008980)     _MATH_EMAVG_Multiplier2
 
-000089c0     227 (000089c0)     _CNTL_2P2Z_CoefStruct1
-000089ce     227 (000089c0)     _CNTL_2P2Z_CoefStruct2
-000089dc     227 (000089c0)     _ADCDRV_1ch_Rlt1
-000089de     227 (000089c0)     _ADCDRV_1ch_Rlt5
-000089e0     227 (000089c0)     _ADCDRV_1ch_Rlt6
-000089e2     227 (000089c0)     _ADCDRV_1ch_Rlt7
-000089e4     227 (000089c0)     _PWMDRV_1ch_UpDwnCntCompl_Duty3
-000089e6     227 (000089c0)     _PWMDRV_1ch_UpDwnCntCompl_Period3
+000089c0     227 (000089c0)     _SFRA_IQ_preCount
+000089c1     227 (000089c0)     _SFRA_IQ_state
+000089c2     227 (000089c0)     _SFRA_IQ_windowSamples
+000089c3     227 (000089c0)     _SFRA_IQ_count
+000089c4     227 (000089c0)     _SFRA_IQ_StateSlew
+000089c6     227 (000089c0)     _SFRA_IQ_amplitude
+000089c8     227 (000089c0)     _SFRA_IQ_Q22_Q16Round
+000089ca     227 (000089c0)     _SFRA_IQ_pointer
+000089cc     227 (000089c0)     _SFRA_IQ_step
+000089ce     227 (000089c0)     _SFRA_IQ_uCosSum
+000089d0     227 (000089c0)     _SFRA_IQ_ySinSum
+000089d2     227 (000089c0)     _SFRA_IQ_rCosSum
+000089d4     227 (000089c0)     _SFRA_IQ_uSinSum
+000089d6     227 (000089c0)     _SFRA_IQ_rSinSum
+000089d8     227 (000089c0)     _SFRA_IQ_reference
+000089da     227 (000089c0)     _SFRA_IQ_tableptr
+000089dc     227 (000089c0)     _SFRA_IQ_tableptrStart
+000089de     227 (000089c0)     _SFRA_IQ_yCosSum
+000089e0     227 (000089c0)     _CNTL_2P2Z_CoefStruct1
+000089ee     227 (000089c0)     _CNTL_2P2Z_CoefStruct2
+000089fc     227 (000089c0)     _PWMDRV_1ch_UpDwnCntCompl_Duty3
+000089fe     227 (000089c0)     _PWMDRV_1ch_UpDwnCntCompl_Period3
+
+00008a00     228 (00008a00)     _ADCDRV_1ch_Rlt1
+00008a02     228 (00008a00)     _ADCDRV_1ch_Rlt5
+00008a04     228 (00008a00)     _ADCDRV_1ch_Rlt6
+00008a06     228 (00008a00)     _ADCDRV_1ch_Rlt7
 
 003d7e80    f5fa (003d7e80)     _PartIdRegs
 
-003f4000    fd00 (003f4000)     SINTAB_360
+003f4000    fd00 (003f4000)     _MPPT_slew
+003f4001    fd00 (003f4000)     _Run_MPPT
+003f4002    fd00 (003f4000)     _MPPT_ENABLE
+003f4003    fd00 (003f4000)     _PwmDacCh3
+003f4004    fd00 (003f4000)     _PwmDacCh1
+003f4005    fd00 (003f4000)     _PwmDacCh2
+003f4006    fd00 (003f4000)     _Gui_InvStop
+003f4007    fd00 (003f4000)     _Gui_InvStart
+003f4008    fd00 (003f4000)     _Gui_LightCommand_Prev
+003f4009    fd00 (003f4000)     _UpdateCoef
+003f400a    fd00 (003f4000)     _Gui_MPPTEnable
+003f400b    fd00 (003f4000)     _LedBlinkCnt
+003f400c    fd00 (003f4000)     _PVInverterState
+003f400d    fd00 (003f4000)     _LedBlinkCnt2
+003f400e    fd00 (003f4000)     _TransmitData
+003f400f    fd00 (003f4000)     _DlogCh2
+003f4010    fd00 (003f4000)     _timer1
+003f4011    fd00 (003f4000)     _PwmDacCh4
+003f4012    fd00 (003f4000)     _PanelBoostConnect
+003f4013    fd00 (003f4000)     _ResetPLL
+003f4014    fd00 (003f4000)     _DlogCh3
+003f4015    fd00 (003f4000)     _DlogCh4
+003f4016    fd00 (003f4000)     _sine_prev
+003f4017    fd00 (003f4000)     _ZCDDetect
+003f401a    fd00 (003f4000)     _CloseVloopInv
+003f401b    fd00 (003f4000)     _SerialCommsTimer
+003f401c    fd00 (003f4000)     _CloseIloopInv
+003f401d    fd00 (003f4000)     _K_Light
+003f401e    fd00 (003f4000)     _iK_Vboost
+003f401f    fd00 (003f4000)     _K_Vboost
+003f4020    fd00 (003f4000)     _K_Vpv
+003f4021    fd00 (003f4000)     _K_Ipv
+003f4022    fd00 (003f4000)     _DlogCh1
+003f4023    fd00 (003f4000)     _VloopTicker
+003f4024    fd00 (003f4000)     _CommsOKflg
+003f4025    fd00 (003f4000)     _initializationFlag
+003f4026    fd00 (003f4000)     _i
+003f4027    fd00 (003f4000)     _ClearInvTrip
+003f4028    fd00 (003f4000)     _iK_Ipv
+003f402a    fd00 (003f4000)     _inv_meas_cur_diff_inst
+003f402c    fd00 (003f4000)     _inv_meas_cur_lleg1_inst
+003f402e    fd00 (003f4000)     _Igain_I
+003f4030    fd00 (003f4000)     _Dgain_I
+003f4032    fd00 (003f4000)     _Dmax_V
+003f4034    fd00 (003f4000)     _Pgain_I
+003f4036    fd00 (003f4000)     _inv_meas_vol_inst
+003f4038    fd00 (003f4000)     _inv_ref_cur_inst
+003f403a    fd00 (003f4000)     _Dmax_I
+003f403c    fd00 (003f4000)     _inv_ref_vol_inst
+003f403e    fd00 (003f4000)     _Dgain_V
 
-003f6193    fd86 (003f6180)     __IQ24div
+003f4040    fd01 (003f4040)     _inv_meas_cur_lleg2_inst
+003f4042    fd01 (003f4040)     _Gui_Light
+003f4044    fd01 (003f4040)     _Gui_MPPTTrackingEff
+003f4046    fd01 (003f4040)     _Gui_LightRatio_Avg
+003f4048    fd01 (003f4040)     _Gui_PanelPower
+003f404a    fd01 (003f4040)     _Gui_Vboost
+003f404c    fd01 (003f4040)     _Gui_LightRatio
+003f404e    fd01 (003f4040)     _Gui_PanelPower_Theoretical
+003f4050    fd01 (003f4040)     _hBridge
+003f4052    fd01 (003f4040)     _inverter
+003f4054    fd01 (003f4040)     _panel
+003f4056    fd01 (003f4040)     _HistPtr
+003f4058    fd01 (003f4040)     _Gui_LightCommand
+003f405a    fd01 (003f4040)     _mppt
+003f405c    fd01 (003f4040)     _Vac_in
+003f405e    fd01 (003f4040)     _Grid_Freq
+003f4060    fd01 (003f4040)     _VrmsReal
+003f4062    fd01 (003f4040)     _inv_Iset
+003f4064    fd01 (003f4040)     _InvModIndex
+003f4066    fd01 (003f4040)     _Offset_Volt
+003f4068    fd01 (003f4040)     _InvSine
+003f406a    fd01 (003f4040)     _Gui_Vpv
+003f406c    fd01 (003f4040)     _sdata
+003f406e    fd01 (003f4040)     _temp_Scratch
+003f4070    fd01 (003f4040)     _Temp2
+003f4072    fd01 (003f4040)     _VavgReal
+003f4074    fd01 (003f4040)     _Gui_Ipv
+003f4076    fd01 (003f4040)     _ScaleFactor
+003f407a    fd01 (003f4040)     _IpvRead
+003f407c    fd01 (003f4040)     _VpvRead
+003f407e    fd01 (003f4040)     _IpvRead_EMAVG
 
-003f61da    fd87 (003f61c0)     __IQ9div
+003f4080    fd02 (003f4080)     _VboostRead
+003f4082    fd02 (003f4080)     _Duty3A_fixed
+003f4084    fd02 (003f4080)     _VpvRead_EMAVG
+003f4086    fd02 (003f4080)     _Pgain_V
+003f4088    fd02 (003f4080)     _Igain_V
+003f408a    fd02 (003f4080)     _IboostSwRef_wInj
+003f408c    fd02 (003f4080)     _IboostswRead
+003f408e    fd02 (003f4080)     _VpvRef
+003f4090    fd02 (003f4080)     _VpvRef_MPPT
+003f4092    fd02 (003f4080)     _IboostSwRef
+003f4094    fd02 (003f4080)     _Duty3A
+003f4096    fd02 (003f4080)     _state
+003f4099    fd02 (003f4080)     _VTimer2
+003f409d    fd02 (003f4080)     _VTimer1
+003f40a1    fd02 (003f4080)     _VTimer0
+003f40a5    fd02 (003f4080)     _Hist_Ipv
+003f40ad    fd02 (003f4080)     _Hist_Light
+003f40b5    fd02 (003f4080)     _Hist_Vboost
+
+003f40c0    fd03 (003f40c0)     _Comp
+003f40c8    fd03 (003f40c0)     _Hist_Vpv
+003f40d0    fd03 (003f40c0)     _pwmdac1
+003f40da    fd03 (003f40c0)     _sgen
+003f40e8    fd03 (003f40c0)     _TrigSel
+
+003f4100    fd04 (003f4100)     _ChSel
+003f4110    fd04 (003f4100)     _ACQPS
+003f4120    fd04 (003f4100)     _ePWM
+
+003f4140    fd05 (003f4140)     _mppt_pno1
+003f4156    fd05 (003f4140)     _dlog
+
+003f4180    fd06 (003f4180)     _SFRA1
+003f4198    fd06 (003f4180)     _sine_mainsV
+
+003f41c0    fd07 (003f41c0)     _dataSetList
+003f41e0    fd07 (003f41c0)     _arrayGetList
+
+003f4200    fd08 (003f4200)     _varSetBtnList
+003f4220    fd08 (003f4200)     _varGetList
+
+003f4240    fd09 (003f4240)     _varSetTxtList
+003f4260    fd09 (003f4240)     _varSetSldrList
+
+003f4280    fd0a (003f4280)     _mppt_incc1
+
+003f42c0    fd0b (003f42c0)     _pidGRANDO_Vinv
+
+003f4300    fd0c (003f4300)     _pidGRANDO_Iinv
+
+003f4340    fd0d (003f4340)     _spll1
+
+003f4380    fd0e (003f4380)     _OL_MagVect
+
+003f4480    fd12 (003f4480)     _Plant_PhaseVect
+
+003f4580    fd16 (003f4580)     _FreqVect
+
+003f4680    fd1a (003f4680)     _Plant_MagVect
+
+003f4780    fd1e (003f4780)     _OL_PhaseVect
+
+003f4848    fd21 (003f4840)     ___TI_cleanup_ptr
+003f484a    fd21 (003f4840)     ___TI_dtors_ptr
+003f484c    fd21 (003f4840)     _SFRA_IQ_BromSineTableStart
+003f484e    fd21 (003f4840)     __lock
+003f4850    fd21 (003f4840)     __unlock
+
+003f4880    fd22 (003f4880)     _probes
+003f4888    fd22 (003f4880)     _loggerVars
+
+003f48c0    fd23 (003f48c0)     _buffer
+
+003f49c0    fd27 (003f49c0)     _commros
+
+003f4b80    fd2e (003f4b80)     _dataOut16
+003f4b81    fd2e (003f4b80)     _RcvTskPtrShdw
+003f4b82    fd2e (003f4b80)     _NumWords
+003f4b83    fd2e (003f4b80)     _wordsLeftToGet
+003f4b84    fd2e (003f4b80)     _MemGetPtr
+003f4b85    fd2e (003f4b80)     _delayer
+003f4b86    fd2e (003f4b80)     _MemSetPtr
+003f4b87    fd2e (003f4b80)     _MemGetAmount
+003f4b88    fd2e (003f4b80)     _TaskDoneFlag
+003f4b89    fd2e (003f4b80)     _RxWord
+003f4b8a    fd2e (003f4b80)     _LowByteFlag
+003f4b8b    fd2e (003f4b80)     _RxChar
+003f4b8c    fd2e (003f4b80)     _SendTaskPtr
+003f4b8e    fd2e (003f4b80)     _Temp
+003f4b90    fd2e (003f4b80)     _MemSetValue
+003f4b92    fd2e (003f4b80)     _MemGetAddress
+003f4b94    fd2e (003f4b80)     _memDataPtr16
+003f4b96    fd2e (003f4b80)     _dataOut32
+003f4b98    fd2e (003f4b80)     _RcvTaskPointer
+003f4b9a    fd2e (003f4b80)     _memDataPtr32
+003f4b9c    fd2e (003f4b80)     _CmdPacket
+
+003f4bc0    fd2f (003f4bc0)     _CmdDispatcher
+003f4be0    fd2f (003f4bc0)     SINTAB_360
+
+003f6000    fd80 (003f6000)     __IQ16log
+
+003f609d    fd82 (003f6080)     __IQ16atan2
+
+003f6118    fd84 (003f6100)     __IQ16mag
+
+003f6178    fd85 (003f6140)     __IQ15div
+
+003f61bf    fd86 (003f6180)     __IQ24div
+
+003f6206    fd88 (003f6200)     __IQ9div
+
+003f624d    fd89 (003f6240)     __IQ15isqrt
+
+003f6293    fd8a (003f6280)     __IQ15sqrt
+
+003f62d5    fd8b (003f62c0)     __IQ16toF
 
 003f7ff8    fdff (003f7fc0)     _CsmPwl
 
@@ -718,37 +825,48 @@ GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name
 page  address   name                             
 ----  -------   ----                             
 abs   ffffffff  .text                            
-0     003efe17  C$$EXIT                          
-0     003efb70  FD$$MPY                          
-0     003efd8b  FD$$TOL                          
-0     003efbf3  FS$$MPY                          
-0     003efdc8  FS$$TOFD                         
-0     003efd69  I$$DIV                           
-0     003efd7a  I$$MOD                           
-0     003efde4  I$$TOFS                          
-0     003efe30  LL$$AND                          
-0     003efdaa  LL$$CMP                          
-0     003efe38  LL$$OR                           
-0     003efe40  LL$$XOR                          
-1     003f4000  SINTAB_360                       
-0     003efdbc  ULL$$CMP                         
-1     000083e0  _ACQPS                           
-1     000089dc  _ADCDRV_1ch_Rlt1                 
-1     000089de  _ADCDRV_1ch_Rlt5                 
-1     000089e0  _ADCDRV_1ch_Rlt6                 
-1     000089e2  _ADCDRV_1ch_Rlt7                 
-0     003ef42e  _ADC_SOC_CNF                     
+0     003ec515  C$$EXIT                          
+0     003ec189  FD$$MPY                          
+0     003ec46f  FD$$TOL                          
+0     003ec294  FS$$ADD                          
+0     003ec20c  FS$$DIV                          
+0     00009000  FS$$MPY                          
+0     003ec568  FS$$NEG                          
+0     003ec28f  FS$$SUB                          
+0     003ec4ac  FS$$TOFD                         
+0     003ec44d  I$$DIV                           
+0     003ec45e  I$$MOD                           
+0     003ec4c8  I$$TOFS                          
+0     003ec423  L$$DIV                           
+0     003ec432  L$$MOD                           
+0     003ec4e2  L$$TOFS                          
+0     003ec52e  LL$$AND                          
+0     003ec48e  LL$$CMP                          
+0     003ec536  LL$$OR                           
+0     003ec53e  LL$$XOR                          
+1     003f4be0  SINTAB_360                       
+0     003ec440  UL$$DIV                          
+0     003ec447  UL$$MOD                          
+0     003ec4a0  ULL$$CMP                         
+1     003f4110  _ACQPS                           
+1     00008a00  _ADCDRV_1ch_Rlt1                 
+1     00008a02  _ADCDRV_1ch_Rlt5                 
+1     00008a04  _ADCDRV_1ch_Rlt6                 
+1     00008a06  _ADCDRV_1ch_Rlt7                 
+0     003ef9b5  _ADC_SOC_CNF                     
 1     00007100  _AdcRegs                         
 1     00000b00  _AdcResult                       
-0     003ef212  _AddLoggerVariableBuffers        
-0     003ef20d  _AddProbes                       
-0     003ef846  _ByteProtocol_DecodeByte         
-0     003ef818  _ByteProtocol_Init               
-0     003ef7b1  _ByteProtocol_Transmit           
+0     003ef5ac  _AddLoggerVariableBuffers        
+0     003ef5a7  _AddProbes                       
+0     003eed4e  _ArrayGet                        
+0     003eed2d  _ButtonSet                       
+0     003efdcd  _ByteProtocol_DecodeByte         
+0     003efd9f  _ByteProtocol_Init               
+0     003efd38  _ByteProtocol_Transmit           
 1     00008996  _CNTL_2P2Z_Coef1                 
 1     000089a8  _CNTL_2P2Z_Coef2                 
-1     000089c0  _CNTL_2P2Z_CoefStruct1           
-1     000089ce  _CNTL_2P2Z_CoefStruct2           
+1     000089e0  _CNTL_2P2Z_CoefStruct1           
+1     000089ee  _CNTL_2P2Z_CoefStruct2           
 1     00008998  _CNTL_2P2Z_DBUFF1                
 1     000089aa  _CNTL_2P2Z_DBUFF2                
 1     00008992  _CNTL_2P2Z_Fdbk1                 
@@ -757,48 +875,54 @@ abs   ffffffff  .text
 1     000089a6  _CNTL_2P2Z_Out2                  
 1     00008990  _CNTL_2P2Z_Ref1                  
 1     000089a2  _CNTL_2P2Z_Ref2                  
-1     00008410  _ChSel                           
+1     003f4100  _ChSel                           
 1     00001400  _Cla1Regs                        
-1     00008314  _ClearInvTrip                    
-0     003ef01e  _ClearVariables                  
-1     0000830e  _CloseIloopInv                   
-1     0000830c  _CloseVloopInv                   
-1     000083c0  _Comp                            
+1     003f4027  _ClearInvTrip                    
+0     003ef3b8  _ClearVariables                  
+1     003f401c  _CloseIloopInv                   
+1     003f401a  _CloseVloopInv                   
+1     003f4bc0  _CmdDispatcher                   
+0     003eeccb  _CmdInterpreter                  
+1     003f4b9c  _CmdPacket                       
+1     003f4024  _CommsOKflg                      
+1     003f40c0  _Comp                            
 1     00006400  _Comp1Regs                       
 1     00006420  _Comp2Regs                       
 1     00006440  _Comp3Regs                       
-0     003ee653  _ConvertToBytes16                
-0     003ee646  _ConvertToBytes32                
-0     003ee658  _ConvertToUint16                 
-0     003ee627  _ConvertToUint32                 
-0     003ee65c  _ConvertToUint64                 
+0     003ee6f9  _ConvertToBytes16                
+0     003ee6ec  _ConvertToBytes32                
+0     003ee6fe  _ConvertToUint16                 
+0     003ee6cd  _ConvertToUint32                 
+0     003ee702  _ConvertToUint64                 
 1     00000c00  _CpuTimer0Regs                   
 1     00000c08  _CpuTimer1Regs                   
 1     00000c10  _CpuTimer2Regs                   
 1     003f7ff8  _CsmPwl                          
 1     00000ae0  _CsmRegs                         
-0     003efca0  _DLOG_4CH_init                   
-0     003efcab  _DLOG_4CH_update                 
+0     003ec35a  _DLOG_4CH_init                   
+0     003ec365  _DLOG_4CH_update                 
 0     003ee000  _DLOG_BuffInit                   
-0     00009000  _DPL_ISR                         
-0     003efc4d  _DPL_Init                        
-0     000090ef  _DSP28x_usDelay                  
-0     003ef158  _Datalogger                      
-0     003ef02c  _DecodeCommands                  
-0     003ee729  _DecodePacket                    
+0     000093ce  _DPL_Func                        
+0     003ec307  _DPL_Init                        
+0     000094ba  _DSP28x_usDelay                  
+0     003eed51  _DataGet                         
+0     003eed78  _DataSet32                       
+0     003ef4f2  _Datalogger                      
+0     003ef3c6  _DecodeCommands                  
+0     003ee7cf  _DecodePacket                    
 1     00000880  _DevEmuRegs                      
-0     003ef5f2  _DeviceInit                      
-1     00008376  _Dgain_I                         
-1     0000838c  _Dgain_V                         
-1     00008304  _DlogCh1                         
-1     00008303  _DlogCh2                         
-1     00008310  _DlogCh3                         
-1     0000830f  _DlogCh4                         
-1     0000832c  _Dmax_I                          
-1     00008386  _Dmax_V                          
-0     003ee6bc  _DoCrc32                         
-1     0000836a  _Duty3A                          
-1     00008368  _Duty3A_fixed                    
+0     003efb79  _DeviceInit                      
+1     003f4030  _Dgain_I                         
+1     003f403e  _Dgain_V                         
+1     003f4022  _DlogCh1                         
+1     003f400f  _DlogCh2                         
+1     003f4014  _DlogCh3                         
+1     003f4015  _DlogCh4                         
+1     003f403a  _Dmax_I                          
+1     003f4032  _Dmax_V                          
+0     003ee762  _DoCrc32                         
+1     003f4094  _Duty3A                          
+1     003f4082  _Duty3A_fixed                    
 1     00006040  _ECanaLAMRegs                    
 1     000060c0  _ECanaMOTORegs                   
 1     00006080  _ECanaMOTSRegs                   
@@ -813,44 +937,51 @@ abs   ffffffff  .text
 1     00006940  _EPwm6Regs                       
 1     00006980  _EPwm7Regs                       
 1     00006b00  _EQep1Regs                       
+0     003eec2a  _EchoCmdByte                     
+0     003eec9e  _EchoDataByte                    
+0     003eec64  _EchoSizeByte                    
 1     00000d01  _EmuBMode                        
 1     00000d00  _EmuKey                          
-0     003ee70a  _EncodeAndTransmitData           
+0     003ee7b0  _EncodeAndTransmitData           
 1     00000a80  _FlashRegs                       
 1     00000d04  _Flash_CPUScaleFactor            
 1     00000d02  _Flash_CallbackPtr               
+1     003f4580  _FreqVect                        
+0     003eebf0  _GetCmdByte                      
+0     003eec7b  _GetDataByte                     
+0     003eec41  _GetSizeByte                     
 1     00006f80  _GpioCtrlRegs                    
 1     00006fc0  _GpioDataRegs                    
 1     00006fe0  _GpioIntRegs                     
-1     0000835c  _Grid_Freq                       
-1     00008307  _Gui_InvStart                    
-1     00008306  _Gui_InvStop                     
-1     00008362  _Gui_Ipv                         
-1     00008342  _Gui_Light                       
-1     0000833c  _Gui_LightCommand                
-1     00008305  _Gui_LightCommand_Prev           
-1     0000833e  _Gui_LightRatio                  
-1     0000833a  _Gui_LightRatio_Avg              
-1     00008309  _Gui_MPPTEnable                  
-1     00008340  _Gui_MPPTTrackingEff             
-1     00008360  _Gui_PanelPower                  
-1     00008344  _Gui_PanelPower_Theoretical      
-1     0000835e  _Gui_Vboost                      
-1     00008366  _Gui_Vpv                         
-0     003ef8d6  _HBridgeCtor                     
-0     003ef95d  _HBridgeTransitionFunction       
-0     003ef90b  _HBridge_VDC                     
-0     003ef926  _HBridge_Zero                    
-0     003ef8e7  _HBridge_default                 
-0     003ef8de  _HBridge_initial                 
-0     003ef941  _HBridge_negVDC                  
+1     003f405e  _Grid_Freq                       
+1     003f4007  _Gui_InvStart                    
+1     003f4006  _Gui_InvStop                     
+1     003f4074  _Gui_Ipv                         
+1     003f4042  _Gui_Light                       
+1     003f4058  _Gui_LightCommand                
+1     003f4008  _Gui_LightCommand_Prev           
+1     003f404c  _Gui_LightRatio                  
+1     003f4046  _Gui_LightRatio_Avg              
+1     003f400a  _Gui_MPPTEnable                  
+1     003f4044  _Gui_MPPTTrackingEff             
+1     003f4048  _Gui_PanelPower                  
+1     003f404e  _Gui_PanelPower_Theoretical      
+1     003f404a  _Gui_Vboost                      
+1     003f406a  _Gui_Vpv                         
+0     003efe5d  _HBridgeCtor                     
+0     003efee4  _HBridgeTransitionFunction       
+0     003efe92  _HBridge_VDC                     
+0     003efead  _HBridge_Zero                    
+0     003efe6e  _HBridge_default                 
+0     003efe65  _HBridge_initial                 
+0     003efec8  _HBridge_negVDC                  
 1     00006ac0  _HRCap1Regs                      
 1     00006ae0  _HRCap2Regs                      
-1     00008350  _HistPtr                         
-1     000083b5  _Hist_Ipv                        
-1     0000839d  _Hist_Light                      
-1     000083ad  _Hist_Vboost                     
-1     000083a5  _Hist_Vpv                        
+1     003f4056  _HistPtr                         
+1     003f40a5  _Hist_Ipv                        
+1     003f40ad  _Hist_Light                      
+1     003f40b5  _Hist_Vboost                     
+1     003f40c8  _Hist_Vpv                        
 1     00007900  _I2caRegs                        
 0     003fead8  _IQ10mpyRndSatTable              
 0     003feacc  _IQ11mpyRndSatTable              
@@ -900,178 +1031,252 @@ abs   ffffffff  .text
 0     003fe712  _IQsqrtRoundSatTable             
 0     003fe722  _IQsqrtTable                     
 0     003fe824  _IQsqrtTableEnd                  
-0     003efe65  _ISR_ILLEGAL                     
-1     0000837c  _IboostSwRef                     
-1     00008372  _IboostswRead                    
-1     00008378  _Igain_I                         
-1     0000838a  _Igain_V                         
-0     003ef01d  _Init                            
-0     003efb31  _InitCommros                     
-0     003eea6f  _InitCore                        
-0     000090cf  _InitFlash                       
-0     003efaf9  _InitSciaGpio                    
-1     00008328  _InvModIndex                     
-1     00008338  _InvSine                         
-0     000090ea  _Inv_ISR                         
-0     003eed47  _InverterCtor                    
-0     003eee7e  _InverterTransitionFunction      
-0     003eee1c  _Inverter_AlmostOutOfParameters  
-0     003eedba  _Inverter_OutOfParameters        
-0     003eed89  _Inverter_PowerOn                
-0     003eee4d  _Inverter_ShutDown               
-0     003eedeb  _Inverter_WithinParameters       
-0     003eed58  _Inverter_default                
-0     003eed4f  _Inverter_initial                
-1     00008384  _IpvRead                         
-1     00008370  _IpvRead_EMAVG                   
-1     0000831f  _K_Ipv                           
-1     0000831e  _K_Light                         
-1     00008320  _K_Vboost                        
-1     00008324  _K_Vpv                           
-1     0000830b  _LedBlinkCnt                     
-1     00008312  _LedBlinkCnt2                    
+0     003ec563  _ISR_ILLEGAL                     
+1     003f4092  _IboostSwRef                     
+1     003f408a  _IboostSwRef_wInj                
+1     003f408c  _IboostswRead                    
+1     003f402e  _Igain_I                         
+1     003f4088  _Igain_V                         
+0     003ef3b7  _Init                            
+0     003ec14a  _InitCommros                     
+0     003eeb15  _InitCore                        
+0     0000949f  _InitFlash                       
+0     003ec112  _InitSciaGpio                    
+1     003f4064  _InvModIndex                     
+1     003f4068  _InvSine                         
+0     000090dd  _Inv_ISR                         
+0     003ef0e1  _InverterCtor                    
+0     003ef218  _InverterTransitionFunction      
+0     003ef1b6  _Inverter_AlmostOutOfParameters  
+0     003ef154  _Inverter_OutOfParameters        
+0     003ef123  _Inverter_PowerOn                
+0     003ef1e7  _Inverter_ShutDown               
+0     003ef185  _Inverter_WithinParameters       
+0     003ef0f2  _Inverter_default                
+0     003ef0e9  _Inverter_initial                
+1     003f407a  _IpvRead                         
+1     003f407e  _IpvRead_EMAVG                   
+1     003f4021  _K_Ipv                           
+1     003f401d  _K_Light                         
+1     003f401f  _K_Vboost                        
+1     003f4020  _K_Vpv                           
+1     003f400b  _LedBlinkCnt                     
+1     003f400d  _LedBlinkCnt2                    
+0     003eecf2  _LifePulseTsk                    
 1     00006c00  _LinaRegs                        
+1     003f4b8a  _LowByteFlag                     
 1     000089b4  _MATH_EMAVG_In1                  
 1     000089ba  _MATH_EMAVG_In2                  
 1     000089b8  _MATH_EMAVG_Multiplier1          
 1     000089be  _MATH_EMAVG_Multiplier2          
 1     000089b6  _MATH_EMAVG_Out1                 
 1     000089bc  _MATH_EMAVG_Out2                 
-1     00008322  _MPPT_ENABLE                     
-1     00008316  _MPPT_slew                       
-0     003ef79c  _MemCopy                         
-0     003eead9  _MpptCtor                        
-0     003eecf4  _MpptTransitionFunction          
-0     003eebf5  _Mppt_Blink                      
-0     003eecde  _Mppt_Disable                    
-0     003eeaea  _Mppt_Execute                    
-0     003eec17  _Mppt_StateMachine               
-0     003eeae1  _Mppt_initial                    
+1     003f4002  _MPPT_ENABLE                     
+1     003f4000  _MPPT_slew                       
+0     003efd23  _MemCopy                         
+1     003f4b92  _MemGetAddress                   
+1     003f4b87  _MemGetAmount                    
+1     003f4b84  _MemGetPtr                       
+1     003f4b86  _MemSetPtr                       
+1     003f4b90  _MemSetValue                     
+0     003eee73  _MpptCtor                        
+0     003ef08e  _MpptTransitionFunction          
+0     003eef8f  _Mppt_Blink                      
+0     003ef078  _Mppt_Disable                    
+0     003eee84  _Mppt_Execute                    
+0     003eefb1  _Mppt_StateMachine               
+0     003eee7b  _Mppt_initial                    
 1     00007060  _NmiIntruptRegs                  
-1     0000835a  _Offset_Volt                     
-0     003ef722  _PLLset                          
-1     0000830a  _PVInverterState                 
-1     000089e4  _PWMDRV_1ch_UpDwnCntCompl_Duty3  
-1     000089e6  _PWMDRV_1ch_UpDwnCntCompl_Period3
-0     003ef9e7  _PWM_1ch_UpDwnCntCompl_CNF       
-1     00008315  _PanelBoostConnect               
-0     003ef217  _PanelCtor                       
-0     003ef3da  _PanelTransitionFunction         
-0     003ef360  _Panel_Connect                   
-0     003ef228  _Panel_Dashboard                 
-0     003ef384  _Panel_Emulator                  
-0     003ef21f  _Panel_initial                   
+1     003f4b82  _NumWords                        
+1     003f4380  _OL_MagVect                      
+1     003f4780  _OL_PhaseVect                    
+1     003f4066  _Offset_Volt                     
+0     003efca9  _PLLset                          
+1     003f400c  _PVInverterState                 
+1     000089fc  _PWMDRV_1ch_UpDwnCntCompl_Duty3  
+1     000089fe  _PWMDRV_1ch_UpDwnCntCompl_Period3
+0     003ec000  _PWM_1ch_UpDwnCntCompl_CNF       
+0     000090bd  _PWM_ISR                         
+0     003eecb1  _PackWord                        
+1     003f4012  _PanelBoostConnect               
+0     003ef5b1  _PanelCtor                       
+0     003ef778  _PanelTransitionFunction         
+0     003ef6fe  _Panel_Connect                   
+0     003ef5c2  _Panel_Dashboard                 
+0     003ef722  _Panel_Emulator                  
+0     003ef5b9  _Panel_initial                   
 1     003d7e80  _PartIdRegs                      
-1     00008388  _Pgain_I                         
-1     00008380  _Pgain_V                         
-0     003ef75c  _PieCntlInit                     
+1     003f4034  _Pgain_I                         
+1     003f4086  _Pgain_V                         
+0     003efce3  _PieCntlInit                     
 1     00000ce0  _PieCtrlRegs                     
 1     00000d00  _PieVectTable                    
-0     003ef77b  _PieVectTableInit                
-1     00008308  _PwmDacCh1                       
-1     00008302  _PwmDacCh2                       
-1     00008301  _PwmDacCh3                       
-1     00008300  _PwmDacCh4                       
-0     003f00f3  _RamfuncsLoadEnd                 
+0     003efd02  _PieVectTableInit                
+1     003f4680  _Plant_MagVect                   
+1     003f4480  _Plant_PhaseVect                 
+1     003f4004  _PwmDacCh1                       
+1     003f4005  _PwmDacCh2                       
+1     003f4003  _PwmDacCh3                       
+1     003f4011  _PwmDacCh4                       
+0     003f04be  _RamfuncsLoadEnd                 
 0     003f0000  _RamfuncsLoadStart               
 0     00009000  _RamfuncsRunStart                
-1     0000830d  _ResetPLL                        
-1     00008321  _Run_MPPT                        
-0     003efadf  _SCIDataAvailable                
-0     003efae7  _SCIReceiveByte                  
-0     003efaeb  _SCITransmitByte                 
-0     003efd2f  _SGENHP_2_calc                   
-0     003ee600  _SPI_init                        
+1     003f4b98  _RcvTaskPointer                  
+1     003f4b81  _RcvTskPtrShdw                   
+1     003f4013  _ResetPLL                        
+0     003ee5eb  _RunInverter                     
+1     003f4001  _Run_MPPT                        
+1     003f4b8b  _RxChar                          
+1     003f4b89  _RxWord                          
+0     003eeb7f  _SCIA_Init                       
+0     003ec0f8  _SCIDataAvailable                
+0     003ec100  _SCIReceiveByte                  
+0     003ec104  _SCITransmitByte                 
+1     003f4180  _SFRA1                           
+0     003ef7cc  _SFRA_IQ_BACKGROUND              
+1     003f484c  _SFRA_IQ_BromSineTableStart      
+0     00009078  _SFRA_IQ_COLLECT                 
+0     003eff6e  _SFRA_IQ_INIT                    
+0     0000905a  _SFRA_IQ_INJECT                  
+1     000089c8  _SFRA_IQ_Q22_Q16Round            
+1     000089c4  _SFRA_IQ_StateSlew               
+1     000089c6  _SFRA_IQ_amplitude               
+1     000089c3  _SFRA_IQ_count                   
+1     000089ca  _SFRA_IQ_pointer                 
+1     000089c0  _SFRA_IQ_preCount                
+1     000089d2  _SFRA_IQ_rCosSum                 
+1     000089d6  _SFRA_IQ_rSinSum                 
+1     000089d8  _SFRA_IQ_reference               
+1     000089c1  _SFRA_IQ_state                   
+1     000089cc  _SFRA_IQ_step                    
+1     000089da  _SFRA_IQ_tableptr                
+1     000089dc  _SFRA_IQ_tableptrStart           
+1     000089ce  _SFRA_IQ_uCosSum                 
+1     000089d4  _SFRA_IQ_uSinSum                 
+1     000089c2  _SFRA_IQ_windowSamples           
+1     000089de  _SFRA_IQ_yCosSum                 
+1     000089d0  _SFRA_IQ_ySinSum                 
+0     003ec3e9  _SGENHP_2_calc                   
+0     003ee6a6  _SPI_init                        
 0     003ee014  _SPLL_1ph_init                   
-1     00008374  _ScaleFactor                     
+1     003f4076  _ScaleFactor                     
 1     00007050  _SciaRegs                        
-0     003eea4b  _SendResetMessage                
-0     003ee9ec  _ServiceRoutine                  
-0     003efb0f  _SetupSerialPort                 
+0     003eeda0  _SendData                        
+0     003eeaf1  _SendResetMessage                
+1     003f4b8c  _SendTaskPtr                     
+1     003f401b  _SerialCommsTimer                
+0     003eebeb  _SerialHostComms                 
+0     003eea92  _ServiceRoutine                  
+0     003ec128  _SetupSerialPort                 
+0     003eed3c  _SliderSet                       
+0     003eed9b  _SpareTsk08                      
 1     00007040  _SpiaRegs                        
 1     00007740  _SpibRegs                        
 1     00007010  _SysCtrlRegs                     
 1     00000985  _SysPwrCtrlRegs                  
-1     00008354  _Temp2                           
-1     00008311  _TransmitData                    
-1     00008400  _TrigSel                         
-1     0000831b  _UpdateCoef                      
-1     00008399  _VTimer0                         
-1     00008395  _VTimer1                         
-1     00008391  _VTimer2                         
-1     00008358  _Vac_in                          
-1     00008352  _VavgReal                        
-1     0000836e  _VboostRead                      
-1     00008325  _VloopTicker                     
-1     00008382  _VpvRead                         
-1     0000837e  _VpvRead_EMAVG                   
-1     0000836c  _VpvRef                          
-1     0000837a  _VpvRef_MPPT                     
-1     00008356  _VrmsReal                        
-0     003ef71a  _WDogDisable                     
+1     003f4b88  _TaskDoneFlag                    
+1     003f4b8e  _Temp                            
+1     003f4070  _Temp2                           
+0     003eed1e  _TextSet                         
+1     003f400e  _TransmitData                    
+1     003f40e8  _TrigSel                         
+1     003f4009  _UpdateCoef                      
+1     003f40a1  _VTimer0                         
+1     003f409d  _VTimer1                         
+1     003f4099  _VTimer2                         
+1     003f405c  _Vac_in                          
+0     003eed4b  _VariableGet                     
+1     003f4072  _VavgReal                        
+1     003f4080  _VboostRead                      
+1     003f4023  _VloopTicker                     
+1     003f407c  _VpvRead                         
+1     003f4084  _VpvRead_EMAVG                   
+1     003f408e  _VpvRef                          
+1     003f4090  _VpvRef_MPPT                     
+1     003f4060  _VrmsReal                        
+0     003efca1  _WDogDisable                     
 1     00007070  _XIntruptRegs                    
-1     00008323  _ZCDDetect                       
-0     003f6193  __IQ24div                        
-0     003f61da  __IQ9div                         
+1     003f4017  _ZCDDetect                       
+0     003f6178  __IQ15div                        
+0     003f624d  __IQ15isqrt                      
+0     003f6293  __IQ15sqrt                       
+0     003f609d  __IQ16atan2                      
+0     003f6000  __IQ16log                        
+0     003f6118  __IQ16mag                        
+0     003f62d5  __IQ16toF                        
+0     003f61bf  __IQ24div                        
+0     003f6206  __IQ9div                         
 1     000003d0  __STACK_END                      
 abs   00000380  __STACK_SIZE                     
-1     000082c8  ___TI_cleanup_ptr                
-1     000082ca  ___TI_dtors_ptr                  
+1     003f4848  ___TI_cleanup_ptr                
+1     003f484a  ___TI_dtors_ptr                  
 abs   ffffffff  ___binit__                       
 abs   ffffffff  ___c_args__                      
-0     003f6000  ___cinit__                       
+0     003f62e9  ___cinit__                       
 abs   ffffffff  ___etext__                       
 abs   ffffffff  ___pinit__                       
 abs   ffffffff  ___text__                        
-0     003efdfe  __args_main                      
-1     000082cc  __lock                           
-0     003efe5c  __nop                            
-0     003efe58  __register_lock                  
-0     003efe54  __register_unlock                
+0     003ec4fc  __args_main                      
+1     003f484e  __lock                           
+0     003ec55a  __nop                            
+0     003ec556  __register_lock                  
+0     003ec552  __register_unlock                
 1     00000050  __stack                          
-1     000082ce  __unlock                         
-0     003efe17  _abort                           
-1     00008040  _buffer                          
-0     003efceb  _c_int00                         
-1     00008140  _commros                         
-1     00008420  _dlog                            
-1     000083f0  _ePWM                            
-0     003efe19  _exit                            
-1     0000834a  _hBridge                         
-1     00008319  _i                               
-1     0000831d  _iK_Ipv                          
-1     0000831c  _iK_Vboost                       
-1     00008332  _inv_Iset                        
-1     00008336  _inv_meas_cur_diff_inst          
-1     00008330  _inv_meas_cur_lleg1_inst         
-1     00008326  _inv_meas_cur_lleg2_inst         
-1     00008334  _inv_meas_vol_inst               
-1     0000832a  _inv_ref_cur_inst                
-1     0000832e  _inv_ref_vol_inst                
-1     0000834e  _inverter                        
-0     003eefb0  _loggdata                        
-1     00008008  _loggerVars                      
+1     003f4850  __unlock                         
+0     003ec515  _abort                           
+1     003f41e0  _arrayGetList                    
+1     003f48c0  _buffer                          
+0     003ec3a5  _c_int00                         
+1     003f49c0  _commros                         
+1     003f4b80  _dataOut16                       
+1     003f4b96  _dataOut32                       
+1     003f41c0  _dataSetList                     
+1     003f4b85  _delayer                         
+1     003f4156  _dlog                            
+1     003f4120  _ePWM                            
+0     003ec517  _exit                            
+1     003f4050  _hBridge                         
+1     003f4026  _i                               
+1     003f4028  _iK_Ipv                          
+1     003f401e  _iK_Vboost                       
+1     003f4025  _initializationFlag              
+1     003f4062  _inv_Iset                        
+1     003f402a  _inv_meas_cur_diff_inst          
+1     003f402c  _inv_meas_cur_lleg1_inst         
+1     003f4040  _inv_meas_cur_lleg2_inst         
+1     003f4036  _inv_meas_vol_inst               
+1     003f4038  _inv_ref_cur_inst                
+1     003f403c  _inv_ref_vol_inst                
+1     003f4052  _inverter                        
+0     003ef34a  _loggdata                        
+1     003f4888  _loggerVars                      
 0     003ee0ce  _main                            
-0     003efe48  _memset                          
-1     00008346  _mppt                            
-1     00008480  _mppt_incc1                      
-1     00008440  _mppt_pno1                       
-1     00008348  _panel                           
-1     000084c0  _pidGRANDO_Iinv                  
-1     00008500  _pidGRANDO_Vinv                  
-1     00008580  _plotArray                       
-1     00008000  _probes                          
-1     000083c8  _pwmdac1                         
-1     00008364  _sdata                           
-1     000083d2  _sgen                            
-1     00008456  _sine_mainsV                     
-1     00008317  _sine_prev                       
-1     00008540  _spll1                           
-1     0000838e  _state                           
-1     0000834c  _temp_Scratch                    
-1     00008313  _timer1                          
+1     003f4b94  _memDataPtr16                    
+1     003f4b9a  _memDataPtr32                    
+0     003ec546  _memset                          
+1     003f405a  _mppt                            
+1     003f4280  _mppt_incc1                      
+1     003f4140  _mppt_pno1                       
+1     003f4054  _panel                           
+1     003f4300  _pidGRANDO_Iinv                  
+1     003f42c0  _pidGRANDO_Vinv                  
+1     003f4880  _probes                          
+1     003f40d0  _pwmdac1                         
+1     003f406c  _sdata                           
+1     003f40da  _sgen                            
+1     003f4198  _sine_mainsV                     
+1     003f4016  _sine_prev                       
+1     003f4340  _spll1                           
+1     003f4096  _state                           
+1     003f406e  _temp_Scratch                    
+1     003f4010  _timer1                          
+1     003f4220  _varGetList                      
+1     003f4200  _varSetBtnList                   
+1     003f4260  _varSetSldrList                  
+1     003f4240  _varSetTxtList                   
+1     003f4b83  _wordsLeftToGet                  
 abs   ffffffff  binit                            
-0     003f6000  cinit                            
+0     003f62e9  cinit                            
 0     003f7ff6  code_start                       
 abs   ffffffff  etext                            
 abs   ffffffff  pinit                            
@@ -1081,111 +1286,153 @@ GLOBAL SYMBOLS: SORTED BY Symbol Address
 
 page  address   name                             
 ----  -------   ----                             
-0     00009000  _DPL_ISR                         
+0     00009000  FS$$MPY                          
 0     00009000  _RamfuncsRunStart                
-0     000090cf  _InitFlash                       
-0     000090ea  _Inv_ISR                         
-0     000090ef  _DSP28x_usDelay                  
+0     0000905a  _SFRA_IQ_INJECT                  
+0     00009078  _SFRA_IQ_COLLECT                 
+0     000090bd  _PWM_ISR                         
+0     000090dd  _Inv_ISR                         
+0     000093ce  _DPL_Func                        
+0     0000949f  _InitFlash                       
+0     000094ba  _DSP28x_usDelay                  
+0     003ec000  _PWM_1ch_UpDwnCntCompl_CNF       
+0     003ec0f8  _SCIDataAvailable                
+0     003ec100  _SCIReceiveByte                  
+0     003ec104  _SCITransmitByte                 
+0     003ec112  _InitSciaGpio                    
+0     003ec128  _SetupSerialPort                 
+0     003ec14a  _InitCommros                     
+0     003ec189  FD$$MPY                          
+0     003ec20c  FS$$DIV                          
+0     003ec28f  FS$$SUB                          
+0     003ec294  FS$$ADD                          
+0     003ec307  _DPL_Init                        
+0     003ec35a  _DLOG_4CH_init                   
+0     003ec365  _DLOG_4CH_update                 
+0     003ec3a5  _c_int00                         
+0     003ec3e9  _SGENHP_2_calc                   
+0     003ec423  L$$DIV                           
+0     003ec432  L$$MOD                           
+0     003ec440  UL$$DIV                          
+0     003ec447  UL$$MOD                          
+0     003ec44d  I$$DIV                           
+0     003ec45e  I$$MOD                           
+0     003ec46f  FD$$TOL                          
+0     003ec48e  LL$$CMP                          
+0     003ec4a0  ULL$$CMP                         
+0     003ec4ac  FS$$TOFD                         
+0     003ec4c8  I$$TOFS                          
+0     003ec4e2  L$$TOFS                          
+0     003ec4fc  __args_main                      
+0     003ec515  C$$EXIT                          
+0     003ec515  _abort                           
+0     003ec517  _exit                            
+0     003ec52e  LL$$AND                          
+0     003ec536  LL$$OR                           
+0     003ec53e  LL$$XOR                          
+0     003ec546  _memset                          
+0     003ec552  __register_unlock                
+0     003ec556  __register_lock                  
+0     003ec55a  __nop                            
+0     003ec563  _ISR_ILLEGAL                     
+0     003ec568  FS$$NEG                          
 0     003ee000  _DLOG_BuffInit                   
 0     003ee014  _SPLL_1ph_init                   
 0     003ee0ce  _main                            
-0     003ee600  _SPI_init                        
-0     003ee627  _ConvertToUint32                 
-0     003ee646  _ConvertToBytes32                
-0     003ee653  _ConvertToBytes16                
-0     003ee658  _ConvertToUint16                 
-0     003ee65c  _ConvertToUint64                 
-0     003ee6bc  _DoCrc32                         
-0     003ee70a  _EncodeAndTransmitData           
-0     003ee729  _DecodePacket                    
-0     003ee9ec  _ServiceRoutine                  
-0     003eea4b  _SendResetMessage                
-0     003eea6f  _InitCore                        
-0     003eead9  _MpptCtor                        
-0     003eeae1  _Mppt_initial                    
-0     003eeaea  _Mppt_Execute                    
-0     003eebf5  _Mppt_Blink                      
-0     003eec17  _Mppt_StateMachine               
-0     003eecde  _Mppt_Disable                    
-0     003eecf4  _MpptTransitionFunction          
-0     003eed47  _InverterCtor                    
-0     003eed4f  _Inverter_initial                
-0     003eed58  _Inverter_default                
-0     003eed89  _Inverter_PowerOn                
-0     003eedba  _Inverter_OutOfParameters        
-0     003eedeb  _Inverter_WithinParameters       
-0     003eee1c  _Inverter_AlmostOutOfParameters  
-0     003eee4d  _Inverter_ShutDown               
-0     003eee7e  _InverterTransitionFunction      
-0     003eefb0  _loggdata                        
-0     003ef01d  _Init                            
-0     003ef01e  _ClearVariables                  
-0     003ef02c  _DecodeCommands                  
-0     003ef158  _Datalogger                      
-0     003ef20d  _AddProbes                       
-0     003ef212  _AddLoggerVariableBuffers        
-0     003ef217  _PanelCtor                       
-0     003ef21f  _Panel_initial                   
-0     003ef228  _Panel_Dashboard                 
-0     003ef360  _Panel_Connect                   
-0     003ef384  _Panel_Emulator                  
-0     003ef3da  _PanelTransitionFunction         
-0     003ef42e  _ADC_SOC_CNF                     
-0     003ef5f2  _DeviceInit                      
-0     003ef71a  _WDogDisable                     
-0     003ef722  _PLLset                          
-0     003ef75c  _PieCntlInit                     
-0     003ef77b  _PieVectTableInit                
-0     003ef79c  _MemCopy                         
-0     003ef7b1  _ByteProtocol_Transmit           
-0     003ef818  _ByteProtocol_Init               
-0     003ef846  _ByteProtocol_DecodeByte         
-0     003ef8d6  _HBridgeCtor                     
-0     003ef8de  _HBridge_initial                 
-0     003ef8e7  _HBridge_default                 
-0     003ef90b  _HBridge_VDC                     
-0     003ef926  _HBridge_Zero                    
-0     003ef941  _HBridge_negVDC                  
-0     003ef95d  _HBridgeTransitionFunction       
-0     003ef9e7  _PWM_1ch_UpDwnCntCompl_CNF       
-0     003efadf  _SCIDataAvailable                
-0     003efae7  _SCIReceiveByte                  
-0     003efaeb  _SCITransmitByte                 
-0     003efaf9  _InitSciaGpio                    
-0     003efb0f  _SetupSerialPort                 
-0     003efb31  _InitCommros                     
-0     003efb70  FD$$MPY                          
-0     003efbf3  FS$$MPY                          
-0     003efc4d  _DPL_Init                        
-0     003efca0  _DLOG_4CH_init                   
-0     003efcab  _DLOG_4CH_update                 
-0     003efceb  _c_int00                         
-0     003efd2f  _SGENHP_2_calc                   
-0     003efd69  I$$DIV                           
-0     003efd7a  I$$MOD                           
-0     003efd8b  FD$$TOL                          
-0     003efdaa  LL$$CMP                          
-0     003efdbc  ULL$$CMP                         
-0     003efdc8  FS$$TOFD                         
-0     003efde4  I$$TOFS                          
-0     003efdfe  __args_main                      
-0     003efe17  C$$EXIT                          
-0     003efe17  _abort                           
-0     003efe19  _exit                            
-0     003efe30  LL$$AND                          
-0     003efe38  LL$$OR                           
-0     003efe40  LL$$XOR                          
-0     003efe48  _memset                          
-0     003efe54  __register_unlock                
-0     003efe58  __register_lock                  
-0     003efe5c  __nop                            
-0     003efe65  _ISR_ILLEGAL                     
+0     003ee5eb  _RunInverter                     
+0     003ee6a6  _SPI_init                        
+0     003ee6cd  _ConvertToUint32                 
+0     003ee6ec  _ConvertToBytes32                
+0     003ee6f9  _ConvertToBytes16                
+0     003ee6fe  _ConvertToUint16                 
+0     003ee702  _ConvertToUint64                 
+0     003ee762  _DoCrc32                         
+0     003ee7b0  _EncodeAndTransmitData           
+0     003ee7cf  _DecodePacket                    
+0     003eea92  _ServiceRoutine                  
+0     003eeaf1  _SendResetMessage                
+0     003eeb15  _InitCore                        
+0     003eeb7f  _SCIA_Init                       
+0     003eebeb  _SerialHostComms                 
+0     003eebf0  _GetCmdByte                      
+0     003eec2a  _EchoCmdByte                     
+0     003eec41  _GetSizeByte                     
+0     003eec64  _EchoSizeByte                    
+0     003eec7b  _GetDataByte                     
+0     003eec9e  _EchoDataByte                    
+0     003eecb1  _PackWord                        
+0     003eeccb  _CmdInterpreter                  
+0     003eecf2  _LifePulseTsk                    
+0     003eed1e  _TextSet                         
+0     003eed2d  _ButtonSet                       
+0     003eed3c  _SliderSet                       
+0     003eed4b  _VariableGet                     
+0     003eed4e  _ArrayGet                        
+0     003eed51  _DataGet                         
+0     003eed78  _DataSet32                       
+0     003eed9b  _SpareTsk08                      
+0     003eeda0  _SendData                        
+0     003eee73  _MpptCtor                        
+0     003eee7b  _Mppt_initial                    
+0     003eee84  _Mppt_Execute                    
+0     003eef8f  _Mppt_Blink                      
+0     003eefb1  _Mppt_StateMachine               
+0     003ef078  _Mppt_Disable                    
+0     003ef08e  _MpptTransitionFunction          
+0     003ef0e1  _InverterCtor                    
+0     003ef0e9  _Inverter_initial                
+0     003ef0f2  _Inverter_default                
+0     003ef123  _Inverter_PowerOn                
+0     003ef154  _Inverter_OutOfParameters        
+0     003ef185  _Inverter_WithinParameters       
+0     003ef1b6  _Inverter_AlmostOutOfParameters  
+0     003ef1e7  _Inverter_ShutDown               
+0     003ef218  _InverterTransitionFunction      
+0     003ef34a  _loggdata                        
+0     003ef3b7  _Init                            
+0     003ef3b8  _ClearVariables                  
+0     003ef3c6  _DecodeCommands                  
+0     003ef4f2  _Datalogger                      
+0     003ef5a7  _AddProbes                       
+0     003ef5ac  _AddLoggerVariableBuffers        
+0     003ef5b1  _PanelCtor                       
+0     003ef5b9  _Panel_initial                   
+0     003ef5c2  _Panel_Dashboard                 
+0     003ef6fe  _Panel_Connect                   
+0     003ef722  _Panel_Emulator                  
+0     003ef778  _PanelTransitionFunction         
+0     003ef7cc  _SFRA_IQ_BACKGROUND              
+0     003ef9b5  _ADC_SOC_CNF                     
+0     003efb79  _DeviceInit                      
+0     003efca1  _WDogDisable                     
+0     003efca9  _PLLset                          
+0     003efce3  _PieCntlInit                     
+0     003efd02  _PieVectTableInit                
+0     003efd23  _MemCopy                         
+0     003efd38  _ByteProtocol_Transmit           
+0     003efd9f  _ByteProtocol_Init               
+0     003efdcd  _ByteProtocol_DecodeByte         
+0     003efe5d  _HBridgeCtor                     
+0     003efe65  _HBridge_initial                 
+0     003efe6e  _HBridge_default                 
+0     003efe92  _HBridge_VDC                     
+0     003efead  _HBridge_Zero                    
+0     003efec8  _HBridge_negVDC                  
+0     003efee4  _HBridgeTransitionFunction       
+0     003eff6e  _SFRA_IQ_INIT                    
 0     003f0000  _RamfuncsLoadStart               
-0     003f00f3  _RamfuncsLoadEnd                 
-0     003f6000  ___cinit__                       
-0     003f6000  cinit                            
-0     003f6193  __IQ24div                        
-0     003f61da  __IQ9div                         
+0     003f04be  _RamfuncsLoadEnd                 
+0     003f6000  __IQ16log                        
+0     003f609d  __IQ16atan2                      
+0     003f6118  __IQ16mag                        
+0     003f6178  __IQ15div                        
+0     003f61bf  __IQ24div                        
+0     003f6206  __IQ9div                         
+0     003f624d  __IQ15isqrt                      
+0     003f6293  __IQ15sqrt                       
+0     003f62d5  __IQ16toF                        
+0     003f62e9  ___cinit__                       
+0     003f62e9  cinit                            
 0     003f7ff6  code_start                       
 0     003fe000  _IQsinTable                      
 0     003fe100  _IQcosTable                      
@@ -1283,125 +1530,6 @@ page  address   name
 1     00007100  _AdcRegs                         
 1     00007740  _SpibRegs                        
 1     00007900  _I2caRegs                        
-1     00008000  _probes                          
-1     00008008  _loggerVars                      
-1     00008040  _buffer                          
-1     00008140  _commros                         
-1     000082c8  ___TI_cleanup_ptr                
-1     000082ca  ___TI_dtors_ptr                  
-1     000082cc  __lock                           
-1     000082ce  __unlock                         
-1     00008300  _PwmDacCh4                       
-1     00008301  _PwmDacCh3                       
-1     00008302  _PwmDacCh2                       
-1     00008303  _DlogCh2                         
-1     00008304  _DlogCh1                         
-1     00008305  _Gui_LightCommand_Prev           
-1     00008306  _Gui_InvStop                     
-1     00008307  _Gui_InvStart                    
-1     00008308  _PwmDacCh1                       
-1     00008309  _Gui_MPPTEnable                  
-1     0000830a  _PVInverterState                 
-1     0000830b  _LedBlinkCnt                     
-1     0000830c  _CloseVloopInv                   
-1     0000830d  _ResetPLL                        
-1     0000830e  _CloseIloopInv                   
-1     0000830f  _DlogCh4                         
-1     00008310  _DlogCh3                         
-1     00008311  _TransmitData                    
-1     00008312  _LedBlinkCnt2                    
-1     00008313  _timer1                          
-1     00008314  _ClearInvTrip                    
-1     00008315  _PanelBoostConnect               
-1     00008316  _MPPT_slew                       
-1     00008317  _sine_prev                       
-1     00008319  _i                               
-1     0000831b  _UpdateCoef                      
-1     0000831c  _iK_Vboost                       
-1     0000831d  _iK_Ipv                          
-1     0000831e  _K_Light                         
-1     0000831f  _K_Ipv                           
-1     00008320  _K_Vboost                        
-1     00008321  _Run_MPPT                        
-1     00008322  _MPPT_ENABLE                     
-1     00008323  _ZCDDetect                       
-1     00008324  _K_Vpv                           
-1     00008325  _VloopTicker                     
-1     00008326  _inv_meas_cur_lleg2_inst         
-1     00008328  _InvModIndex                     
-1     0000832a  _inv_ref_cur_inst                
-1     0000832c  _Dmax_I                          
-1     0000832e  _inv_ref_vol_inst                
-1     00008330  _inv_meas_cur_lleg1_inst         
-1     00008332  _inv_Iset                        
-1     00008334  _inv_meas_vol_inst               
-1     00008336  _inv_meas_cur_diff_inst          
-1     00008338  _InvSine                         
-1     0000833a  _Gui_LightRatio_Avg              
-1     0000833c  _Gui_LightCommand                
-1     0000833e  _Gui_LightRatio                  
-1     00008340  _Gui_MPPTTrackingEff             
-1     00008342  _Gui_Light                       
-1     00008344  _Gui_PanelPower_Theoretical      
-1     00008346  _mppt                            
-1     00008348  _panel                           
-1     0000834a  _hBridge                         
-1     0000834c  _temp_Scratch                    
-1     0000834e  _inverter                        
-1     00008350  _HistPtr                         
-1     00008352  _VavgReal                        
-1     00008354  _Temp2                           
-1     00008356  _VrmsReal                        
-1     00008358  _Vac_in                          
-1     0000835a  _Offset_Volt                     
-1     0000835c  _Grid_Freq                       
-1     0000835e  _Gui_Vboost                      
-1     00008360  _Gui_PanelPower                  
-1     00008362  _Gui_Ipv                         
-1     00008364  _sdata                           
-1     00008366  _Gui_Vpv                         
-1     00008368  _Duty3A_fixed                    
-1     0000836a  _Duty3A                          
-1     0000836c  _VpvRef                          
-1     0000836e  _VboostRead                      
-1     00008370  _IpvRead_EMAVG                   
-1     00008372  _IboostswRead                    
-1     00008374  _ScaleFactor                     
-1     00008376  _Dgain_I                         
-1     00008378  _Igain_I                         
-1     0000837a  _VpvRef_MPPT                     
-1     0000837c  _IboostSwRef                     
-1     0000837e  _VpvRead_EMAVG                   
-1     00008380  _Pgain_V                         
-1     00008382  _VpvRead                         
-1     00008384  _IpvRead                         
-1     00008386  _Dmax_V                          
-1     00008388  _Pgain_I                         
-1     0000838a  _Igain_V                         
-1     0000838c  _Dgain_V                         
-1     0000838e  _state                           
-1     00008391  _VTimer2                         
-1     00008395  _VTimer1                         
-1     00008399  _VTimer0                         
-1     0000839d  _Hist_Light                      
-1     000083a5  _Hist_Vpv                        
-1     000083ad  _Hist_Vboost                     
-1     000083b5  _Hist_Ipv                        
-1     000083c0  _Comp                            
-1     000083c8  _pwmdac1                         
-1     000083d2  _sgen                            
-1     000083e0  _ACQPS                           
-1     000083f0  _ePWM                            
-1     00008400  _TrigSel                         
-1     00008410  _ChSel                           
-1     00008420  _dlog                            
-1     00008440  _mppt_pno1                       
-1     00008456  _sine_mainsV                     
-1     00008480  _mppt_incc1                      
-1     000084c0  _pidGRANDO_Iinv                  
-1     00008500  _pidGRANDO_Vinv                  
-1     00008540  _spll1                           
-1     00008580  _plotArray                       
 1     00008990  _CNTL_2P2Z_Ref1                  
 1     00008992  _CNTL_2P2Z_Fdbk1                 
 1     00008994  _CNTL_2P2Z_Out1                  
@@ -1418,16 +1546,191 @@ page  address   name
 1     000089ba  _MATH_EMAVG_In2                  
 1     000089bc  _MATH_EMAVG_Out2                 
 1     000089be  _MATH_EMAVG_Multiplier2          
-1     000089c0  _CNTL_2P2Z_CoefStruct1           
-1     000089ce  _CNTL_2P2Z_CoefStruct2           
-1     000089dc  _ADCDRV_1ch_Rlt1                 
-1     000089de  _ADCDRV_1ch_Rlt5                 
-1     000089e0  _ADCDRV_1ch_Rlt6                 
-1     000089e2  _ADCDRV_1ch_Rlt7                 
-1     000089e4  _PWMDRV_1ch_UpDwnCntCompl_Duty3  
-1     000089e6  _PWMDRV_1ch_UpDwnCntCompl_Period3
+1     000089c0  _SFRA_IQ_preCount                
+1     000089c1  _SFRA_IQ_state                   
+1     000089c2  _SFRA_IQ_windowSamples           
+1     000089c3  _SFRA_IQ_count                   
+1     000089c4  _SFRA_IQ_StateSlew               
+1     000089c6  _SFRA_IQ_amplitude               
+1     000089c8  _SFRA_IQ_Q22_Q16Round            
+1     000089ca  _SFRA_IQ_pointer                 
+1     000089cc  _SFRA_IQ_step                    
+1     000089ce  _SFRA_IQ_uCosSum                 
+1     000089d0  _SFRA_IQ_ySinSum                 
+1     000089d2  _SFRA_IQ_rCosSum                 
+1     000089d4  _SFRA_IQ_uSinSum                 
+1     000089d6  _SFRA_IQ_rSinSum                 
+1     000089d8  _SFRA_IQ_reference               
+1     000089da  _SFRA_IQ_tableptr                
+1     000089dc  _SFRA_IQ_tableptrStart           
+1     000089de  _SFRA_IQ_yCosSum                 
+1     000089e0  _CNTL_2P2Z_CoefStruct1           
+1     000089ee  _CNTL_2P2Z_CoefStruct2           
+1     000089fc  _PWMDRV_1ch_UpDwnCntCompl_Duty3  
+1     000089fe  _PWMDRV_1ch_UpDwnCntCompl_Period3
+1     00008a00  _ADCDRV_1ch_Rlt1                 
+1     00008a02  _ADCDRV_1ch_Rlt5                 
+1     00008a04  _ADCDRV_1ch_Rlt6                 
+1     00008a06  _ADCDRV_1ch_Rlt7                 
 1     003d7e80  _PartIdRegs                      
-1     003f4000  SINTAB_360                       
+1     003f4000  _MPPT_slew                       
+1     003f4001  _Run_MPPT                        
+1     003f4002  _MPPT_ENABLE                     
+1     003f4003  _PwmDacCh3                       
+1     003f4004  _PwmDacCh1                       
+1     003f4005  _PwmDacCh2                       
+1     003f4006  _Gui_InvStop                     
+1     003f4007  _Gui_InvStart                    
+1     003f4008  _Gui_LightCommand_Prev           
+1     003f4009  _UpdateCoef                      
+1     003f400a  _Gui_MPPTEnable                  
+1     003f400b  _LedBlinkCnt                     
+1     003f400c  _PVInverterState                 
+1     003f400d  _LedBlinkCnt2                    
+1     003f400e  _TransmitData                    
+1     003f400f  _DlogCh2                         
+1     003f4010  _timer1                          
+1     003f4011  _PwmDacCh4                       
+1     003f4012  _PanelBoostConnect               
+1     003f4013  _ResetPLL                        
+1     003f4014  _DlogCh3                         
+1     003f4015  _DlogCh4                         
+1     003f4016  _sine_prev                       
+1     003f4017  _ZCDDetect                       
+1     003f401a  _CloseVloopInv                   
+1     003f401b  _SerialCommsTimer                
+1     003f401c  _CloseIloopInv                   
+1     003f401d  _K_Light                         
+1     003f401e  _iK_Vboost                       
+1     003f401f  _K_Vboost                        
+1     003f4020  _K_Vpv                           
+1     003f4021  _K_Ipv                           
+1     003f4022  _DlogCh1                         
+1     003f4023  _VloopTicker                     
+1     003f4024  _CommsOKflg                      
+1     003f4025  _initializationFlag              
+1     003f4026  _i                               
+1     003f4027  _ClearInvTrip                    
+1     003f4028  _iK_Ipv                          
+1     003f402a  _inv_meas_cur_diff_inst          
+1     003f402c  _inv_meas_cur_lleg1_inst         
+1     003f402e  _Igain_I                         
+1     003f4030  _Dgain_I                         
+1     003f4032  _Dmax_V                          
+1     003f4034  _Pgain_I                         
+1     003f4036  _inv_meas_vol_inst               
+1     003f4038  _inv_ref_cur_inst                
+1     003f403a  _Dmax_I                          
+1     003f403c  _inv_ref_vol_inst                
+1     003f403e  _Dgain_V                         
+1     003f4040  _inv_meas_cur_lleg2_inst         
+1     003f4042  _Gui_Light                       
+1     003f4044  _Gui_MPPTTrackingEff             
+1     003f4046  _Gui_LightRatio_Avg              
+1     003f4048  _Gui_PanelPower                  
+1     003f404a  _Gui_Vboost                      
+1     003f404c  _Gui_LightRatio                  
+1     003f404e  _Gui_PanelPower_Theoretical      
+1     003f4050  _hBridge                         
+1     003f4052  _inverter                        
+1     003f4054  _panel                           
+1     003f4056  _HistPtr                         
+1     003f4058  _Gui_LightCommand                
+1     003f405a  _mppt                            
+1     003f405c  _Vac_in                          
+1     003f405e  _Grid_Freq                       
+1     003f4060  _VrmsReal                        
+1     003f4062  _inv_Iset                        
+1     003f4064  _InvModIndex                     
+1     003f4066  _Offset_Volt                     
+1     003f4068  _InvSine                         
+1     003f406a  _Gui_Vpv                         
+1     003f406c  _sdata                           
+1     003f406e  _temp_Scratch                    
+1     003f4070  _Temp2                           
+1     003f4072  _VavgReal                        
+1     003f4074  _Gui_Ipv                         
+1     003f4076  _ScaleFactor                     
+1     003f407a  _IpvRead                         
+1     003f407c  _VpvRead                         
+1     003f407e  _IpvRead_EMAVG                   
+1     003f4080  _VboostRead                      
+1     003f4082  _Duty3A_fixed                    
+1     003f4084  _VpvRead_EMAVG                   
+1     003f4086  _Pgain_V                         
+1     003f4088  _Igain_V                         
+1     003f408a  _IboostSwRef_wInj                
+1     003f408c  _IboostswRead                    
+1     003f408e  _VpvRef                          
+1     003f4090  _VpvRef_MPPT                     
+1     003f4092  _IboostSwRef                     
+1     003f4094  _Duty3A                          
+1     003f4096  _state                           
+1     003f4099  _VTimer2                         
+1     003f409d  _VTimer1                         
+1     003f40a1  _VTimer0                         
+1     003f40a5  _Hist_Ipv                        
+1     003f40ad  _Hist_Light                      
+1     003f40b5  _Hist_Vboost                     
+1     003f40c0  _Comp                            
+1     003f40c8  _Hist_Vpv                        
+1     003f40d0  _pwmdac1                         
+1     003f40da  _sgen                            
+1     003f40e8  _TrigSel                         
+1     003f4100  _ChSel                           
+1     003f4110  _ACQPS                           
+1     003f4120  _ePWM                            
+1     003f4140  _mppt_pno1                       
+1     003f4156  _dlog                            
+1     003f4180  _SFRA1                           
+1     003f4198  _sine_mainsV                     
+1     003f41c0  _dataSetList                     
+1     003f41e0  _arrayGetList                    
+1     003f4200  _varSetBtnList                   
+1     003f4220  _varGetList                      
+1     003f4240  _varSetTxtList                   
+1     003f4260  _varSetSldrList                  
+1     003f4280  _mppt_incc1                      
+1     003f42c0  _pidGRANDO_Vinv                  
+1     003f4300  _pidGRANDO_Iinv                  
+1     003f4340  _spll1                           
+1     003f4380  _OL_MagVect                      
+1     003f4480  _Plant_PhaseVect                 
+1     003f4580  _FreqVect                        
+1     003f4680  _Plant_MagVect                   
+1     003f4780  _OL_PhaseVect                    
+1     003f4848  ___TI_cleanup_ptr                
+1     003f484a  ___TI_dtors_ptr                  
+1     003f484c  _SFRA_IQ_BromSineTableStart      
+1     003f484e  __lock                           
+1     003f4850  __unlock                         
+1     003f4880  _probes                          
+1     003f4888  _loggerVars                      
+1     003f48c0  _buffer                          
+1     003f49c0  _commros                         
+1     003f4b80  _dataOut16                       
+1     003f4b81  _RcvTskPtrShdw                   
+1     003f4b82  _NumWords                        
+1     003f4b83  _wordsLeftToGet                  
+1     003f4b84  _MemGetPtr                       
+1     003f4b85  _delayer                         
+1     003f4b86  _MemSetPtr                       
+1     003f4b87  _MemGetAmount                    
+1     003f4b88  _TaskDoneFlag                    
+1     003f4b89  _RxWord                          
+1     003f4b8a  _LowByteFlag                     
+1     003f4b8b  _RxChar                          
+1     003f4b8c  _SendTaskPtr                     
+1     003f4b8e  _Temp                            
+1     003f4b90  _MemSetValue                     
+1     003f4b92  _MemGetAddress                   
+1     003f4b94  _memDataPtr16                    
+1     003f4b96  _dataOut32                       
+1     003f4b98  _RcvTaskPointer                  
+1     003f4b9a  _memDataPtr32                    
+1     003f4b9c  _CmdPacket                       
+1     003f4bc0  _CmdDispatcher                   
+1     003f4be0  SINTAB_360                       
 1     003f7ff8  _CsmPwl                          
 abs   00000380  __STACK_SIZE                     
 abs   ffffffff  .text                            
@@ -1440,4 +1743,4 @@ abs   ffffffff  binit
 abs   ffffffff  etext                            
 abs   ffffffff  pinit                            
 
-[358 symbols]
+[456 symbols]

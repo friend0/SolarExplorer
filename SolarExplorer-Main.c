@@ -25,60 +25,95 @@
 * algorithm for steering the trajectory of a power inverter output to, and holding it within a desired
 * tracking band.
 *
-* @TeamMembers: Ryan Rodriguez, Ben Chainey, Lucas Adams
-* @Email: ryarodri@ucsc.edu, bchainey@ucsc.edu, lhadams@ucsc.edu
+* @TeamMembers: Ryan Rodriguez, Ben Chainey
+* @Email: ryarodri@ucsc.edu, bchainey@ucsc.edu
 */
 
 #include "SolarExplorer-Includes.h"
 #include "stdbool.h"
 #include "inverterVariables.h"
-
+#include "SFRA_IQ_Include.h"
 #include "fsm.h"
 #include "panelFSM.h"
 #include "mpptFSM.h"
 #include "hBridgeFSM.h"
 #include "inverterFSM.h"
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// FUNCTION PROTOTYPES
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// Add protoypes of functions being used in the project here 
+/**
+ * Private Defines
+ */
+#define SFRA_ISR_FREQ 200000
+#define SFRA_FREQ_START 100
+#define SFRA_FREQ_LENGTH 100
+//SFRA step Multiply = 10^(1/No of steps per decade(40))
+#define FREQ_STEP_MULTIPLY (float)1.059253
 
+/**
+ * Function Prototypes
+ */
 void DeviceInit(void);
 #ifdef FLASH		
 	void InitFlash();
 #endif
 void MemCopy();
+void DPL_Func();
+void SPI_init();
+void SCIA_Init();
+void SerialHostComms();
+char RunInverter();
 
+/**
+ * Interrupt Declarations
+ */
 #ifdef FLASH
 #pragma CODE_SECTION(Inv_ISR,"ramfuncs");
+#pragma CODE_SECTION(PWM_ISR,"ramfuncs")
 #endif
+interrupt void PWM_ISR(void);
 interrupt void Inv_ISR(void);
 interrupt void spiTxFifoIsr(void);
 interrupt void spiRxFifoIsr(void);
 
-void SPI_init();
 
 StateVariable state;
 
-//-------------------------------- DPLIB --------------------------------------------
+/**
+ * Configure 1 channel of PWM in up-dwn count mode
+ * @param n      [target ePWM module]
+ * @param period [period in sysclks]
+ * @param mode   [master or slave mode, e.g. mode=1 for master, mode=0 for slave]
+ * @param phase  [phase offset from upstream master in Sysclks]
+ */
 void PWM_1ch_UpDwnCntCompl_CNF(int16 n, int16 period, int16 mode, int16 phase);
+/**
+ * ADC configuration to support up to 16 conversions on 
+ * 		Start of Conversion(SOC) based ADCs (type 3) found on F2802x and 
+ * 		F3803x devices.  Independent selection of Channel, Trigger and 
+ * 		acquisition window using ChSel[],TrigSel[] and ACQPS[].
+ * @param ChSel    [description]
+ * @param Trigsel  [description]
+ * @param ACQPS    [description]
+ * @param IntChSel [description]
+ * @param mode     [description]
+ */
 void ADC_SOC_CNF(int ChSel[], int Trigsel[], int ACQPS[], int IntChSel, int mode);
 
-// -------------------------------- FRAMEWORK --------------------------------------
-// State Machine function prototypes
-//----------------------------------------------------------------------------------
 
-//----------------------------------------------------------------------------------
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// VARIABLE DECLARATIONS - GENERAL
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// -------------------------------- FRAMEWORK --------------------------------------
+/**
+ * Variable Declarations
+ */
 
 int16	VTimer0[4];					// Virtual Timers slaved off CPU Timer 0
 int16	VTimer1[4];					// Virtual Timers slaved off CPU Timer 1
 int16	VTimer2[4];					// Virtual Timers slaved off CPU Timer 2
+
+/**
+ * SFRA GUI Variables
+ */
+int16	SerialCommsTimer;
+int16 	CommsOKflg;
+int16 initializationFlag;
 
 // Used for running BackGround in flash, and ISR in RAM
 extern Uint16 *RamfuncsLoadStart, *RamfuncsLoadEnd, *RamfuncsRunStart;
@@ -90,9 +125,7 @@ int 	ChSel[16] =   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 int		TrigSel[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 int     ACQPS[16] =   {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
 
-//---------------------L------------------------------------------------------
 // Used to indirectly access all EPWM modules
-
 volatile struct EPWM_REGS *ePWM[] = 
  				  { &EPwm1Regs,			//intentional: (ePWM[0] not used)
 				  	&EPwm1Regs,
@@ -136,14 +169,20 @@ extern volatile long *ADCDRV_1ch_Rlt7; 	// instance #7
 extern volatile long *PWMDRV_1ch_UpDwnCntCompl_Duty3; 
 extern volatile long PWMDRV_1ch_UpDwnCntCompl_Period3; 
 
-// CONTROL_2P2Z
+/**
+ * 2P2Z Controller, Instance 1
+ * This module is used for the outer voltage loop
+ */
 extern volatile long *CNTL_2P2Z_Ref1;	// instance #1
 extern volatile long *CNTL_2P2Z_Out1;	// instance #1
 extern volatile long *CNTL_2P2Z_Fdbk1;	// instance #1
 extern volatile long *CNTL_2P2Z_Coef1; 	// instance #1
 extern volatile long CNTL_2P2Z_DBUFF1[5];
 
-// CONTROL_2P2Z
+/**
+ * 2P2Z Controller, Instance 2
+ * This module is used for the inner current loop
+ */
 extern volatile long *CNTL_2P2Z_Ref2;	// instance #1
 extern volatile long *CNTL_2P2Z_Out2;	// instance #1
 extern volatile long *CNTL_2P2Z_Fdbk2;	// instance #1
@@ -169,17 +208,29 @@ volatile long VpvRef;
 volatile long VpvRead, IpvRead;
 volatile long VpvRead_EMAVG, IpvRead_EMAVG;
 volatile long IboostswRead;
-volatile long IboostSwRef;
+volatile long IboostSwRef, IboostSwRef_wInj;
 volatile long VpvRef_MPPT;
 
+/**
+ * Declare 2P2Z Controllers for DC/DC boost
+ */
 #pragma DATA_SECTION(CNTL_2P2Z_CoefStruct1, "CNTL_2P2Z_Coef");  
+#pragma DATA_SECTION(CNTL_2P2Z_CoefStruct2, "CNTL_2P2Z_Coef");
 struct CNTL_2P2Z_CoefStruct CNTL_2P2Z_CoefStruct1;
-
-#pragma DATA_SECTION(CNTL_2P2Z_CoefStruct2, "CNTL_2P2Z_Coef");  
 struct CNTL_2P2Z_CoefStruct CNTL_2P2Z_CoefStruct2;
 
 long Pgain_V,Igain_V,Dgain_V,Dmax_V;
 long Pgain_I,Igain_I,Dgain_I,Dmax_I;
+
+
+// SFRA lib Object
+SFRA_IQ SFRA1;
+// SFRA Variables
+int32 Plant_MagVect[SFRA_FREQ_LENGTH];
+int32 Plant_PhaseVect[SFRA_FREQ_LENGTH];
+int32 OL_MagVect[SFRA_FREQ_LENGTH];
+int32 OL_PhaseVect[SFRA_FREQ_LENGTH];
+float32 FreqVect[SFRA_FREQ_LENGTH];
 
 int16 UpdateCoef;
 
@@ -264,6 +315,16 @@ int16 TransmitData;
 Uint16 sdata[2];     // Send data buffer
 // Display Values 
 
+//GUI support variables
+// sets a limit on the amount of external GUI controls - increase as necessary
+int16 	*varSetTxtList[16];					//16 textbox controlled variables
+int16 	*varSetBtnList[16];					//16 button controlled variables
+int16 	*varSetSldrList[16];				//16 slider controlled variables
+int16 	*varGetList[16];					//16 variables sendable to GUI
+int32 	*arrayGetList[16];					//16 arrays sendable to GUI
+Uint32   *dataSetList[16];					//16 32-bit textbox or label controlled variables
+
+
 // Monitor ("Get")						// Display as:
 _iq	Gui_Vpv;							// Q10
 _iq Gui_Ipv;							// Q12
@@ -310,65 +371,75 @@ Uint16 VloopTicker=0;
 Uint16 ZCDDetect=0;
 int16 sine_prev=0;
 
+
+/**
+ * FRAMEWORK
+ * State Machine Prototypes
+ */
+
 Inverter inverter;
 HBridge hBridge;
 Mppt mppt;
 Panel panel;
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// MAIN CODE - starts here
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/**********************************************************
+ _       __    _   _          __  _____   __    ___  _____
+| |\/|  / /\  | | | |\ |     ( (`  | |   / /\  | |_)  | |
+|_|  | /_/--\ |_| |_| \|     _)_)  |_|  /_/--\ |_| \  |_|
+
+ **********************************************************/
 void main(void)
 {
-//=================================================================================
-//	INITIALISATION - General
-//=================================================================================
+
 	/**
-		 * State Machine Constructors
-		 */
-		InverterCtor(&inverter);
-		HBridgeCtor(&hBridge);
-		MpptCtor(&mppt);
-		PanelCtor(&panel);
+	* The DeviceInit() function configures the clocks and pin mux registers. 
+	* The function is declared in {ProjectName}-DevInit_F2803/2x.c,
+	* Please ensure/edit that all the desired components pin muxes 
+	* are configured properly that clocks for the peripherals used
+	* are enabled, for example the individual PWM clock must be enabled 
+	* along with the Time Base Clock 
+	**/
+	DeviceInit();
 
-		/**
-		 * Statem Machine Initializations
-		 */
-		FsmInit((Fsm *)&inverter, 0);
-		FsmInit((Fsm *)&hBridge, 0);
-		FsmInit((Fsm *)&mppt, 0);
-		FsmInit((Fsm *)&panel, 0);
+	////////////////////////////////////////////////////////////////////////
+	// NOTE: the variable FLASH is defined by the compiler with -d FLASH //
+	////////////////////////////////////////////////////////////////////////
+	#ifdef FLASH
+	/**
+	 * Copy time critical code and Flash setup code to RAM
+	 * The  RamfuncsLoadStart, RamfuncsLoadEnd, and RamfuncsRunStart
+	 * symbols are created by the linker. Refer to the linker files.
+	 **/
+		MemCopy(&RamfuncsLoadStart, &RamfuncsLoadEnd, &RamfuncsRunStart);
 
+	/**
+	 * Call Flash Initialization to setup flash waitstates
+	 * This function must reside in RAM
+	 */
+		InitFlash();	// Call the flash wrapper init function
+	#endif //(FLASH)
 
-	// The DeviceInit() configures the clocks and pin mux registers 
-	// The function is declared in {ProjectName}-DevInit_F2803/2x.c,
-	// Please ensure/edit that all the desired components pin muxes 
-	// are configured properly that clocks for the peripherals used
-	// are enabled, for example the individual PWM clock must be enabled 
-	// along with the Time Base Clock 
+	/**
+	 * State Machine Constructors
+	 */
+	InverterCtor(&inverter);
+	HBridgeCtor(&hBridge);
+	MpptCtor(&mppt);
+	PanelCtor(&panel);
 
-	DeviceInit();	// Device Life support & GPIO
+	/**
+	 * Statem Machine Initializations
+	 */
+	FsmInit((Fsm *)&inverter, 0);
+	FsmInit((Fsm *)&hBridge, 0);
+	FsmInit((Fsm *)&mppt, 0);
+	FsmInit((Fsm *)&panel, 0);
 
-//-------------------------------- FRAMEWORK --------------------------------------
-
-// Only used if running from FLASH
-// Note that the variable FLASH is defined by the compiler with -d FLASH
-
-#ifdef FLASH		
-// Copy time critical code and Flash setup code to RAM
-// The  RamfuncsLoadStart, RamfuncsLoadEnd, and RamfuncsRunStart
-// symbols are created by the linker. Refer to the linker files. 
-	MemCopy(&RamfuncsLoadStart, &RamfuncsLoadEnd, &RamfuncsRunStart);
-
-// Call Flash Initialization to setup flash waitstates
-// This function must reside in RAM
-	InitFlash();	// Call the flash wrapper init function
-#endif //(FLASH)
-
-
-// Timing sync for background loops
-// Timer period definitions found in PeripheralHeaderIncludes.h
-	CpuTimer0Regs.PRD.all =  mSec5;		// A tasks
+	/**
+	 * Timing sync for background loops
+	 * Timer period definitions found in PeripheralHeaderIncludes.h
+	 */
+	CpuTimer0Regs.PRD.all =  mSec1;		// A tasks
 	CpuTimer1Regs.PRD.all =  mSec50;	// B tasks
 	CpuTimer2Regs.PRD.all =  mSec1000;	// C tasks
 
@@ -378,8 +449,54 @@ void main(void)
 	LedBlinkCnt = 5;
 	LedBlinkCnt2 = 5;
 
-// ---------------------------------- USER -----------------------------------------
-//  put common initialization/variable definitions here
+/**
+ _____ _____ _____ _____    _____ _____ _____
+|   __|   __| __  |  _  |  |   __|  |  |     |
+|__   |   __|    -|     |  |  |  |  |  |-   -|
+|_____|__|  |__|__|__|__|  |_____|_____|_____|
+
+*/
+
+#ifdef	FLASH
+	// 15000000 is the LSPCLK or the Clock used for the SCI Module
+	// 57600 is the Baudrate desired of the SCI module
+	SCIA_Init(15000000, 57600);
+
+	CommsOKflg = 0;
+	SerialCommsTimer = 0;
+	//"Set" variables
+	// assign GUI Buttons to desired flag addresses
+	varSetBtnList[0] = (int16*)&initializationFlag;
+
+	//"Get" variables
+	//---------------------------------------
+	// assign a GUI "getable" parameter address
+	varGetList[0] = (int16*)&(SFRA1.Vec_Length);			//int16
+	varGetList[1] = (int16*)&(SFRA1.status);			    //int16
+	varGetList[2] = (int16*)&(SFRA1.FreqIndex);					//int16
+
+	//"Setable" variables
+	//----------------------------------------
+	// assign GUI "setable" by Text parameter address
+	dataSetList[0] = (Uint32*)&(SFRA1.Freq_Start);      //Float 32
+	dataSetList[1] = (Uint32*)&(SFRA1.amplitude);	   //Int32
+	dataSetList[2] = (Uint32*)&(SFRA1.Freq_Step);	   //Float32
+
+	// assign a GUI "getable" parameter array address
+	arrayGetList[0] = (int32*)FreqVect;			        //Float 32
+	arrayGetList[1] = (int32*)OL_MagVect;			    //
+	arrayGetList[2] = (int32*)OL_PhaseVect;		        //
+	arrayGetList[3] = (int32*)Plant_MagVect;			//
+	arrayGetList[4] = (int32*)Plant_PhaseVect;			//
+	arrayGetList[5] = (int32*)&(SFRA1.Freq_Start);      //Float 32
+	arrayGetList[6] = (int32*)&(SFRA1.amplitude);	   //Int32
+	arrayGetList[7] = (int32*)&(SFRA1.Freq_Step);	   //Float32
+#endif
+
+
+/**
+ * User - Put common variable initializations here
+ */
 
 	for(i=0;i<HistorySize;i++)
 	{
@@ -406,37 +523,17 @@ void main(void)
 	sdata[0]=0;     // Send data buffer
 	sdata[1]=1;
 		
-//==================================================================================
-//	INCREMENTAL BUILD OPTIONS - NOTE: selected via {ProjectName-Settings.h
-//==================================================================================
-// ---------------------------------- USER -----------------------------------------
-
-//----------------------------------------------------------------------
-//#if (INCR_BUILD == 1) 	
-//----------------------------------------------------------------------
-	
 	// Configure PWM3 for 100Khz switching Frequency
 	PWM_1ch_UpDwnCntCompl_CNF(3, 600,0,30); 
 	
 	//Solar_PWM_Inv_1ph_unipolar_CNF(1, 1500, 20, 20);
 	PWM_1phInv_unipolar_CNF(1,1500,20,20);		
 
-//============== Inverter Driver initialization	==================
-	/*invdrv.deadband = INVERTER_DEADBAND;
-	invdrv.n1		= 1;			// EPWM1
-	invdrv.n2		= 2;			// EPWM2
-	invdrv.period	= SINE_GEN_PRD;
-	Solar_PWMDRV_Inv_1ph_unipolINIT_MACRO(invdrv);
-	*/				
-//================================================================   	
-   	// ADC Channel Selection for Configuring the ADC
-	// The following configuration would configure the ADC for parameters needed for 
-	
-
-	
-	//Map channel to ADC Pin
-	// the dummy reads are to account for first sample issue in Rev 0 silicon
-	// Please refer to the Errata and the datasheet, this would be tfixed in later versions of the silicon
+	/**
+	 * Map channel to ADC Pin
+	 * the dummy reads are to account for first sample issue in Rev 0 silicon
+	 * Please refer to the Errata and the datasheet, this would be tfixed in later versions of the silicon
+	 */
     ChSel[0] = 14;						 // B6 - Iboostsw-FB, DC-DC Boost switch current, not routed on Rev 1, dummy read
     ChSel[1] = 14;						 // B6 - Iboostsw-FB, DC-DC Boost switch current, not routed on Rev 1  
     ChSel[2] = 4;						 // A4 - Ileg1,
@@ -450,7 +547,9 @@ void main(void)
     ChSel[10] = 9;						 // B1 - VL-fb
     ChSel[11] = 8;						 // B0 - Light-fb 
      
-	// Select Trigger Event 
+	/**
+	 * Select Trigger Event
+	 */
     TrigSel[0]= ADCTRIG_EPWM3_SOCA;
     TrigSel[1]= ADCTRIG_EPWM3_SOCA;
 	TrigSel[2]= ADCTRIG_EPWM1_SOCA;
@@ -464,20 +563,25 @@ void main(void)
 	TrigSel[10]= ADCTRIG_EPWM1_SOCA;
 	TrigSel[11]= ADCTRIG_EPWM1_SOCA;
 	
-	
 	ADC_SOC_CNF(ChSel,TrigSel,ACQPS,3,0); // use auto clr ADC int flag mode, end of conversion 2 trigger ADC INT 1
 
 	
-	// Configure the Start of Conversion for the ADC.
+	/**
+	 * Configure the Start of Conversion for the ADC.
+	 */
 	
-	// SOC for DCDC Boost MPPT
+	/**
+	 * SOC for DCDC Boost MPPT
+	 */
 	EPwm3Regs.ETSEL.bit.SOCAEN 	= 1;
 	EPwm3Regs.ETSEL.bit.SOCASEL = ET_CTR_PRD;	// Use PRD event as trigger for ADC SOC 
     EPwm3Regs.ETPS.bit.SOCAPRD 	= ET_2ND;        // Generate pulse on 2nd event 
 	
 	//SOC for DCAC Inverter,SOCA is configured by the PWM CNF macro
 	
-	// Implement phase synchronization to avoid ADC and ISR conflicts
+	/**
+	 * Phase synchronization to avoid ADC and ISR conflicts
+	 */
 	EPwm1Regs.TBCTL.bit.PHSEN   = TB_DISABLE;
 	EPwm1Regs.TBCTL.bit.SYNCOSEL = TB_CTR_ZERO;
 	
@@ -492,13 +596,15 @@ void main(void)
 	
 	EPwm3Regs.TBPHS.half.TBPHS=4;
 	
-	// Digital Power CLA(DP) library initialisation 
+	/**
+	 * Digital Power CLA(DP) library initialisation
+	 */
 	DPL_Init();
 
 //============================================================
-	// Lib Module connection to "nets" 
-	//----------------------------------------
-	// Connect the PWM Driver input to an input variable, Open Loop System
+	/**Lib Module connection to "nets"
+	 * Connect the PWM Driver input to an input variable, Open Loop System
+	 */
 	PWMDRV_1ch_UpDwnCntCompl_Duty3 = &Duty3A; //&Duty3A; //&Duty3A_fixed; 
 	
 	ADCDRV_1ch_Rlt1=&IboostswRead;
@@ -516,10 +622,10 @@ void main(void)
 	MATH_EMAVG_Out2=&VpvRead_EMAVG;
 	MATH_EMAVG_Multiplier2=_IQ30(0.001); // a 1000 point moving average filter
 	
-	
-	//======================================================================================
+//======================================================================================
 	//connect the 2P2Z connections, for the inner current Loop
-	CNTL_2P2Z_Ref2 = &IboostSwRef; 
+	CNTL_2P2Z_Ref2 = &IboostSwRef_wInj;
+	//CNTL_2P2Z_Ref2 = &IboostSwRef;
 	CNTL_2P2Z_Out2 = &Duty3A;
 	CNTL_2P2Z_Fdbk2= &IboostswRead; 
 	CNTL_2P2Z_Coef2 = &CNTL_2P2Z_CoefStruct2.b2;
@@ -536,15 +642,17 @@ void main(void)
 	Pgain_V = _IQ26(0.015);	  
 	Igain_V = _IQ26(0.00005);  
 	Dgain_V =_IQ26(0.0);  
-				
+
+
+
 	// Coefficient init	--- Coeeficient values in Q26
-	CNTL_2P2Z_CoefStruct1.b2   =Dgain_V;                            // B2
-    CNTL_2P2Z_CoefStruct1.b1   =(Igain_V-Pgain_V-Dgain_V-Dgain_V);  // B1
-    CNTL_2P2Z_CoefStruct1.b0   =(Pgain_V + Igain_V + Dgain_V);      // B0
-    CNTL_2P2Z_CoefStruct1.a2   =0.0;                              	// A2 = 0
-    CNTL_2P2Z_CoefStruct1.a1   =_IQ26(1.0);                       	// A1 = 1 
-    CNTL_2P2Z_CoefStruct1.max  =Dmax_V;					  		  	//Clamp Hi 
-    CNTL_2P2Z_CoefStruct1.min  =_IQ24(0.0); 					  	//Clamp Min   
+	CNTL_2P2Z_CoefStruct1.b2 = Dgain_V;                            // B2
+    CNTL_2P2Z_CoefStruct1.b1 = (Igain_V-Pgain_V-Dgain_V-Dgain_V);  // B1
+    CNTL_2P2Z_CoefStruct1.b0 = (Pgain_V + Igain_V + Dgain_V);      // B0
+    CNTL_2P2Z_CoefStruct1.b2 = 0.0;                              	// A2 = 0
+    CNTL_2P2Z_CoefStruct1.b1 =_IQ26(1.0);                       	// A1 = 1
+    CNTL_2P2Z_CoefStruct1.max =	Dmax_V;					  		  	//Clamp Hi
+    CNTL_2P2Z_CoefStruct1.min = _IQ24(0.0); 					  	//Clamp Min
     
 	// Coefficients for Inner Current Loop
 	// PID coefficients & Clamping - Current loop (Q26)
@@ -558,9 +666,33 @@ void main(void)
     CNTL_2P2Z_CoefStruct2.b1   =(Igain_I-Pgain_I-Dgain_I-Dgain_I);  // B1
     CNTL_2P2Z_CoefStruct2.b0   =(Pgain_I + Igain_I + Dgain_I);      // B0
     CNTL_2P2Z_CoefStruct2.a2   =0.0;                              	// A2 = 0
-    CNTL_2P2Z_CoefStruct2.a1   =_IQ26(1.0);                       	// A1 = 1 
-    CNTL_2P2Z_CoefStruct2.max  =Dmax_I;					  		  	//Clamp Hi 
-    CNTL_2P2Z_CoefStruct2.min  =_IQ24(0.0); 					  	//Clamp Min   
+    CNTL_2P2Z_CoefStruct2.a1   =_IQ26(1.0);                       	// A1 = 1
+    CNTL_2P2Z_CoefStruct2.max  =Dmax_I;					  		  	//Clamp Hi
+    CNTL_2P2Z_CoefStruct2.min  =_IQ24(0.0); 					  	//Clamp Min
+
+	// Do SFRA Object Initialization here
+
+	//SFRA Object Initialization
+	//Specify the injection amplitude
+	SFRA1.amplitude=_IQ26(0.01);
+	//Specify the length of SFRA
+	SFRA1.Vec_Length=SFRA_FREQ_LENGTH;
+	//Specify the SFRA ISR Frequency
+	SFRA1.ISR_Freq=SFRA_ISR_FREQ;
+	//Specify the Start Frequency of the SFRA analysis
+	SFRA1.Freq_Start=SFRA_FREQ_START;
+	//Specify the Frequency Step
+	SFRA1.Freq_Step=FREQ_STEP_MULTIPLY;
+	//Assign array location to Pointers in the SFRA object
+	SFRA1.FreqVect=FreqVect;
+	SFRA1.GH_MagVect=OL_MagVect;
+	SFRA1.GH_PhaseVect=OL_PhaseVect;
+	SFRA1.H_MagVect=Plant_MagVect;
+	SFRA1.H_PhaseVect=Plant_PhaseVect;
+
+	initializationFlag = 0;
+
+	SFRA_IQ_INIT(&SFRA1);
 
 	// Initialize the net variables
 	Duty3A =_IQ24(0.0);
@@ -695,7 +827,11 @@ void main(void)
 //Also Set the appropriate # define's in the {ProjectName}-Settings.h 
 //to enable interrupt management in the ISR
 	EALLOW;
-    PieVectTable.EPWM3_INT = &DPL_ISR;      	// DP Lib interrupt for boost closed loop control (100Khz) 
+	//TODO notate where the adc int is getting set, how the int is triggered
+
+    //PieVectTable.EPWM3_INT = &DPL_ISR;      	// DP Lib interrupt for boost closed loop control (100Khz)
+
+    PieVectTable.EPWM3_INT = &PWM_ISR;      	// DP Lib interrupt for boost closed loop control (100Khz)
     PieVectTable.ADCINT1 = &Inv_ISR;		// Inverter Control Interrupt (20Khz)
      
    	PieCtrlRegs.PIEIER3.bit.INTx3 = 1;      	// PIE level enable, Grp3 / Int3
@@ -774,80 +910,128 @@ void main(void)
 	EDIS;
 	
 	SPI_init();
-//=================================================================================
-//	BACKGROUND (BG) LOOP
-//=================================================================================
 
-//--------------------------------- FRAMEWORK -------------------------------------
+	/**
+	 * Background Loop
+	 */
+
 	for(;;)  //infinite loop
 	{
-		// State machine entry & exit point
-		//===========================================================
-		//(*Alpha_State_Ptr)();	// jump to an Alpha state (A0,B0,...)
-		//===========================================================
-
-		static char returner = 0;
-			// loop rate synchronizer for panel tasks
-			if(CpuTimer0Regs.TCR.bit.TIF == 1)
-			{
-				CpuTimer0Regs.TCR.bit.TIF = 1;	// clear flag
-
-				PanelEvent panelEvent;
-				panelEvent.code = 'T';
-				panelEvent.super_.transition = true;
-				returner = PanelTransitionFunction(panel, &panelEvent);
-				//if(returner == -1) return 0;
-				FsmDispatch((Fsm *)&panel, (Event *)&panelEvent);  //dispatch
-
-				VTimer0[0]++;			// virtual timer 0, instance 0 (spare)
-			}
-
-			// loop rate synchronizer for MPPT and 'Macro State Machine'
-			if(CpuTimer1Regs.TCR.bit.TIF == 1)
-			{
-				CpuTimer1Regs.TCR.bit.TIF = 1;				// clear flag
-
-				MpptEvent mpptEvent;
-				mpptEvent.code = 'T';
-				mpptEvent.super_.transition = true;
-				returner = MpptTransitionFunction(mppt, &mpptEvent);
-				//if(returner == -1) return 0;
-				FsmDispatch((Fsm *)&mppt, (Event *)&mpptEvent);  //dispatch
-
-				VTimer1[0]++;			// virtual timer 1, instance 0 (spare)
-			}
-
-			// loop rate synchronizer for coefficients tasks
-			if(CpuTimer2Regs.TCR.bit.TIF == 1)
-			{
-				CpuTimer2Regs.TCR.bit.TIF = 1;				// clear flag
-				static int count = 0;
-				count++;
-
-				if((count % 4 == 0) && (count != 0)){
-					count = 0;
-				/**
-				 * This is the only thing that 'C' does, so I will just do this for now
-				 */
-					//Update Coefficients
-					if(UpdateCoef==1)
-					{
-					CNTL_2P2Z_CoefStruct2.b2  = Dgain_I;                            // B2
-					CNTL_2P2Z_CoefStruct2.b1  = (Igain_I-Pgain_I-Dgain_I-Dgain_I);  // B1
-					CNTL_2P2Z_CoefStruct2.b0  = (Pgain_I + Igain_I + Dgain_I);      // B0
-					UpdateCoef=0;
-					}
-				}
-				VTimer2[0]++;			//virtual timer 2, instance 0 (spare)
-			}
-
-#ifdef FLASH
-		ServiceRoutine(&commros); 
-		Datalogger(&commros.m_datalogger,0);
-#endif
+		if(RunInverter() == -1)break;
 
 	}
-} //END MAIN CODE
+}
+/************************************************
+ _       __    _   _          ____  _      ___
+| |\/|  / /\  | | | |\ |     | |_  | |\ | | | \
+|_|  | /_/--\ |_| |_| \|     |_|__ |_| \| |_|_/
+
+ *************************************************/
+
+
+/**
+ * Implement Private Function Prototpes
+ */
+
+char RunInverter(){
+	char returner = 0;
+	static int aTaskCounter = 0;
+
+	if(initializationFlag == 1)
+	{
+		SFRA_IQ_INIT(&SFRA1);
+		initializationFlag = 0;
+		SFRA1.start = 1;
+	}
+
+	/**
+	 * Loop rate synchronizer for 'PanelFSM' tasks
+	 */
+	if(CpuTimer0Regs.TCR.bit.TIF == 1)
+	{
+		aTaskCounter++;
+		if(aTaskCounter != 5){
+			//Run SFRA stuff
+			SerialCommsTimer++;
+		}
+		else{
+			SerialCommsTimer++;
+			CpuTimer0Regs.TCR.bit.TIF = 1;	// clear flag
+			PanelEvent panelEvent;
+			panelEvent.code = 'T';
+			panelEvent.super_.transition = true;
+			returner = PanelTransitionFunction(panel, &panelEvent);
+			FsmDispatch((Fsm *)&panel, (Event *)&panelEvent);  //dispatch
+			VTimer0[0]++;			// virtual timer 0, instance 0 (spare)
+			aTaskCounter = 0;
+		}
+	}
+
+	/**
+	 * Loop rate synchronizer for MPPT and 'Macro State Machine', mpptFSM
+	 */
+	if(CpuTimer1Regs.TCR.bit.TIF == 1)
+	{
+		//Added this SFRA comms helper function
+		//TODO think about adding this to the FSM, or ommiting
+        SerialHostComms();
+
+
+		CpuTimer1Regs.TCR.bit.TIF = 1;				// clear flag
+		MpptEvent mpptEvent;
+		mpptEvent.code = 'T';
+		mpptEvent.super_.transition = true;
+		returner = MpptTransitionFunction(mppt, &mpptEvent);
+		FsmDispatch((Fsm *)&mppt, (Event *)&mpptEvent);  //dispatch
+		VTimer1[0]++;			// virtual timer 1, instance 0 (spare)
+	}
+
+	/**
+	 * Loop rate synchronizer for coefficients tasks
+	 */
+	if(CpuTimer2Regs.TCR.bit.TIF == 1)
+	{
+
+		/**
+		 * Allows change of SFRA parameters from GUI
+		 */
+		if(initializationFlag == 1)
+		{
+			SFRA_IQ_INIT(&SFRA1);
+			initializationFlag = 0;
+			SFRA1.start = 1;
+		}
+		SFRA_IQ_BACKGROUND (&SFRA1);
+		/**
+		 * End SFRA GUI link
+		 */
+
+		CpuTimer2Regs.TCR.bit.TIF = 1;				// clear flag
+		static int count = 0;
+		count++;
+		if((count % 4 == 0) && (count != 0)){
+			count = 0;
+		/**
+		 * This is the only thing that 'C' does, so I will just do this for now
+		 * Update Coefficients
+		 */
+			if(UpdateCoef==1){
+				CNTL_2P2Z_CoefStruct2.b2  = Dgain_I;                            // B2
+				CNTL_2P2Z_CoefStruct2.b1  = (Igain_I-Pgain_I-Dgain_I-Dgain_I);  // B1
+				CNTL_2P2Z_CoefStruct2.b0  = (Pgain_I + Igain_I + Dgain_I);      // B0
+				UpdateCoef=0;
+			}
+		}
+		VTimer2[0]++;			//virtual timer 2, instance 0 (spare)
+	}
+
+	#ifdef FLASH
+			ServiceRoutine(&commros); 
+			Datalogger(&commros.m_datalogger,0);
+	#endif
+
+	return returner;
+}
 
 void SPI_init()
 {
@@ -883,12 +1067,70 @@ void SPI_init()
    SpibRegs.SPIPRI.bit.FREE=1; 
 }
 
-static int i = 0;
-int plotArray[PlotSize];
+
+#define openLoop 0
+#define closedLoop 0
+
+interrupt void PWM_ISR(void)
+{
+
+IboostSwRef_wInj=SFRA_IQ_INJECT(IboostSwRef);
+//DPL_Func();
+SFRA_IQ_COLLECT(&Duty3A,&IboostswRead);
+
+/**
+#ifdef openLoop
+	//Read ADC and computer Fbk Value
+	Vout1_Read= _IQsat((((int32)Vout1R<<12)-offset_Vout),_IQ24(1.0),_IQ24(0.0)); //(int32)Vout1R<<12;
+
+	//Add SFRA injection into the duty cycle for the open loop converter
+	Duty_pu=SFRA_IQ_INJECT(Duty_pu_DC);
+
+	//Update PWM value
+	EPwm1Regs.CMPA.half.CMPA=_IQ24mpy((long)(BUCK_PWM_PERIOD),Duty_pu);
+
+	SFRA_IQ_COLLECT(&Duty_pu,&Vout1_Read);
+#endif 
+
+#ifdef closedLoop
+
+	//Read ADC and computer Fbk Value
+	cntl3p3z_vars1.Fdbk= _IQsat((((int32)Vout1R<<12)-offset_Vout),_IQ24(1.0),_IQ24(0.0));
+
+	//Add SFRA injection into the reference of the controller
+	cntl3p3z_vars1.Ref= SFRA_IQ_INJECT(Vout1SetSlewed);
+
+	// Call the controller
+	CNTL_3P3Z_IQ_ASM(&cntl3p3z_coeff1,&cntl3p3z_vars1);
+
+	//Update PWM value
+	EPwm1Regs.CMPA.half.CMPA=_IQ24mpy((long)(BUCK_PWM_PERIOD),cntl3p3z_vars1.Out);
+
+	SFRA_IQ_COLLECT(&cntl3p3z_vars1.Out,&cntl3p3z_vars1.Fdbk);
+
+#endif
+
+	//dval1=_IQtoIQ15(Vout1SetSlewed);
+	//DLOG_1CH_IQ_FUNC(&dlog_1ch1);
+
+
+	EPwm1Regs.ETCLR.bit.INT=1;
+	PieCtrlRegs.PIEACK.bit.ACK3=0x1;
+
+	**/
+}
+
+
 
 // ISR for inverter
+#define PWM_MODE
 interrupt void Inv_ISR()
 {
+
+	//Use these variables to take a chunk of data that we want to observe - i.e. current in inductor - and
+	//Have it operate as a circular buffer with n samples
+	//static int i = 0;
+	//int plotArray[PlotSize];
 
 #ifdef PWM_MODE
 
@@ -1017,7 +1259,7 @@ interrupt void Inv_ISR()
 		}
 
 		// Apply inverter o/p correction
-		if (CloseIloopInv ==0)
+		if (CloseIloopInv == 0)
 		{
 			PWMDRV_1phInv_unipolar(1,_IQ15(1500),_IQ24mpy((InvSine<<9),InvModIndex));
 		}
@@ -1061,11 +1303,11 @@ interrupt void Inv_ISR()
 	    PwmDacCh2 = (int16)_IQtoIQ15(inv_meas_vol_inst);
 	    PwmDacCh3 = (int16)_IQtoIQ15(inv_meas_cur_diff_inst);
 	    PwmDacCh4 = (int16)_IQtoIQ15(inv_ref_cur_inst);
-
 	// ------------------------------------------------------------------------------
 	//    Call the PWMDAC update macro.
 	// ------------------------------------------------------------------------------
-		PWMDAC_MACRO(pwmdac1)
+
+		PWMDAC_MACRO(pwmdac1);
 
 	#ifdef FLASH
 		//update commros data logger probe
@@ -1088,6 +1330,7 @@ interrupt void Inv_ISR()
 	 * - Current through the inductor, voltage across the capacitor
 	 * - Phase: determine switching regions based on phase, i.e. M1, M2, Si, So
 	 */
+	VrmsReal = _IQ15mpy (KvInv, sine_mainsV.Vrms);
 
 	Vac_in=(long)((long)Vac_FB<<9)-Offset_Volt;	// shift to convert to Q21
 	inv_ref_cur_inst = _IQ24mpy(inv_Iset, (((int32) (InvSine)) << 9)) ;

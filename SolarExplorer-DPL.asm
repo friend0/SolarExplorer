@@ -57,12 +57,13 @@ _DPL_Init:
 ; Digital Power library - Interrupt Service Routine
 
 		.sect "ramfuncs"
-		; label to DP ISR Run function
-		.def	_DPL_ISR
+		; label to DPL ISR Run function
+		.def	_DPL_Func
 
-_DPL_ISR:
+_DPL_Func:
 		; full context save - push any unprotected registers onto stack
 		PUSH  	AR1H:AR0H
+		push 	XAR1
 		PUSH  	XAR2
 		PUSH  	XAR3
 		PUSH  	XAR4
@@ -167,8 +168,12 @@ _DPL_ISR:
 		POP   	XAR4
 		POP   	XAR3
 		POP   	XAR2
+		POP 	XAR1
 		POP   	AR1H:AR0H
-		IRET							; return from interrupt
+
+
+		;IRET							; return from interrupt
+		LRETR							; return from jump
 		.end
 
 ; end of file

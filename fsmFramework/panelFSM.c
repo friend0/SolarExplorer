@@ -41,6 +41,8 @@ void Panel_Dashboard(Panel *self, Event *e) {
 	//	Gui_Vbout = VboutAvg * K_Vbout, where VboutAvg = sum of 8 Vbout samples
 	//	Gui_Iinb = IinbAvg * K_Iinb, where IinbAvg = sum of 8 Iinb samples
 
+    	SFRA_IQ_BACKGROUND(&SFRA1);
+
 		HistPtr++;
 		if (HistPtr >= HistorySize)	HistPtr = 0;
 

@@ -6,10 +6,10 @@
 				<macros>
 					<stringMacro name="CONTROLSUITE_SGENLIB_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/dsp/SGEN/v101"/>
 					<stringMacro name="CONTROLSUITE_MOTORLIB_MATH_IQMATH_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/app_libs/motor_control/math_blocks/v2.0"/>
-					<stringMacro name="CONTROLSUITE_INSTALL_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../.."/>
-					<stringMacro name="CONTROLSUITE_F2803x_DEVICE_SUPPORT_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../device_support/f2803x/v125"/>
-					<stringMacro name="CONTROLSUITE_DSP_FIXPOINT_LIB_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/dsp/FixedPointLib/v101"/>
 					<stringMacro name="ORIGINAL_PROJECT_ROOT" type="VALUE_PATH_DIR" value="C:/ti/controlSUITE/development_kits/SolarExplorer_v1.0/SolarExplorer_PVInverter_F2803x"/>
+					<stringMacro name="CONTROLSUITE_DSP_FIXPOINT_LIB_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/dsp/FixedPointLib/v101"/>
+					<stringMacro name="CONTROLSUITE_F2803x_DEVICE_SUPPORT_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../device_support/f2803x/v125"/>
+					<stringMacro name="CONTROLSUITE_INSTALL_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../.."/>
 					<stringMacro name="CONTROLSUITE_F2803x_APPLIB_DRIVERS_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/app_libs/drivers/v1.0/F2803x"/>
 					<stringMacro name="CONTROLSUITE_F2803x_POWERLIB_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/app_libs/digital_power/f2803x_v3.3"/>
 					<stringMacro name="CONTROLSUITE_IQMATH_ROOT" type="VALUE_PATH_DIR" value="${ORIGINAL_PROJECT_ROOT}/../../../libs/math/IQmath/v160"/>
@@ -55,18 +55,20 @@
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_6.2.compilerID.INCLUDE_PATH.1317697895" name="Add dir to #include search path (--include_path, -I)" superClass="com.ti.ccstudio.buildDefinitions.C2000_6.2.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_ROOT}/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_POWERLIB_ROOT}\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\ti\controlSUITE\libs\app_libs\SFRA\v1_10_00_00\IQ\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_INSTALL_ROOT}\development_kits\~SupportFiles\F2803x_headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_DEVICE_SUPPORT_ROOT}\DSP2803x_headers\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_DEVICE_SUPPORT_ROOT}\DSP2803x_common\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_INSTALL_ROOT}\development_kits\~SupportFiles\F2803x_headers&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SolarExplorer_PVInverter_F2803x/src commros}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;Y:\Documents\GitHub\SolarExplorer\fsmFramework&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;Y:\Documents\GitHub\SolarExplorer\&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_IQMATH_ROOT}\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_POWERLIB_ROOT}\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_POWERLIB_ROOT}\asm&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_SOLARLIB_IQMATH_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_F2803x_APPLIB_DRIVERS_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_SGENLIB_ROOT}\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\ti\controlSUITE\libs\app_libs\solar\v1.2\IQ\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\ti\controlSUITE\libs\app_libs\solar\v1.0\IQ\&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/SolarExplorer_PVInverter_F2803x/src commros}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;Y:\Documents\GitHub\SolarExplorer\fsmFramework\&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;Y:\Documents\GitHub\SolarExplorer\&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_6.2.compilerID.DIAG_WARNING.782560715" name="Treat diagnostic &lt;id&gt; as warning (--diag_warning, -pdsw)" superClass="com.ti.ccstudio.buildDefinitions.C2000_6.2.compilerID.DIAG_WARNING" valueType="stringList">
 									<listOptionValue builtIn="false" value="225"/>
@@ -86,10 +88,16 @@
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_6.2.linkerID.SEARCH_PATH.1935955293" name="Add &lt;dir&gt; to library search path (--search_path, -i)" superClass="com.ti.ccstudio.buildDefinitions.C2000_6.2.linkerID.SEARCH_PATH" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_ROOT}/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_ROOT}/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${CONTROLSUITE_IQMATH_ROOT}\lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\ti\controlSUITE\libs\app_libs\solar\v1.2\IQ\lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;C:\ti\controlSUITE\libs\app_libs\SFRA\v1_10_00_00\IQ\lib&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_6.2.linkerID.XML_LINK_INFO.371319056" name="Detailed link information data-base into &lt;file&gt; (--xml_link_info, -xml_link_info)" superClass="com.ti.ccstudio.buildDefinitions.C2000_6.2.linkerID.XML_LINK_INFO" value="&quot;SolarExplorer_PVInverter_linkInfo.xml&quot;" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_6.2.linkerID.LIBRARY.1173520278" name="Include library file or command file as input (--library, -l)" superClass="com.ti.ccstudio.buildDefinitions.C2000_6.2.linkerID.LIBRARY" valueType="libs">
 									<listOptionValue builtIn="false" value="&quot;libc.a&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;rts2800_ml.lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;IQmath.lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;SFRA_IQ_Lib.lib&quot;"/>
 								</option>
 								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_6.2.exeLinker.inputType__CMD_SRCS.381833111" name="Linker Command Files" superClass="com.ti.ccstudio.buildDefinitions.C2000_6.2.exeLinker.inputType__CMD_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_6.2.exeLinker.inputType__CMD2_SRCS.1359971676" name="Linker Command Files" superClass="com.ti.ccstudio.buildDefinitions.C2000_6.2.exeLinker.inputType__CMD2_SRCS"/>

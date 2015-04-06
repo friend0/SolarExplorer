@@ -86,14 +86,18 @@ struct Event
 /**
  * Initializes state machine, with some event
  */
-#define FsmInit(self_, e_)     (*(self_)->state__)((self_), (e_))
+#define FsmInit(self_, e_) (*(self_)->state__)((self_), (e_))
 
 /**
  * Dispatches events to the state machine
  */
 #define FsmDispatch(self_, e_) (*(self_)->state__)((self_), (e_))
 
+/**
+ *
+ */
 #define FunctionDispatch(self_, e) (*self_)(self, (e))
+
 /**
  * This takes a state transition, i.e. updates the state
  * q+

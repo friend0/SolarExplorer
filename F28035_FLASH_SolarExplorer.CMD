@@ -80,9 +80,7 @@ PAGE 1 :
    	RAMM1       : origin = 0x000400, length = 0x000400     /* on-chip RAM block M1 */
    	dataRAM		: origin = 0x008800, length = 0x000400	   /* on-chip RAM block L1 */
    	RAML2		: origin = 0x008C00, length = 0x000400	   /* on-chip RAM block L2 */
-	
 	FLASHB      : origin = 0x3F4000, length = 0x002000     /* on-chip FLASH */
-
 	CLA_CPU_MSGRAM  : origin = 0x001480, length = 0x000080 /* CLA-R/W, CPU-R message RAM */
 	CPU_CLA_MSGRAM  : origin = 0x001500, length = 0x000080 /* CPU-R/W, CLA-R message RAM */
 }
@@ -103,6 +101,11 @@ SECTIONS
                        LOAD_END(_RamfuncsLoadEnd),
                        RUN_START(_RamfuncsRunStart),
                        PAGE = 0
+                       {
+                       		--library=rts2800_ml.lib<fs_mpy.obj>
+     						--library=SFRA_IQ_Lib.lib<SFRA_IQ_INJECT.obj>
+     						--library=SFRA_IQ_Lib.lib<SFRA_IQ_COLLECT.obj>
+                       }
                        
 	
    csmpasswds        : > CSM_PWL     PAGE = 0
@@ -111,7 +114,8 @@ SECTIONS
    /* Allocate uninitalized data sections: */
    .cio 			 : > RAML2, 	 PAGE = 1
    .stack            : > RAMM0,      PAGE = 1
-   .ebss             : > RAML0,    	 PAGE = 1
+   //.ebss             : > RAML0,    	 PAGE = 1
+   .ebss             : > FLASHB,    	 PAGE = 1
    .esysmem          : > RAMM1,      PAGE = 1
 	
    /* Initalized sections go in Flash */
@@ -120,8 +124,10 @@ SECTIONS
    .switch           : > FLASHA      PAGE = 0      
 
    /* Allocate IQ math areas: */
-   IQmath            : > FLASHA      PAGE = 0                  /* Math Code */
-   IQmathTables      : > IQTABLES     PAGE = 0, TYPE = NOLOAD   /* Math Tables In ROM */
+    IQmath           : > FLASHA      PAGE = 0                  /* Math Code */
+    IQmathTables     : > IQTABLES     PAGE = 0, TYPE = NOLOAD   /* Math Tables In ROM */
+
+	SFRA_IQ_Data		: > dataRAM, ALIGN = 64, PAGE = 1
 
    Cla1ToCpuMsgRAM   : > CLA_CPU_MSGRAM PAGE = 1
    CpuToCla1MsgRAM   : > CPU_CLA_MSGRAM PAGE = 1
