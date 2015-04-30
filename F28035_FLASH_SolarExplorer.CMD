@@ -74,7 +74,7 @@ PAGE 0:
 	VECTORS     : origin = 0x3FFFC2, length = 0x00003E     /* part of boot ROM  */
 
 PAGE 1 : 
-	RAML0	    : origin = 0x008000, length = 0x000800 /* on-chip RAM (L0-L1)*/
+	RAML0	    : origin = 0x008000, length = 0x000800     /* on-chip RAM (L0-L1)*/
 	BOOT_RSVD   : origin = 0x000000, length = 0x000050     /* Part of M0, BOOT rom will use this for stack */
 	RAMM0       : origin = 0x000050, length = 0x0003B0     /* on-chip RAM block M0 */
    	RAMM1       : origin = 0x000400, length = 0x000400     /* on-chip RAM block M1 */

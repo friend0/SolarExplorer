@@ -1,6 +1,8 @@
 #ifndef H_BRIDGE_FSM_H
 #define H_BRIDGE_FSM_H
 
+#include "inverterVariables.h"
+
 /////////////////////////////////////////
 //Declaration of FSM and Event objects //
 /////////////////////////////////////////
@@ -93,7 +95,7 @@ void HBridge_negVDC(HBridge *self, Event *e);
  * @param e    event
  */
 
-char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e);
+char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable currentState);
 
 #endif
 

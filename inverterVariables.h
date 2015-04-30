@@ -51,7 +51,7 @@ typedef struct {
 	/**
 	 * Will need to be chosen for proper Q values in IQmath
 	 **/
-	int current, voltage, phase;
+	long current, voltage, phase;
 }StateVariable;
 
 void updateState(StateVariable *s, int current, int voltage, int phase);

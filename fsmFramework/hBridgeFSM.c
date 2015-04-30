@@ -12,7 +12,7 @@
 //#include <stdio.h>
 #include <ctype.h>
 #include "stdbool.h"
-
+#include "inverterVariables.h"
 ///////////
 //Events //
 ///////////
@@ -134,8 +134,23 @@ void HBridge_negVDC(HBridge *self, Event *e)
 * @param self [description]
 * @param e    [description]
 */
+/**
+#define ampVc = 120/(2.85)*sqrt(2)
+#define ampIl = 3*sqrt(2)
+ C = ampIl/(ampVc*w)
+ L = 1/(C*w^2)
+a = ampVc
+b = a/(C*w)
+epsilon = .1 //choose some meaningful epsilon based on ADC resolution and sampling rate
+err = 1e-4 //choose some meaningful error based on ADC resolution and sampling rate
 
-char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e)
+cmid
+cin
+cout
+Vz0 = (il/a)^2 + (vc/b)^2
+**/
+
+char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable currentState)
 {
     //After dereferencing, self is an HBridge object
     //
