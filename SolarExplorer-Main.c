@@ -1094,16 +1094,17 @@ interrupt void Inv_ISR()
 	 */
 
 	Vac_in=(long)((long)Vac_FB<<9)-Offset_Volt;	// shift to convert to Q21
-	inv_ref_cur_inst = _IQ24mpy(inv_Iset, (((int32) (InvSine)) << 9)) ;
+	inv_ref_cur_inst = _IQ24mpy(inv_Iset, (((long) (InvSine)) << 9)) ;
 
-	inv_meas_cur_lleg1_inst=(((int32) Ileg1_fb) <<12)-_IQ24(0.5);
-	inv_meas_cur_lleg2_inst=(((int32) Ileg2_fb) <<12)-_IQ24(0.5);
+	inv_meas_cur_lleg1_inst=(((long) Ileg1_fb) <<12)-_IQ24(0.5);
+	inv_meas_cur_lleg2_inst=(((long) Ileg2_fb) <<12)-_IQ24(0.5);
 
 	inv_meas_cur_diff_inst = (inv_meas_cur_lleg1_inst - inv_meas_cur_lleg2_inst)<<1;
 
 	inv_meas_vol_inst =((long)((long)Vac_FB<<12)-_IQ24(0.5))<<1;	// shift to convert to Q24
 
-	updateState(&state, 0, 0, 0);
+
+	updateState(&state, 0, 0, 0);		//update the
 
 	//phase = atan(inv_meas_vol_inst, inv_meas_cur_diff_inst);
 	//updateState(state, inv_meas_cur_diff_inst, inv_meas_vol_inst, phase);
@@ -1118,8 +1119,8 @@ interrupt void Inv_ISR()
 	hBridgeEvent hBridgeEvent;
 	hBridgeEvent.code = 'T';
 	hBridgeEvent.super_.transition = true;
-	returner = hBridgeTransitionFunction(hBridge, &hBridgeEvent);
-	FsmDispatch((Fsm *)&hBridge, (Event *)&hBridgeEvent);  //dispatch
+	returner = hBridgeTransitionFunction(hBridge, &hBridgeEvent, state);
+	FsmDispatch((Fsm *)&hBridge, (Event *)&hBridgeEvent);  //
 
 	/**
 	 * Run DAC

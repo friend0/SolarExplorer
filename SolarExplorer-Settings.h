@@ -41,6 +41,7 @@
 #define PlotSize 64
 //#define DLOG_SIZE   200
 
+#define Sqrt2 _IQ24(1.4142136)
 #define Isqrt2 _IQ24(0.70710678)	// 1/sqrt(2)
 #define Gv_Inv _IQ15(1500)		// 3.3/0.083
 #define KvInv _IQ15(39.759)				// 3.3/0.083
@@ -50,6 +51,26 @@
 //#define GLOBAL_Q 22
 #define GRID_FREQ	60
 
+#define TURNS_RATIO _IQ24(2.85)
+#define AMP_VC	IQ24mpy(60.67)		//120VRMS(~169Vpk) will result from transformer with turns ratio of 2.85
+#define AMP_IL  _IQ24(4.981)			//~5 Amps - determined form MATLAB for inductance of .05778 Henries, 173 microFarads
+
+/**
+ * Filter Values for HybridMode
+ */
+#define RES _IQ24(0.5) 			//In Ohms
+#define IND _IQ24(0.5)			//In Henries, probably best to express in IQ30, 29, or 28?
+#define CAP _IQ24(0.5)			//In Farads, perhaps also best expressed in same IQ as 'L'
+#define FREQ 60
+#define ERR _IQ24(0.001)		//Dimension-agnostic varibale used to determine equality of two floating point numbers. @TODO: Determine best Q format.
+#define EPSILON _IQ24(0.001)	//Used to determine membership in M1 or M2 - used to avoid fast swithcing in certain regions of the Power Plane
+
+/**
+ * Tracking band constants - hard coded for now
+ */
+#define CMID _IQ24(0.001)
+#define CIN _IQ24(0.001)
+#define COUT _IQ24(0.001)
 
 // inverter states
 #define		INV_CAL					0

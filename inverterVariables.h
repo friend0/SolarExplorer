@@ -23,16 +23,16 @@
 
 	// ADC Channel Selection for Configuring the ADC
 	// The following configuration would configure the ADC for parameters needed for
-	#define Iboostsw_FB		AdcResult.ADCRESULT1
-	#define Ileg1_fb 		AdcResult.ADCRESULT3
-	#define Ileg2_fb		AdcResult.ADCRESULT4
-	#define Vboost_FB  		AdcResult.ADCRESULT5
-	#define Ipv_FB			AdcResult.ADCRESULT6
-	#define Vpv_FB			AdcResult.ADCRESULT7
-	#define Vac_FB			AdcResult.ADCRESULT8
-	#define VN_FB			AdcResult.ADCRESULT9
-	#define VL_FB			AdcResult.ADCRESULT10
-	#define LIGHT_FB		AdcResult.ADCRESULT11
+#define Iboostsw_FB		AdcResult.ADCRESULT1
+#define Ileg1_fb 		AdcResult.ADCRESULT3
+#define Ileg2_fb		AdcResult.ADCRESULT4
+#define Vboost_FB  		AdcResult.ADCRESULT5
+#define Ipv_FB			AdcResult.ADCRESULT6
+#define Vpv_FB			AdcResult.ADCRESULT7
+#define Vac_FB			AdcResult.ADCRESULT8
+#define VN_FB			AdcResult.ADCRESULT9
+#define VL_FB			AdcResult.ADCRESULT10
+#define LIGHT_FB		AdcResult.ADCRESULT11
 
 extern int16	VTimer0[4];					// Virtual Timers slaved off CPU Timer 0
 extern int16	VTimer1[4];					// Virtual Timers slaved off CPU Timer 1
@@ -54,7 +54,7 @@ typedef struct {
 	long current, voltage, phase;
 }StateVariable;
 
-void updateState(StateVariable *s, int current, int voltage, int phase);
+void updateState(StateVariable *s, long current, long voltage, long phase);
 
 // Used to indirectly access all EPWM modules
 extern volatile struct EPWM_REGS *ePWM[];
