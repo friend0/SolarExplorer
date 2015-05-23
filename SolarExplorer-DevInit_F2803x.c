@@ -19,6 +19,13 @@
 #pragma CODE_SECTION(InitFlash, "ramfuncs");
 #define Device_cal (void   (*)(void))0x3D7C80
 
+/**
+ * Set PWM_MODE as '1' to operate as unipolar inverter
+ * Set PWM_MODE to '0' to operate in Hybrid Mode
+ */
+#define PWM_MODE 1
+#define HYBRID_MODE !PWM_MODE
+
 // used by CLA Initialaization function
 extern Uint16 Cla1funcsLoadStart, Cla1funcsLoadEnd, Cla1funcsRunStart;
 

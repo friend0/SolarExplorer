@@ -17,6 +17,9 @@
 //Events //
 ///////////
 
+long Vz0;
+bool inC, inD, M1, M2;
+
 /* signals used by the HBridge FSM */
 enum
 {
@@ -150,7 +153,7 @@ cout
 Vz0 = (il/a)^2 + (vc/b)^2
 **/
 
-char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable currentState)
+char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable state)
 {
     //After dereferencing, self is an HBridge object
     //
@@ -164,54 +167,154 @@ char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable curr
     //Next, get the signal pointed to by the event in HBridgeEvent
 
     void    *funptr = self.super_.state__;
-    //void    *funptr = self->super_.state__;
+    
+    /**
+     * Determine which set the state variable belongs to: C or D
+     */
+    
+    //Reset set membership status
+    inC = false;   
+    inD = false;
 
-    if(funptr == &HBridge_default){
-        switch (e->code)                  //This switch uses the data attribute 'code' of the HBridge Event
-        {
-            case '.' : return -1;          // terminate the test
-            case '+' : e->super_.signal = VDC; break;
-            case '-' : e->super_.signal = NEG_VDC; break;
-            case '0' : e->super_.signal = ZERO_VDC; break;
+    /**
+     * C:
+     * Determining Flow Set Membership
+     * Don't think this is necessary in hardware implementation
+     */
+    Vz0 = (state.current/ALPHA)^2 + (state.voltage/BETA)^2;
 
-            default : e->super_.signal = NO_EVENT; break;
+
+    /**
+     * Supervisory Controller 
+     * Determine if we need to swtich controllers, depending on where the state variable is
+     */
+    if(state.controller == GLOBAL){
+        if((Vz0 >= CIN) && (Vz0 <= COUT)){      // are we between the two tracking bands? -> select forward controller
+            state -> controller = FORWARD;
+            //inD = true;
         }
     }
-    else if(funptr == &HBridge_VDC){
-        switch (e->code)                  //This switch uses the data attribute 'code' of the HBridge Event
-        {
-            case '.' : return -1;          // terminate the test
-            case '+' : e->super_.signal = VDC; break;
-            case '-' : e->super_.signal = NEG_VDC; break;
-            case '0' : e->super_.signal = ZERO_VDC; break;
-
-            default : e->super_.signal = NO_EVENT; break;
+    else if(state.controller == FORWARD){
+        if((Vz0 >= COUT) || (Vz0 <= CIN)){      // are we inside both, or outside both tracking bands? -> select global controller
+            state -> controller = GLOBAL;
         }
     }
-    else if(funptr == &HBridge_Zero){
-        switch (e->code)                  //This switch uses the data attribute 'code' of the HBridge Event
-        {
-            case '.' : return -1;          // terminate the test
-            case '+' : e->super_.signal = VDC; break;
-            case '-' : e->super_.signal = NEG_VDC; break;
-            case '0' : e->super_.signal = ZERO_VDC; break;
 
-            default : e->super_.signal = NO_EVENT; break;
+    /**
+     * I don't think we really need to know when we're in the flow set since we will always be flowing, not simulating
+     */
+
+    /** Forward Controller Check */
+    if(state.controller == FORWARD)           
+    {      
+        if((Vz0 >= CIN) && (Vz0 <= COUT)){
+            inC = true;
+        }
+        else{
+            inC = false;            
+        }
+
+    }
+    /** Global Controller Check */
+    else if(state.controller == GLOBAL)   
+    {     
+        if((Vz0 <= CIN) && (Vz0 >= COUT)){
+            inC = true;
+        }
+        else{
+            inC = false;            
         }
     }
-    else if(funptr == &HBridge_negVDC){
-        switch (e->code)                  //This switch uses the data attribute 'code' of the HBridge Event
-        {
-            case '.' : return -1;          // terminate the test
-            case '+' : e->super_.signal = VDC; break;
-            case '-' : e->super_.signal = NEG_VDC; break;
-            case '0' : e->super_.signal = ZERO_VDC; break;
 
-            default : e->super_.signal = NO_EVENT; break;
+    /**
+     * D:
+     * Determining Jump Set membership
+     */
+    
+    /**
+     * Determine if we are in 'fast-swithcing regions' M1 or M2 so that we may respond accordingly
+     */
+    //M1 = ((_IQabs(Vz0-cout) < ERROR) && ((state.current >= 0) && (state.current <= EPSILON)) && (state.voltage <= 0)) ? true:false;
+    //M2 = ((_IQabs(Vz0 - COUT) < ERROR) && ((state.current >= -EPSILON) && (state.current <= 0)) && (state.voltage >= 0)) ? true:false;
+    if((_IQabs(Vz0-cout) < ERROR) && ((state.current >= 0) && (state.current <= EPSILON)) && (state.voltage <= 0)) M1 = true;
+    else M1 = false;
+    
+    if((_IQabs(Vz0 - COUT) < ERROR) && ((state.current >= -EPSILON) && (state.current <= 0)) && (state.voltage >= 0)) M2 = true;
+    else M2 = false;
+
+    /** Forward Controller Check */
+    if(state.controller == FORWARD)           
+    {      
+        if(q != 0){
+
+           if( (abs(Vz0-cin) <= err) && (il*q <= 0)){
+               inD = 1;
+           }
+           else if( (abs(Vz0-cout) <= err) && (il*q >= 0)){
+               inD = 1;
+           }
+       }
+        else if (q == 0){
+            if( (abs(Vz0-cin) <= err) && (q == 0)){
+                inD = 1;
+            }
         }
     }
-    else
-        ;
+
+    /** Global Controller CHeck */
+    if(state.controller == GLOBAL){
+        if((Vz0 >= cin) && (Vz0 <= cout)){
+            inD = 1;
+        }
+    }
+
+    /**
+     * If we're in the jump set, determine which state transition to make
+     * Else, dont waste clock cycles!
+     */
+    if(inD){
+
+        /**
+         * For the Hfw Controller
+         */
+        if(State.controller == FORWARD){    
+            if(State.bridgeState != NEG_VDC){
+                if( ((abs(Vz0-cout) <= err) && (il >= 0) && (~M1)) || (((abs(Vz0-cin) <= err)) && (il <= 0)) ){
+                qplus = NEG_VDC;
+                }
+            }
+            else if ( ((M1) && (abs(il - mEpsilon) >= err) && (q == 1)) || ((M2) && (abs(il + mEpsilon) >= err) && (q == -1)) ){
+                    qplus = ZERO_VDC;
+                }
+            else if(State.bridgeState != VDC){
+                if( ((abs(Vz0 - cout) <= err) && (il <= 0) && (~M2)) || (((abs(Vz0 - cin) <= err)) && (il >= 0)) ){
+                    qplus = VDC;
+                }
+            }
+            else{
+                qplus = NO_EVENT;                
+            }
+        }
+
+        /**
+         * For the Hg Controller
+         */
+        else if(State.controller == GLOBAL){
+            if(Vz0 <= CIN){
+                qplus = VDC;
+            }
+            else if(Vz0 >= COUT){
+                qplus = ZERO_VDC;
+            }
+            else{
+                qplus = NO_EVENT;
+            }
+        }
+    }
+
+    if(pplus != NO_EVENT){
+        e->super_.signal = qplus;
+    }
 
     return 0;
 }

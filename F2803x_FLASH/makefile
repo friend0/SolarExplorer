@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.3
+CG_TOOL_ROOT := C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2
 
 ORDERED_OBJS += \
 "./ADC_SOC_Cnf.obj" \
@@ -157,13 +157,13 @@ all: SolarExplorer_PVInverter.out
 SolarExplorer_PVInverter.out: $(OBJS) $(CMD_SRCS) $(CMD_UPPER_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: C2000 Linker'
-	"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.3/bin/cl2000" -v28 -ml -mt --cla_support=cla0 -g --define="_DEBUG" --define="FLASH" --define="LARGE_MODEL" --diag_warning=225 -z -m"ProjectName.map" --stack_size=0x380 --warn_sections -i"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.3/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.3/include" --reread_libs --xml_link_info="SolarExplorer_PVInverter_linkInfo.xml" --rom_model -o "SolarExplorer_PVInverter.out" $(ORDERED_OBJS)
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/bin/cl2000" -v28 -ml -mt --cla_support=cla0 -g --define="_DEBUG" --define="FLASH" --define="LARGE_MODEL" --diag_warning=225 -z -m"ProjectName.map" --stack_size=0x380 --warn_sections -i"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/include" --reread_libs --xml_link_info="SolarExplorer_PVInverter_linkInfo.xml" --rom_model -o "SolarExplorer_PVInverter.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 SolarExplorer_PVInverter.hex: $(EXE_OUTPUTS)
 	@echo 'Invoking: C2000 Hex Utility'
-	"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.3/bin/hex2000"  -o "SolarExplorer_PVInverter.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-c2000_6.4.2/bin/hex2000"  -o "SolarExplorer_PVInverter.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $@'
 	@echo ' '
 

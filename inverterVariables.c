@@ -7,6 +7,25 @@
 
 #include "inverterVariables.h"
 
+
+/**
+ * The initState function is to be used during setup to init the StateVariable struct and all of its constituent members.
+ * 
+ * @param s       The StateVariable to be set
+ * @param current Current reading
+ * @param voltage Voltage reading
+ * @param phase   Phase reading
+ * @param controller  Global or Forward Controller - typically initialized to Global controller as it is the safer choice
+ * @param bridgeState the current state at the hBridge - initialize to zero is the safest choice
+ */
+void initState(StateVariable *s, long current, long voltage, long phase, char controller, char bridgeState){
+  s->current = current;
+  s->voltage = voltage;
+  s->phase = phase;
+  s->controller = controller;
+  s->bridgeState = bridgeState;
+}
+
 /**
  * The updateState() function is used to quickly set the state variable
  * with data collected in the inverter interrupt. Is used to set a variable of type StateVariable.

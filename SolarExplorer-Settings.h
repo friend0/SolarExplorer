@@ -46,7 +46,13 @@
 #define Gv_Inv _IQ15(1500)		// 3.3/0.083
 #define KvInv _IQ15(39.759)				// 3.3/0.083
 
-#define VdcRef	 _IQ24(0.75)
+/**
+ * HNIC: Set the voltage target for the Boost
+ * For HIT Dev Board, we have a voltage divider with 2.7k/169k=0.01597633136
+ * This gives us a maximum voltage of 206.55555556V
+ * VdcRef is a ratio of this maximum.
+ */
+#define VdcRef	 _IQ24(0.363)	//will result in a voltage of about 75V
 
 //#define GLOBAL_Q 22
 #define GRID_FREQ	60
@@ -86,6 +92,9 @@
 #define	MAX_MOD_INDEX	50000		// 1.53 ->  50000
 
 
+/**
+ * @todo: update inverter set voltage
+ */
 // PWM1A & 1B related & PWM2A & 2B related - Inverter mode
 #define	SINE_GEN_PRD			1500			// 60M / 20480 = 2929 in Asymmetric mode
 #define	INVERTER_DEADBAND		20				//  2 uSec deadband
@@ -95,6 +104,7 @@
 #define	TEMP_LOOKUP_TBL_SIZE     	69
 #define	SINE_TBL_SIZE 				512
 
+//@todo: get rid og all references to the light sensor
 #define LIGHTSENSOR_MAX_INV  _IQ13(0.41666)	// 1/LightSensorMaxOutput = 1/2.4
 
 //==================================================================================

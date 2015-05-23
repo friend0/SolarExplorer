@@ -28,11 +28,9 @@ struct PanelEvent {
 
 };
 
-///////////
-//Events //
-///////////
-
-/* signals used by the Panel FSM - Algorithm either runs, or it does not. This is a submachine of the inverterFSM.*/
+/**
+ * Events
+ */
 enum {
     TIMER_PANEL,
     NO_EVENT_PANEL

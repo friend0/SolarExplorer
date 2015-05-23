@@ -415,11 +415,16 @@ void main(void)
 //#if (INCR_BUILD == 1) 	
 //----------------------------------------------------------------------
 	
+
 	// Configure PWM3 for 100Khz switching Frequency
-	PWM_1ch_UpDwnCntCompl_CNF(3, 600,0,30); 
+	PWM_1ch_UpDwnCntCompl_CNF(3, 600,0,30); 	//For the boost!
+
 	
+	/**
+	 * This should happen only if we're in PWM mode!
+	 */
 	//Solar_PWM_Inv_1ph_unipolar_CNF(1, 1500, 20, 20);
-	PWM_1phInv_unipolar_CNF(1,1500,20,20);		
+	PWM_1phInv_unipolar_CNF(1,1500,20,20);		//Init PWM 1A/B and 2A/B
 
 //============== Inverter Driver initialization	==================
 	/*invdrv.deadband = INVERTER_DEADBAND;
@@ -886,18 +891,14 @@ void SPI_init()
    SpibRegs.SPIPRI.bit.FREE=1; 
 }
 
-int i = 0;
 int plotArray[PlotSize];
-#define PWM_MODE 1
-// ISR for inverter
 
 // ISR for inverter
 interrupt void Inv_ISR()
 {
-
+	EINT;
 #ifdef PWM_MODE
 
-	EINT;
 //-------------------------------------------------------------------
 // Inverter State execution
 //-------------------------------------------------------------------
@@ -1022,7 +1023,7 @@ interrupt void Inv_ISR()
 	}
 
 	// Apply inverter o/p correction
-	if (CloseIloopInv ==0)
+	if (CloseIloopInv == 0)
 	{
 		PWMDRV_1phInv_unipolar(1,_IQ15(1500),_IQ24mpy((InvSine<<9),InvModIndex));
 	}
@@ -1072,19 +1073,6 @@ interrupt void Inv_ISR()
 // ------------------------------------------------------------------------------
 	PWMDAC_MACRO(pwmdac1)
 
-#ifdef FLASH
-	//update commros data logger probe
-	Datalogger(&commros.m_datalogger,1);
-#endif
-
-	//-------------------------------------------------------------------
-	//			 Reinitialize for next ADC sequence
-	//-------------------------------------------------------------------
-	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
-	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
-	//-------------------------------------------------------------------
-
-	GpioDataRegs.GPACLEAR.bit.GPIO22 = 1;	// Clear the pin
 
 #elif HYBRID_MODE
 	/**
@@ -1093,7 +1081,7 @@ interrupt void Inv_ISR()
 	 * - Phase: determine switching regions based on phase, i.e. M1, M2, Si, So
 	 */
 
-	Vac_in=(long)((long)Vac_FB<<9)-Offset_Volt;	// shift to convert to Q21
+	Vac_in = (long)((long)Vac_FB<<9)-Offset_Volt;	// shift to convert to Q21
 	inv_ref_cur_inst = _IQ24mpy(inv_Iset, (((long) (InvSine)) << 9)) ;
 
 	inv_meas_cur_lleg1_inst=(((long) Ileg1_fb) <<12)-_IQ24(0.5);
@@ -1122,6 +1110,10 @@ interrupt void Inv_ISR()
 	returner = hBridgeTransitionFunction(hBridge, &hBridgeEvent, state);
 	FsmDispatch((Fsm *)&hBridge, (Event *)&hBridgeEvent);  //
 
+	void    *statePtr = (Fsm *)&hBridge.super_.state__;		//hBridge struct of type 'HBridge' contains an FSM in .super_,
+															//therefore we retrieve the state of the hBridge with (xxx.super_.state__)
+	PWMDRV_Hybrid(statePtr);
+
 	/**
 	 * Run DAC
 	 */
@@ -1129,6 +1121,24 @@ interrupt void Inv_ISR()
     PwmDacCh3 = (int16)_IQtoIQ15(inv_meas_cur_diff_inst);
     PwmDacCh4 = (int16)_IQtoIQ15(inv_ref_cur_inst);
 #endif
+
+    /**
+     * Log data, clear interrupt
+     */
+	#ifdef FLASH
+		//update commros data logger probe
+		Datalogger(&commros.m_datalogger,1);
+	#endif
+
+
+	//-------------------------------------------------------------------
+	//			 Reinitialize for next ADC sequence
+	//-------------------------------------------------------------------
+	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
+	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
+	//-------------------------------------------------------------------
+
+	GpioDataRegs.GPACLEAR.bit.GPIO22 = 1;	// Clear the pin
 
   	return;
 
