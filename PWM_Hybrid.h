@@ -4,9 +4,10 @@
  *  Created on: May 11, 2015
  *      Author: Ryan A. Rodriguez
  */
+#include "inverterVariables.h"
 
-#ifndef PWM_HYBRID_H_
-#define PWM_HYBRID_H_
+#ifndef PWM_HYBRID_H
+#define PWM_HYBRID_H
 
 
 
@@ -74,23 +75,21 @@
 	EDIS;
 
 
-#define PWMDRV_Hybrid(v)
-	if ( v == VDC)
-	{
-		(*ePWM[n]).CMPA.half.CMPA	= 0 ;
-		(*ePWM[n+1]).CMPA.half.CMPA	= TBPRD + 1;
-	}
-	else if (v == ZERO_VDC){
-		(*ePWM[n]).CMPA.half.CMPA	= 0 ;
-		(*ePWM[n+1]).CMPA.half.CMPA	= 0;
-	}
-	else if (v == NEG_VDC)
-	{
-		(*ePWM[n]).CMPA.half.CMPA	=  TBPRD + 1;
-		(*ePWM[n+1]).CMPA.half.CMPA	= 0 ;
-	}
-#endif
-
+#define PWMDRV_Hybrid(v, n)																				    \
+	if (v == VDC)                                                                								\
+	{                                                               										\
+		(*ePWM[n]).CMPA.half.CMPA	= 0 ;                                                                   \
+		(*ePWM[n+1]).CMPA.half.CMPA	= TBPRD + 1;                                                            \
+	}                                                                										\
+	else if (v == ZERO_VDC){                                                              							\
+		(*ePWM[n]).CMPA.half.CMPA	= 0 ;                                                                   \
+		(*ePWM[n+1]).CMPA.half.CMPA	= 0;                                                                    \
+	}                                                               										\
+	else if (v == NEG_VDC)                                                                						\
+	{                                                                										\
+		(*ePWM[n]).CMPA.half.CMPA	=  TBPRD + 1;                                                           \
+		(*ePWM[n+1]).CMPA.half.CMPA	= 0 ;                                                                   \
+	}                                                               										\
 
 
 #endif /* PWM_HYBRID_H_ */

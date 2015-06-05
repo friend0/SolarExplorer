@@ -23,6 +23,8 @@ struct HBridgeEvent
     char code;
 };
 
+//Making the enum of state public so that PWM driver function can access on return of transition function
+
 
 ////////////////////////////////////
 // Declaration of state functions //

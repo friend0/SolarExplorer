@@ -23,13 +23,9 @@ void PanelCtor(Panel *self) {
     _FsmCtor_(&self->super_, &Panel_initial);
 }
 
-//I have ommited the 'const' qualifier here because I would like to be bale to set the transition state here
-//May also need to change others for setting exit transition? will this get handled in transition function?
-void Panel_initial(Panel *self, Event *e) {
-    /* ... initialization of Panel attributes */
 
-    //cannot call this here, the initial event passed is a zero...
-    //e->transition = true;
+void Panel_initial(Panel *self, Event *e) {
+
     _FsmTran_((Fsm *) self, &Panel_Dashboard);
 }
 
@@ -49,7 +45,6 @@ void Panel_Dashboard(Panel *self, Event *e) {
 		Hist_Vpv[HistPtr]    = 	Vpv_FB;
 		Hist_Ipv[HistPtr]    = 	Ipv_FB;
 		Hist_Vboost[HistPtr] = 	Vboost_FB;
-		Hist_Light[HistPtr]  =  LIGHT_FB;
 
 		temp_Scratch=0;
 		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Vpv[i];
@@ -63,11 +58,6 @@ void Panel_Dashboard(Panel *self, Event *e) {
 		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Vboost[i];
 		Gui_Vboost = ( (long) temp_Scratch * (long) K_Vboost ) >> 15;
 
-		temp_Scratch=0;
-		for(i=0; i<8; i++)	temp_Scratch = temp_Scratch + Hist_Light[i];
-		Gui_Light = ( (long) temp_Scratch * (long) K_Light ) >> 15;
-
-		Gui_LightRatio =_IQ13mpy(Gui_Light,LIGHTSENSOR_MAX_INV);
 
 		Gui_PanelPower=_IQ9mpy(((Gui_Vpv-_IQ9(0.20))>_IQ9(0.0)?(Gui_Vpv-_IQ9(0.20)):_IQ9(0.0)),(((long)(Gui_Ipv-_IQ12(0.03))>>3)>_IQ9(0.0)?((long)(Gui_Ipv-_IQ12(0.03))>>3):_IQ9(0.0)));
 
@@ -81,90 +71,16 @@ void Panel_Dashboard(Panel *self, Event *e) {
 
     switch (e->signal) {
         case TIMER_PANEL:
-            _FsmTran_((Fsm *) self, &Panel_Connect);
-            break;
-
-        case NO_EVENT_PANEL:
-            break;
-
-        default:
-            break;
-    }
-}
-
-void Panel_Connect(Panel *self, Event *e) {
-
-    if (e->transition == true) {
-
-    	if(PanelBoostConnect==0)
-    	{
-    		GpioDataRegs.GPACLEAR.bit.GPIO12=0x1;
-    	}
-    	else if (PanelBoostConnect==1)
-    	{
-    		GpioDataRegs.GPASET.bit.GPIO12=0x1;
-    	}
-
-        e->transition = false;
-    }
-
-    switch (e->signal) {
-
-        case TIMER_PANEL:
-            _FsmTran_((Fsm *) self, &Panel_Emulator);
-            break;
-
-        case NO_EVENT_PANEL:
-            break;
-
-        default:
-            break;
-
-    }
-}
-
-void Panel_Emulator(Panel *self, Event *e) {
-
-    if (e->transition == true) {
-    	if(Gui_LightCommand != Gui_LightCommand_Prev)
-    	{
-    	 sdata[0]=1; //1 indicates it is the command for the light value
-
-    	 // saturate the light command to 0.8 because of power capacity of the DC power supply shipped with the kit
-    	 if(Gui_LightCommand>_IQ13(0.8))
-    	 	Gui_LightCommand=_IQ13(0.8);
-
-    	  if(Gui_LightCommand<_IQ13(0.0))
-    	 	Gui_LightCommand=_IQ13(0.0);
-
-    	 sdata[1]=Gui_LightCommand;	// Value of light that needs to be sent to the emulator
-
-    	 Gui_LightCommand_Prev=Gui_LightCommand;
-
-    	 SpibRegs.SPITXBUF=sdata[0];      // Send data
-    	 SpibRegs.SPITXBUF=sdata[1];
-
-    	 SpiaRegs.SPIFFTX.bit.TXFIFO=1;
-
-    	 Gui_PanelPower_Theoretical=_IQ9mpy(_IQ9(36.02),((long)Gui_LightCommand>>4)); // Panel Max power * Luminance Ratio
-
-    	}
-    	e->transition = false;
-    }
-
-    switch (e->signal) {
-        case TIMER_PANEL:
             _FsmTran_((Fsm *) self, &Panel_Dashboard);
             break;
 
         case NO_EVENT_PANEL:
             break;
 
-        default:;
+        default:
             break;
     }
 }
-
 
 
 /**
@@ -207,44 +123,13 @@ char PanelTransitionFunction(Panel self, PanelEvent *e) {
             case '.' :
                 return -1;          // terminate the test
 
-                //default : ke.super_.signal = ANY_KEY_SIG; break;
             default :
                 e->super_.signal = 0;
                 break;
         }
     }
-    else if (funptr == &Panel_Connect) {
-        switch (e->code)                  //This switch uses the data attribute 'code' of the Panel Event
-        {
-            case 'T' :
-                e->super_.signal = TIMER_PANEL;
-                e->super_.transition = true;
-                break;
-            case '.' :
-                return -1;          // terminate the test
 
-            default :
-                e->super_.signal = 0;
-                break;
-        }
-    }
-    else if (funptr == &Panel_Emulator) {
-        switch (e->code)                  //This switch uses the data attribute 'code' of the Panel Event
-        {
-            case 'T' :
-                e->super_.signal = TIMER_PANEL;
-                e->super_.transition = true;
-                break;
-            case '.' :
-                return -1;          // terminate the test
-
-                //default : ke.super_.signal = ANY_KEY_SIG; break;
-            default :
-                e->super_.signal = NO_EVENT_PANEL;
-                break;
-        }
-    }
-    else;
+    else;		//do nothing, error state
 
 
     //FsmDispatch( (Fsm *)&self, (Event *)&e);  //dispatch

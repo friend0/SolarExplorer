@@ -46,16 +46,25 @@
 #define Gv_Inv _IQ15(1500)		// 3.3/0.083
 #define KvInv _IQ15(39.759)				// 3.3/0.083
 
+#define hallSenseScaling _IQ24(.185)
 /**
  * HNIC: Set the voltage target for the Boost
  * For HIT Dev Board, we have a voltage divider with 2.7k/169k=0.01597633136
  * This gives us a maximum voltage of 206.55555556V
  * VdcRef is a ratio of this maximum.
  */
+
 #define VdcRef	 _IQ24(0.363)	//will result in a voltage of about 75V
+
 
 //#define GLOBAL_Q 22
 #define GRID_FREQ	60
+
+/**
+ * Define values for global and forward controllers
+ */
+#define GLOBAL 2
+#define FORWARD 1
 
 #define TURNS_RATIO _IQ24(2.85)
 #define AMP_VC	IQ24mpy(60.67)		//120VRMS(~169Vpk) will result from transformer with turns ratio of 2.85

@@ -18,12 +18,12 @@
  * @param controller  Global or Forward Controller - typically initialized to Global controller as it is the safer choice
  * @param bridgeState the current state at the hBridge - initialize to zero is the safest choice
  */
-void initState(StateVariable *s, long current, long voltage, long phase, char controller, char bridgeState){
-  s->current = current;
-  s->voltage = voltage;
-  s->phase = phase;
-  s->controller = controller;
-  s->bridgeState = bridgeState;
+void initState(StateVariable *s){
+  s->current = 0;
+  s->voltage = 0;
+  s->phase = 0;
+  s->controller = GLOBAL;
+  s->bridgeState = ZERO_VDC;
 }
 
 /**

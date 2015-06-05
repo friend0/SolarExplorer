@@ -13,21 +13,17 @@
 #include <ctype.h>
 #include "stdbool.h"
 #include "inverterVariables.h"
-///////////
-//Events //
-///////////
 
-long Vz0;
+
+
+_iq24 ALPHA, BETA, il, vc;
+static char q, qplus, p, pplus;
+
+long Vz0, cin, cout;		//Should these be _iq24 also?
 bool inC, inD, M1, M2;
 
-/* signals used by the HBridge FSM */
-enum
-{
-    NEG_VDC,    //q = -1
-    ZERO_VDC,   //q = 0
-    VDC,        //q = 1
-    NO_EVENT   //qDot = 0
-};
+
+/* signals used by the HBridge FSM defined in inverterVariables.h */
 
 /**
 * Begin State Defintiions
@@ -41,6 +37,8 @@ void HBridgeCtor(HBridge *self)
 void HBridge_initial(HBridge *self, Event *e)
 {
     /* ... initialization of HBridge attributes */
+	ALPHA = _IQ24(0);
+	BETA = _IQ24(0);
     _FsmTran_((Fsm *)self, &HBridge_default);
 }
 
@@ -145,7 +143,7 @@ void HBridge_negVDC(HBridge *self, Event *e)
 a = ampVc
 b = a/(C*w)
 epsilon = .1 //choose some meaningful epsilon based on ADC resolution and sampling rate
-err = 1e-4 //choose some meaningful error based on ADC resolution and sampling rate
+ERR = 1e-4 //choose some meaningful ERRor based on ADC resolution and sampling rate
 
 cmid
 cin
@@ -166,8 +164,15 @@ char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable stat
     //First, get the event pointed to by HBridge event
     //Next, get the signal pointed to by the event in HBridgeEvent
 
-    void    *funptr = self.super_.state__;
+    void   *funptr = self.super_.state__;
+
+    il = state.current;
+    vc = state.voltage;
+    q = state.bridgeState;
+    p = state.controller;
     
+
+
     /**
      * Determine which set the state variable belongs to: C or D
      */
@@ -181,7 +186,7 @@ char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable stat
      * Determining Flow Set Membership
      * Don't think this is necessary in hardware implementation
      */
-    Vz0 = (state.current/ALPHA)^2 + (state.voltage/BETA)^2;
+    Vz0 = (il/ALPHA)^2 + (vc/BETA)^2;
 
 
     /**
@@ -190,13 +195,13 @@ char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable stat
      */
     if(state.controller == GLOBAL){
         if((Vz0 >= CIN) && (Vz0 <= COUT)){      // are we between the two tracking bands? -> select forward controller
-            state -> controller = FORWARD;
+            state.controller = FORWARD;
             //inD = true;
         }
     }
     else if(state.controller == FORWARD){
         if((Vz0 >= COUT) || (Vz0 <= CIN)){      // are we inside both, or outside both tracking bands? -> select global controller
-            state -> controller = GLOBAL;
+            state.controller = GLOBAL;
         }
     }
 
@@ -236,10 +241,10 @@ char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable stat
      */
     //M1 = ((_IQabs(Vz0-cout) < ERROR) && ((state.current >= 0) && (state.current <= EPSILON)) && (state.voltage <= 0)) ? true:false;
     //M2 = ((_IQabs(Vz0 - COUT) < ERROR) && ((state.current >= -EPSILON) && (state.current <= 0)) && (state.voltage >= 0)) ? true:false;
-    if((_IQabs(Vz0-cout) < ERROR) && ((state.current >= 0) && (state.current <= EPSILON)) && (state.voltage <= 0)) M1 = true;
+    if((_IQabs(Vz0-cout) < ERR) && ((state.current >= 0) && (state.current <= EPSILON)) && (state.voltage <= 0)) M1 = true;
     else M1 = false;
     
-    if((_IQabs(Vz0 - COUT) < ERROR) && ((state.current >= -EPSILON) && (state.current <= 0)) && (state.voltage >= 0)) M2 = true;
+    if((_IQabs(Vz0 - COUT) < ERR) && ((state.current >= -EPSILON) && (state.current <= 0)) && (state.voltage >= 0)) M2 = true;
     else M2 = false;
 
     /** Forward Controller Check */
@@ -247,15 +252,15 @@ char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable stat
     {      
         if(q != 0){
 
-           if( (abs(Vz0-cin) <= err) && (il*q <= 0)){
+           if( (abs(Vz0-cin) <= ERR) && (il*q <= 0)){
                inD = 1;
            }
-           else if( (abs(Vz0-cout) <= err) && (il*q >= 0)){
+           else if( (abs(Vz0-cout) <= ERR) && (il*q >= 0)){
                inD = 1;
            }
        }
         else if (q == 0){
-            if( (abs(Vz0-cin) <= err) && (q == 0)){
+            if( (abs(Vz0-cin) <= ERR) && (q == 0)){
                 inD = 1;
             }
         }
@@ -277,17 +282,17 @@ char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable stat
         /**
          * For the Hfw Controller
          */
-        if(State.controller == FORWARD){    
-            if(State.bridgeState != NEG_VDC){
-                if( ((abs(Vz0-cout) <= err) && (il >= 0) && (~M1)) || (((abs(Vz0-cin) <= err)) && (il <= 0)) ){
+        if(p == FORWARD){
+            if(q != NEG_VDC){
+                if( ((abs(Vz0-cout) <= ERR) && (il >= 0) && (~M1)) || (((abs(Vz0-cin) <= ERR)) && (il <= 0)) ){
                 qplus = NEG_VDC;
                 }
             }
-            else if ( ((M1) && (abs(il - mEpsilon) >= err) && (q == 1)) || ((M2) && (abs(il + mEpsilon) >= err) && (q == -1)) ){
+            else if ( ((M1) && (abs(il - EPSILON) >= ERR) && (q == 1)) || ((M2) && (abs(il + EPSILON) >= ERR) && (q == -1)) ){
                     qplus = ZERO_VDC;
                 }
-            else if(State.bridgeState != VDC){
-                if( ((abs(Vz0 - cout) <= err) && (il <= 0) && (~M2)) || (((abs(Vz0 - cin) <= err)) && (il >= 0)) ){
+            else if(q != VDC){
+                if( ((abs(Vz0 - cout) <= ERR) && (il <= 0) && (~M2)) || (((abs(Vz0 - cin) <= ERR)) && (il >= 0)) ){
                     qplus = VDC;
                 }
             }
@@ -299,7 +304,7 @@ char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable stat
         /**
          * For the Hg Controller
          */
-        else if(State.controller == GLOBAL){
+        else if(p == GLOBAL){
             if(Vz0 <= CIN){
                 qplus = VDC;
             }
@@ -314,8 +319,9 @@ char HBridgeTransitionFunction(HBridge self, HBridgeEvent *e, StateVariable stat
 
     if(pplus != NO_EVENT){
         e->super_.signal = qplus;
+        state.controller = qplus;		//q = qplus
     }
 
-    return 0;
+    return qplus;
 }
 

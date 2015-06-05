@@ -27,6 +27,7 @@ void MpptCtor(Mppt *self) {
 void Mppt_initial(Mppt *self, Event *e) {
     /* ... initialization of Mppt attributes */
 
+
     //cannot call this here, the initial event passed is a zero...
     //e->transition = true;
     _FsmTran_((Fsm *) self, &Mppt_Execute);
@@ -312,16 +313,6 @@ void Mppt_StateMachine(Mppt *self, Event *e) {
 				ResetPLL=0;
 
 		#endif
-
-			if(timer1<20)
-				timer1++;
-
-			if(timer1==20)
-			{
-				PanelBoostConnect=1;
-				Gui_LightCommand=_IQ13(0.2);
-				timer1++;
-			}
 
 			//reset transition flag
 			e->transition = false;

@@ -75,25 +75,6 @@ void Panel_initial(Panel *self, Event *e);
 */
 void Panel_Dashboard(Panel *self, Event *e);
 
-/**
-* Implements the state handler for the case that the Panel
-* algorithm is no longer running.
-*
-* @param self self reference to PanelFSM
-* @param e    event
-*/
-void Panel_Connect(Panel *self, Event *e);
-
-
-/**
-* Implements the state handler for the LED blink routine; provides
-* user feedback, shows that Panel is running.
-*
-* @param self self reference to PanelFSM
-* @param e    event
-*/
-void Panel_Emulator(Panel *self, Event *e);
-
 char PanelTransitionFunction(Panel self, PanelEvent *e);
 
 #endif /* PANELFSM_H_ */

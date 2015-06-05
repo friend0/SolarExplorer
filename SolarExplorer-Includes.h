@@ -26,10 +26,15 @@
 //Sgen Lib
 #include "sgen.h"
 
+
 // Driver Lib
 #include "DriverLib.h"
 #include "PWM_1phInv_unipolar.h"
+#include "PWM_Hybrid.h"
 #include "PWM_dac.h"
+//Custom Hybrid PWM driver
+//#include "PWM_Hybrid.h"
+
 
 // Solar Lib
 #include "SineAnalyzer_diff.h"
@@ -46,5 +51,7 @@
 //Commros header file 		
 #include "Commros_user.h"
 #endif
+
+
 
 #endif

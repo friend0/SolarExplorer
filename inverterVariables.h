@@ -21,6 +21,7 @@
 
 //#include "SPLL_1ph.h"
 
+#define INVERTER_PWM_PAIR 1			//used for the hybrid PWM driver
 	// ADC Channel Selection for Configuring the ADC
 	// The following configuration would configure the ADC for parameters needed for
 #define Iboostsw_FB		AdcResult.ADCRESULT1
@@ -32,7 +33,7 @@
 #define Vac_FB			AdcResult.ADCRESULT8
 #define VN_FB			AdcResult.ADCRESULT9
 #define VL_FB			AdcResult.ADCRESULT10
-#define LIGHT_FB		AdcResult.ADCRESULT11
+#define Iout_FB	        AdcResult.ADCRESULT11
 
 extern int16	VTimer0[4];					// Virtual Timers slaved off CPU Timer 0
 extern int16	VTimer1[4];					// Virtual Timers slaved off CPU Timer 1
@@ -55,7 +56,18 @@ typedef struct {
 	char controller, bridgeState;
 }StateVariable;
 
+enum
+{
+    NEG_VDC,    //state = -1
+    ZERO_VDC,   //state = 0
+    VDC,        //state = 1
+    NO_EVENT   //qDot = 0
+};
+
+
 void updateState(StateVariable *s, long current, long voltage, long phase);
+
+void initState(StateVariable *s);
 
 // Used to indirectly access all EPWM modules
 extern volatile struct EPWM_REGS *ePWM[];
@@ -200,7 +212,6 @@ extern int16 PVInverterState;
 
 // Stand Alone Flash Image Instrumentation, GPIO toggles for different states
 extern int16  LedBlinkCnt,LedBlinkCnt2;
-extern int16 timer1;
 
 extern int16 TransmitData;
 extern Uint16 sdata[2];     // Send data buffer

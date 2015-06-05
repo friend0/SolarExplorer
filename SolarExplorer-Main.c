@@ -25,8 +25,8 @@
 * algorithm for steering the trajectory of a power inverter output to, and holding it within a desired
 * tracking band.
 *
-* @TeamMembers: Ryan Rodriguez, Ben Chainey, Lucas Adams
-* @Email: ryarodri@ucsc.edu, bchainey@ucsc.edu, lhadams@ucsc.edu
+* @TeamMembers: Ryan Rodriguez, Ben Chainey
+* @Email: ryarodri@ucsc.edu, bchainey@ucsc.edu
 */
 
 #include "SolarExplorer-Includes.h"
@@ -229,6 +229,7 @@ DLOG_4CH dlog = DLOG_4CH_DEFAULTS;
 
 _iq24 inv_ref_vol_inst,inv_meas_vol_inst;
 _iq24 inv_ref_cur_inst;
+_iq24 inv_meas_hall_cur;
 _iq24 inv_meas_cur_diff_inst;
 _iq24 inv_meas_cur_lleg1_inst;
 _iq24 inv_meas_cur_lleg2_inst;
@@ -258,7 +259,6 @@ int16 PVInverterState;
 
 // Stand Alone Flash Image Instrumentation, GPIO toggles for different states 
 int16  LedBlinkCnt,LedBlinkCnt2;
-int16 timer1;
 
 int16 TransmitData;
 Uint16 sdata[2];     // Send data buffer
@@ -271,11 +271,7 @@ _iq	Gui_Vboost;							// Q9
 _iq	Gui_PanelPower;						// Q9
 _iq Gui_PanelPower_Theoretical;         //
 _iq Gui_MPPTTrackingEff;
-_iq	Gui_Light;						// Q13
-_iq	Gui_LightRatio;					// Q13
-_iq	Gui_LightRatio_Avg;				// Q13
 
-_iq  Gui_LightCommand;				//Q13
 Uint16  Gui_MPPTEnable;
 Uint16  Gui_InvStart;
 Uint16  Gui_InvStop;
@@ -283,20 +279,17 @@ Uint16  Gui_InvStop;
 
 
 
-Uint16  Gui_LightCommand_Prev;
 
 // History arrays are used for Running Average calculation (boxcar filter)
 // Used for CCS display and GUI only, not part of control loop processing
 int16	Hist_Vpv[HistorySize];
 int16	Hist_Ipv[HistorySize];
-int16	Hist_Light[HistorySize];
 int16	Hist_Vboost[HistorySize];
 
 //Scaling Constants (values found via spreadsheet; exact value calibrated per board)
 int16	K_Vpv;							// Q15
 int16	K_Ipv;							// Q15
 int16	K_Vboost;						// Q15
-int16	K_Light;						// Q15
 
 int16	iK_Vboost;						// Q15
 int16	iK_Ipv;						// Q15
@@ -385,7 +378,6 @@ void main(void)
 	{
 		Hist_Vpv[i]=0;
 		Hist_Ipv[i]=0;
-		Hist_Light[i]=0;
 		Hist_Vboost[i]=0;
 	}
 
@@ -393,10 +385,10 @@ void main(void)
 	
 	K_Vpv=17050;							// Q15
 	K_Ipv=17329;							// Q15
-	K_Vboost=20463;							// Q15
+	//K_Vboost=20463;							// Q15
+	K_Vboost = 26862;						//Q15, HIT SPECIFIC
 	iK_Vboost=26236;						// Q15
 	iK_Ipv=30981;	
-	K_Light=27034;							//Q15
 	
 	Gui_Vpv=0;
 	Gui_Ipv=0;
@@ -415,16 +407,11 @@ void main(void)
 //#if (INCR_BUILD == 1) 	
 //----------------------------------------------------------------------
 	
-
 	// Configure PWM3 for 100Khz switching Frequency
-	PWM_1ch_UpDwnCntCompl_CNF(3, 600,0,30); 	//For the boost!
-
+	PWM_1ch_UpDwnCntCompl_CNF(3, 600,0,30);
 	
-	/**
-	 * This should happen only if we're in PWM mode!
-	 */
 	//Solar_PWM_Inv_1ph_unipolar_CNF(1, 1500, 20, 20);
-	PWM_1phInv_unipolar_CNF(1,1500,20,20);		//Init PWM 1A/B and 2A/B
+	PWM_1phInv_unipolar_CNF(1,1500,20,20);
 
 //============== Inverter Driver initialization	==================
 	/*invdrv.deadband = INVERTER_DEADBAND;
@@ -453,7 +440,7 @@ void main(void)
     ChSel[8] = 7;						 // A7 - Vac-fb
     ChSel[9] = 5;						 // A5 - VN-fb  
     ChSel[10] = 9;						 // B1 - VL-fb
-    ChSel[11] = 8;						 // B0 - Light-fb 
+    ChSel[11] = 8;						 // B0 - Iout-fb - Hall sensor
      
 	// Select Trigger Event 
     TrigSel[0]= ADCTRIG_EPWM3_SOCA;
@@ -504,7 +491,7 @@ void main(void)
 	// Lib Module connection to "nets" 
 	//----------------------------------------
 	// Connect the PWM Driver input to an input variable, Open Loop System
-	PWMDRV_1ch_UpDwnCntCompl_Duty3 = &Duty3A; //&Duty3A; //&Duty3A_fixed; 
+	PWMDRV_1ch_UpDwnCntCompl_Duty3 = &Duty3A; //&Duty3A; //&Duty3A_fixed; 		@todo: Here is how to set the boost to open-loop control!
 	
 	/**
 	 * Set these variables to 'mirror' those found
@@ -556,7 +543,8 @@ void main(void)
     
 	// Coefficients for Inner Current Loop
 	// PID coefficients & Clamping - Current loop (Q26)
-	Dmax_I  = _IQ24(0.9);
+    Dmax_I = _IQ24(0.55);
+	//Dmax_I  = _IQ24(0.9);									//@todo: pretty certain I need to set this to _IQ24(0.55) to limit to 5.5 amps, since new inAmp structure gives 10A max
 	Pgain_I = _IQ26(0.015);	  
 	Igain_I = _IQ26(0.00005);  
 	Dgain_I =_IQ26(0.0); 
@@ -652,7 +640,6 @@ void main(void)
 				
 	SPLL_1ph_init(60,_IQ21(0.00005),&spll1);
 				
-	PanelBoostConnect=0;
 	MPPT_ENABLE = 0;
 	Run_MPPT=0;
 	MPPT_slew=0;
@@ -671,22 +658,17 @@ void main(void)
 	
 	
 	UpdateCoef=0;
-	timer1=0;
 	Offset_Volt=_IQ21(0.5); // the input sinusoid is offset with 1.65 V
 	
 	PVInverterState=0;
 	Gui_MPPTEnable=0;
 	Gui_InvStart=0;
-	Gui_LightRatio_Avg=0;
 	Gui_InvStop=0;
 	Gui_PanelPower_Theoretical=_IQ9(0.0);
 	
 	// keep the PLL in reset by default
 	ResetPLL=1;
-	
-	Gui_LightCommand=_IQ13(0.0);
-	Gui_LightCommand_Prev=_IQ13(0.0);
-	
+
 //#endif // (INCR_BUILD == 1)
 
 #ifdef FLASH
@@ -891,14 +873,18 @@ void SPI_init()
    SpibRegs.SPIPRI.bit.FREE=1; 
 }
 
+int i = 0;
 int plotArray[PlotSize];
+#define PWM_MODE 1
+// ISR for inverter
 
 // ISR for inverter
 interrupt void Inv_ISR()
 {
-	EINT;
+
 #ifdef PWM_MODE
 
+	EINT;
 //-------------------------------------------------------------------
 // Inverter State execution
 //-------------------------------------------------------------------
@@ -1023,7 +1009,7 @@ interrupt void Inv_ISR()
 	}
 
 	// Apply inverter o/p correction
-	if (CloseIloopInv == 0)
+	if (CloseIloopInv ==0)
 	{
 		PWMDRV_1phInv_unipolar(1,_IQ15(1500),_IQ24mpy((InvSine<<9),InvModIndex));
 	}
@@ -1073,6 +1059,19 @@ interrupt void Inv_ISR()
 // ------------------------------------------------------------------------------
 	PWMDAC_MACRO(pwmdac1)
 
+#ifdef FLASH
+	//update commros data logger probe
+	Datalogger(&commros.m_datalogger,1);
+#endif
+
+	//-------------------------------------------------------------------
+	//			 Reinitialize for next ADC sequence
+	//-------------------------------------------------------------------
+	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
+	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
+	//-------------------------------------------------------------------
+
+	GpioDataRegs.GPACLEAR.bit.GPIO22 = 1;	// Clear the pin
 
 #elif HYBRID_MODE
 	/**
@@ -1081,18 +1080,23 @@ interrupt void Inv_ISR()
 	 * - Phase: determine switching regions based on phase, i.e. M1, M2, Si, So
 	 */
 
-	Vac_in = (long)((long)Vac_FB<<9)-Offset_Volt;	// shift to convert to Q21
-	inv_ref_cur_inst = _IQ24mpy(inv_Iset, (((long) (InvSine)) << 9)) ;
+	Vac_in=(long)((long)Vac_FB<<9)-Offset_Volt;	// shift to convert to Q21
+	inv_ref_cur_inst = _IQ24mpy(inv_Iset, (((long) (InvSine)) << 9));
 
-	inv_meas_cur_lleg1_inst=(((long) Ileg1_fb) <<12)-_IQ24(0.5);
-	inv_meas_cur_lleg2_inst=(((long) Ileg2_fb) <<12)-_IQ24(0.5);
+	//The hall sensor does 185mV/A. Get raw ADC value, convert to mV, get amps this way
+	// Left shift by 12 (convertert 12-bit to IQ24?), subtract offset, then multiply by scaling const of hall sense, 185mV
+	inv_meas_hall_cur = _IQ24mpy( (((long) Iout_fb << 12) - _IQ24(0.5)), hallSenseScaling);			//output ought to be in +/- Amps
+
+	inv_meas_cur_lleg1_inst = (((long) Ileg1_fb) << 12)-_IQ24(0.5);
+	inv_meas_cur_lleg2_inst = (((long) Ileg2_fb) << 12)-_IQ24(0.5);
 
 	inv_meas_cur_diff_inst = (inv_meas_cur_lleg1_inst - inv_meas_cur_lleg2_inst)<<1;
 
-	inv_meas_vol_inst =((long)((long)Vac_FB<<12)-_IQ24(0.5))<<1;	// shift to convert to Q24
+	//Instantaneous voltage is that seen from in inAmp connected between Vl and Vn. It has a 1.65v offset, hence we subtract it out
+	inv_meas_vol_inst = ((long)((long)Vac_FB<<12)-_IQ24(0.5))<<1;	// shift to convert to Q24
 
 
-	updateState(&state, 0, 0, 0);		//update the
+	updateState(&state, 0, 0, 0);		//update the state variable
 
 	//phase = atan(inv_meas_vol_inst, inv_meas_cur_diff_inst);
 	//updateState(state, inv_meas_cur_diff_inst, inv_meas_vol_inst, phase);
@@ -1105,40 +1109,29 @@ interrupt void Inv_ISR()
 	 */
 
 	hBridgeEvent hBridgeEvent;
-	hBridgeEvent.code = 'T';
 	hBridgeEvent.super_.transition = true;
-	returner = hBridgeTransitionFunction(hBridge, &hBridgeEvent, state);
-	FsmDispatch((Fsm *)&hBridge, (Event *)&hBridgeEvent);  //
+	returner = hBridgeTransitionFunction(hBridge, &hBridgeEvent, &state);
+	FsmDispatch((Fsm *)&hBridge, (Event *)&hBridgeEvent);
 
-	void    *statePtr = (Fsm *)&hBridge.super_.state__;		//hBridge struct of type 'HBridge' contains an FSM in .super_,
-															//therefore we retrieve the state of the hBridge with (xxx.super_.state__)
-	PWMDRV_Hybrid(statePtr);
+	//Now that state has updated, call PWM driver
+	PWMDRV_Hybrid(returner, INVERTER_PWM_PAIR)
 
 	/**
 	 * Run DAC
 	 */
+	//DlogCh1 = (int16)_IQtoIQ15(inv_meas_cur_hall_sensr);
+	DlogCh2 = (int16)_IQtoIQ15(inv_meas_vol_inst);
+	DlogCh3 = (int16)_IQtoIQ15(inv_meas_cur_diff_inst);
+	DlogCh4 = (int16)_IQtoIQ15(inv_ref_cur_inst);
+    dlog.update(&dlog);
+
+    //PwmDacCh1 = (int16)_IQtoIQ15(inv_meas_cur_hall_sensr);
     PwmDacCh2 = (int16)_IQtoIQ15(inv_meas_vol_inst);
     PwmDacCh3 = (int16)_IQtoIQ15(inv_meas_cur_diff_inst);
     PwmDacCh4 = (int16)_IQtoIQ15(inv_ref_cur_inst);
+	PWMDAC_MACRO(pwmdac1)
+
 #endif
-
-    /**
-     * Log data, clear interrupt
-     */
-	#ifdef FLASH
-		//update commros data logger probe
-		Datalogger(&commros.m_datalogger,1);
-	#endif
-
-
-	//-------------------------------------------------------------------
-	//			 Reinitialize for next ADC sequence
-	//-------------------------------------------------------------------
-	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;		// Must acknowledge the PIE group
-	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;		// Clear ADCINT1 flag
-	//-------------------------------------------------------------------
-
-	GpioDataRegs.GPACLEAR.bit.GPIO22 = 1;	// Clear the pin
 
   	return;
 

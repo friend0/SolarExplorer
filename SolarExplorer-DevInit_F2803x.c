@@ -26,6 +26,8 @@
 #define PWM_MODE 1
 #define HYBRID_MODE !PWM_MODE
 
+#define SOLAREXP_TEST 1
+
 // used by CLA Initialaization function
 extern Uint16 Cla1funcsLoadStart, Cla1funcsLoadEnd, Cla1funcsRunStart;
 
